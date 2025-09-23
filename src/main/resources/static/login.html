@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8" />
     <title>Login Page</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<h2>Login</h2>
-<form id="loginForm">
-    <div>
-        <label>Username: </label>
-        <input type="text" id="username" name="username" required />
-    </div>
-    <div>
-        <label>Password: </label>
-        <input type="password" id="password" name="password" required />
-    </div>
-    <button type="submit">Login</button>
-</form>
+<div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" name="username" required />
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit">Login</button>
+    </form>
 
-<p id="message"></p>
+    <p id="message"></p>
+</div>
 
 <script>
     const form = document.getElementById("loginForm");
@@ -27,6 +30,7 @@
 
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
+        const msg = document.getElementById("message");
 
         try {
             const response = await fetch("http://localhost:8080/auth/login", {
@@ -37,17 +41,18 @@
                 body: JSON.stringify({ username, password }),
             });
 
+            const text = await response.text();
+
             if (response.ok) {
-                const text = await response.text();
-                document.getElementById("message").innerText =
-                    "✅ " + text + " (Welcome " + username + ")";
+                msg.className = "success";
+                msg.innerText = "✅ " + text + " (Welcome " + username + ")";
             } else {
-                document.getElementById("message").innerText =
-                    "❌ Login failed! Please check username/password.";
+                msg.className = "error";
+                msg.innerText = "❌ Login failed! " + text;
             }
         } catch (error) {
-            document.getElementById("message").innerText =
-                "⚠️ Error connecting to server: " + error;
+            msg.className = "warning";
+            msg.innerText = "⚠️ Error connecting to server: " + error;
         }
     });
 </script>

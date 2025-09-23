@@ -1,6 +1,12 @@
-package entity;
+package anbd.he191271.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "customer")
 public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private String email;
@@ -45,5 +51,11 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    public Customer(){}
+    public Customer(String name, String email, String username, String password) {
+        this.name = name;
+        this.email = email;
+        this.username = username;
     }
 }

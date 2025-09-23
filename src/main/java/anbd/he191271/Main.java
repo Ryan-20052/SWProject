@@ -1,13 +1,13 @@
-package com.example.SWProject;
+package anbd.he191271;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SwProjectApplication {
+public class Main {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SwProjectApplication.class, args);
+		SpringApplication.run(Main.class, args);
 	}
 
 }

@@ -1,4 +1,4 @@
-package entity;
+package anbd.he191271.entity;
 
 public class CartItem {
     private int id;
