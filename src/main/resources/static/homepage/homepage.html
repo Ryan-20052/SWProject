@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Shop</title>
+    <style>
+        :root{--blue:#2563eb;--blue-dark:#1d4ed8}
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color:#111 }
+        header { background: var(--blue); color: white; padding: 15px 20px; display: flex; justify-content: center; align-items: center; }
+
+        /* header chỉnh lại */
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+            white-space: nowrap;
+        }
+        .search-box {
+            flex: 1; /* chiếm toàn bộ khoảng trống ở giữa */
+            display: flex;
+            justify-content: center;
+        }
+        .search-box input {
+            width: 100%;
+            max-width: 600px; /* để thanh dài hơn */
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+        }
+        header .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        header button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* nav centered wrapper */
+        nav { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+        .nav-inner { width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 24px; padding: 10px 20px; font-weight: 600; }
+
+        .banner { margin: 20px auto; padding: 34px; border-radius: 12px; background: linear-gradient(90deg, #4ade80, #3b82f6); color: white; text-align: center; max-width:1200px }
+
+        /* Center section container */
+        .products { padding: 20px; text-align: center; max-width:1200px; margin:0 auto }
+        .section-inner { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* bọc riêng để căn trái */
+        .content-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* căn trái */
+            width: max-content;      /* khớp với grid */
+        }
+
+        .content-inner h2 { margin-bottom: 8px; text-align: left; }
+        .content-inner .sub { color:#666; font-size:14px; margin-bottom:14px; text-align:left }
+
+        .grid-featured { display: grid; grid-template-columns: repeat(4, 360px); gap: 30px; justify-content: center; align-items: start; }
+        .grid-all { display: grid; grid-template-columns: repeat(4, 360px); gap: 30px; justify-content: center; align-items: start; }
+
+        .card { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: 0.25s; width:100%; }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+
+        .thumb { height: 140px; border-radius: 8px; background-size: cover; background-position: center; margin-bottom: 10px; }
+        .card h3 { font-size: 15px; margin: 6px 0; height: 40px; overflow: hidden; text-align:left }
+        .meta { display:flex; gap:8px; align-items:center; justify-content:space-between; }
+        .price { color: #059669; font-weight:700 }
+        .old { text-decoration: line-through; color: #9ca3af; font-size: 13px }
+        .discount { background: #fee2e2; color:#dc2626; padding: 4px 6px; border-radius:6px; font-size:12px }
+
+        .card .buy { margin-top:10px; width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:8px; cursor:pointer }
+        .card .buy:hover { background:var(--blue-dark) }
+
+        /* Responsive */
+        @media (max-width: 1280px){ .grid-featured{grid-template-columns:repeat(4,320px)} .grid-all{grid-template-columns:repeat(4,320px)} }
+        @media (max-width: 1100px){ .grid-featured{grid-template-columns:repeat(2,1fr)} .grid-all{grid-template-columns:repeat(2,1fr)} .section-inner{padding:0 20px; box-sizing:border-box} .content-inner{width:100%} }
+        @media (max-width: 600px){
+            .search-box input{min-width:120px}
+            .grid-featured{grid-template-columns:repeat(1,1fr)}
+            .grid-all{grid-template-columns:repeat(2,1fr)}
+            .header-inner{flex-direction: column; gap:10px}
+            .search-box{width:100%}
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>License Shop</h1>
+        <div class="search-box">
+            <input type="text" placeholder="Tìm kiếm sản phẩm...">
+        </div>
+        <div class="actions">
+            <button>Đăng nhập / Đăng ký</button>
+            <button id="cartBtn">Giỏ hàng (0)</button>
+        </div>
+    </div>
+</header>
+
+<nav>
+    <div class="nav-inner">
+        <span>Giải trí</span>
+        <span>Làm việc</span>
+        <span>Học tập</span>
+        <span>Steam</span>
+        <span>VPN</span>
+        <span>Gift Card</span>
+    </div>
+</nav>
+
+<div class="banner">
+    <h2>Khuyến mãi siêu hot!</h2>
+    <p>Giảm giá lên tới 80% cho các phần mềm bản quyền</p>
+</div>
+
+<section class="products">
+    <div class="section-inner">
+        <div class="content-inner">
+            <h2>Sản phẩm nổi bật</h2>
+            <div class="sub">Danh sách những sản phẩm theo xu hướng mà có thể bạn sẽ thích</div>
+            <div class="grid-featured" id="featuredGrid"></div>
+        </div>
+    </div>
+</section>
+
+<section class="products">
+    <div class="section-inner">
+        <div class="content-inner">
+            <h2>Tất cả sản phẩm</h2>
+            <div class="sub">Danh sách đầy đủ sản phẩm</div>
+            <div class="grid-all" id="allGrid"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const featuredProducts = [
+        { id: 1, name: "Duolingo Super 1 năm - Gia hạn chính chủ", price: 295000, oldPrice: 1500000, discount: 84, bg:'linear-gradient(90deg,#ecfccb,#bbf7d0)'} ,
+        { id: 2, name: "Figma Edu (1 năm) - Nâng cấp chính chủ", price: 349000, oldPrice: 800000, discount: 56, bg:'linear-gradient(90deg,#111827,#0ea5e9)'} ,
+        { id: 3, name: "CapCut Pro 1 Tháng - Tài khoản", price: 89000, oldPrice: 210000, discount: 58, bg:'linear-gradient(90deg,#0f172a,#111827)'} ,
+        { id: 4, name: "Wondershare Filmora 14 (1 năm) - Windows", price: 199000, oldPrice: 900000, discount: 78, bg:'linear-gradient(90deg,#0ea5e9,#0f172a)'} ,
+    ];
+
+    const allProducts = [];
+    for (let i = 1; i <= 16; i++) {
+        allProducts.push({
+            id: 100 + i,
+            name: `Sản phẩm mẫu ${i}`,
+            price: 100000 + i * 12000,
+            oldPrice: 200000 + i * 18000,
+            discount: Math.floor(Math.random() * 70) + 10,
+            bg: `linear-gradient(90deg, rgba(${50+i*8},${120+i*5},${200-i*3},0.9), rgba(${80+i*3},${160-i*2},${120+i*4},0.9))`
+        });
+    }
+
+    const cart = [];
+    const featuredGrid = document.getElementById("featuredGrid");
+    const allGrid = document.getElementById("allGrid");
+    const cartBtn = document.getElementById("cartBtn");
+
+    function createCard(p, isFeatured = false){
+        const div = document.createElement('div');
+        div.className = 'card' + (isFeatured? ' featured':'');
+
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.style.background = p.bg || 'linear-gradient(90deg,#eef2ff,#e0f2fe)';
+
+        const title = document.createElement('h3');
+        title.textContent = p.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = `<div style="text-align:left"><div class="price">${p.price.toLocaleString()}đ</div><div class="old">${p.oldPrice.toLocaleString()}đ</div></div><div><div class="discount">Giảm ${p.discount}%</div></div>`;
+
+        const btn = document.createElement('button');
+        btn.className = 'buy';
+        btn.textContent = 'Thêm vào giỏ';
+        btn.onclick = ()=> addToCart(p.id);
+
+        div.appendChild(thumb);
+        div.appendChild(title);
+        div.appendChild(meta);
+        div.appendChild(btn);
+
+        return div;
+    }
+
+    function renderProducts(){
+        featuredProducts.forEach(p => featuredGrid.appendChild(createCard(p, true)));
+        allProducts.forEach(p => allGrid.appendChild(createCard(p)));
+    }
+
+    function addToCart(id){
+        const product = [...featuredProducts, ...allProducts].find(x=>x.id===id);
+        if(product) cart.push(product);
+        cartBtn.textContent = `Giỏ hàng (${cart.length})`;
+    }
+
+    renderProducts();
+</script>
+</body>
+</html>
