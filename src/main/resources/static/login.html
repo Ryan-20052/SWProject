@@ -21,6 +21,16 @@
     </form>
 
     <p id="message"></p>
+
+    <!-- 🔗 Link đến Register -->
+    <p class="register-link">
+        Don’t have an account?
+        <a href="register.html">Register here</a>
+    </p>
+    <!-- 🔗 Link đến Foget Password -->
+    <p class="register-link">
+        <a href="forgetPassword.html">Forget Password</a>
+    </p>
 </div>
 
 <script>
@@ -46,6 +56,7 @@
             if (response.ok) {
                 msg.className = "success";
                 msg.innerText = "✅ " + text + " (Welcome " + username + ")";
+                window.location.href = 'homepage/homepage.html';
             } else {
                 msg.className = "error";
                 msg.innerText = "❌ Login failed! " + text;
