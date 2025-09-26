@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Register - Get OTP</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; background:#f0f4f8; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+        .card { background:#fff; padding:24px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.08); width:360px; }
+        h2 { margin:0 0 12px 0; font-size:20px; color:#223; text-align:center; }
+        .field { margin-bottom:12px; }
+        label{display:block;font-size:13px;color:#456;margin-bottom:6px;}
+        input{width:100%;padding:10px;border:1px solid #d6dee9;border-radius:8px;font-size:14px;}
+        button{width:100%;padding:10px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+        button:active{transform:translateY(1px)}
+        p#msg{margin-top:12px;font-weight:600;text-align:center}
+        p#msg.success{color:green}
+        p#msg.error{color:#c62828}
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Register — Get OTP</h2>
+
+    <form id="registerForm">
+        <div class="field">
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text" required />
+        </div>
+
+        <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" required />
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required />
+        </div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+        </div>
+
+        <button type="submit">Send OTP to Email</button>
+    </form>
+
+    <p id="msg"></p>
+    <p style="font-size:12px;color:#666;margin-top:8px;text-align:center">
+        After receiving the OTP, open <a href="/verify.html">Verify page</a> to complete registration.
+    </p>
+</div>
+
+<script>
+    const form = document.getElementById('registerForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.className = '';
+        msg.textContent = '';
+
+        const payload = {
+            name: document.getElementById('name').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+            email: document.getElementById('email').value.trim()
+        };
+
+        try {
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                msg.className = 'success';
+                msg.textContent = text;
+            } else {
+                msg.className = 'error';
+                msg.textContent = text || 'Register failed';
+            }
+        } catch (err) {
+            msg.className = 'error';
+            msg.textContent = 'Network error: ' + err.message;
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Verify OTP</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; background:#f0f4f8; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+        .card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.08); width:340px; }
+        h2 { margin:0 0 12px 0; font-size:20px; color:#223; text-align:center; }
+        .field { margin-bottom:10px; }
+        label{display:block;font-size:13px;color:#456;margin-bottom:6px;}
+        input{width:100%;padding:10px;border:1px solid #d6dee9;border-radius:8px;font-size:14px;}
+        button{width:100%;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+        p#msg{margin-top:12px;font-weight:600;text-align:center}
+        p#msg.success{color:green}
+        p#msg.error{color:#c62828}
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Verify OTP</h2>
+    <form id="verifyForm">
+        <div class="field">
+            <label for="email">Email (used to register)</label>
+            <input id="email" name="email" type="email" required />
+        </div>
+
+        <div class="field">
+            <label for="otp">OTP code</label>
+            <input id="otp" name="otp" type="text" required />
+        </div>
+
+        <button type="submit">Verify & Create Account</button>
+    </form>
+
+    <p id="msg"></p>
+</div>
+
+<script>
+    const form = document.getElementById('verifyForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.className = '';
+        msg.textContent = '';
+
+        const email = document.getElementById('email').value.trim();
+        const otp = document.getElementById('otp').value.trim();
+
+        try {
+            // controller expects request params (form-urlencoded or query)
+            const body = new URLSearchParams({ email, otp });
+
+            const res = await fetch('/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                msg.className = 'success';
+                msg.textContent = text;
+            } else {
+                msg.className = 'error';
+                msg.textContent = text || 'Verification failed';
+            }
+        } catch (err) {
+            msg.className = 'error';
+            msg.textContent = 'Network error: ' + err.message;
+        }
+    });
+</script>
+</body>
+</html>
