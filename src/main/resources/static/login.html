@@ -52,6 +52,7 @@
             if (response.ok) {
                 msg.className = "success";
                 msg.innerText = "✅ " + text + " (Welcome " + username + ")";
+                window.location.href = 'homepage/homepage.html';
             } else {
                 msg.className = "error";
                 msg.innerText = "❌ Login failed! " + text;
