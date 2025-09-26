@@ -1,40 +1,32 @@
 package anbd.he191271.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "product")
 public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String name;
-    private int category_id;
-    private int manager_id;
 
-    public int getManager_id() {
-        return manager_id;
-    }
+    @Column(name = "categories_id")
+    private int categoryId;
 
-    public void setManager_id(int manager_id) {
-        this.manager_id = manager_id;
-    }
+    @Column(name = "manager_id")
+    private int managerId;
 
-    public int getCategory_id() {
-        return category_id;
-    }
+    // Getters & Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setCategory_id(int category_id) {
-        this.category_id = category_id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public int getCategoryId() { return categoryId; }
+    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getManagerId() { return managerId; }
+    public void setManagerId(int managerId) { this.managerId = managerId; }
 }

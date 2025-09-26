@@ -1,0 +1,23 @@
+package anbd.he191271.service;
+
+import anbd.he191271.entity.Variant;
+import anbd.he191271.repository.VariantRepository;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class VariantService {
+    private final VariantRepository repo;
+
+    public VariantService(VariantRepository repo) {
+        this.repo = repo;
+    }
+
+    public List<Variant> getVariantsByProduct(int productId) {
+        return repo.findByProductId(productId);
+    }
+
+    public Variant create(Variant variant) {
+        return repo.save(variant);
+    }
+}
