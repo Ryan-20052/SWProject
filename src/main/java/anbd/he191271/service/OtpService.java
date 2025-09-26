@@ -19,7 +19,7 @@ public class OtpService {
         return otp;
     }
 
-    // Xác minh OTP
+    // Kiểm tra OTP có hợp lệ không (không xóa ngay)
     public boolean validateOtp(String email, String otp) {
         OtpInfo info = otpStorage.get(email);
 
@@ -32,11 +32,12 @@ public class OtpService {
             return false;
         }
 
-        boolean valid = info.otp.equals(otp);
-        if (valid) {
-            otpStorage.remove(email); // Dùng xong thì xóa
-        }
-        return valid;
+        return info.otp.equals(otp);
+    }
+
+    // Xoá OTP sau khi reset mật khẩu thành công
+    public void clearOtp(String email) {
+        otpStorage.remove(email);
     }
 
     // Lớp chứa OTP và thời gian hết hạn

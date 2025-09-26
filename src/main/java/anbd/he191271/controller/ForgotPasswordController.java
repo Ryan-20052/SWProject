@@ -1,0 +1,66 @@
+package anbd.he191271.controller;
+
+import anbd.he191271.entity.Customer;
+import anbd.he191271.repository.CustomerRepository;
+import anbd.he191271.service.EmailService;
+import anbd.he191271.service.OtpService;
+import jakarta.mail.MessagingException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/auth")
+public class ForgotPasswordController {
+
+    private final OtpService otpService;
+    private final EmailService emailService;
+    private final CustomerRepository customerRepository;
+
+    public ForgotPasswordController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository) {
+        this.otpService = otpService;
+        this.emailService = emailService;
+        this.customerRepository = customerRepository;
+    }
+
+    // Bước 1: Nhập email
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String email) throws MessagingException {
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("❌ Email not found!"));
+
+        String otp = otpService.generateOtp(email);
+        emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
+
+        return "✅ OTP sent to your email. It will expire in 5 minutes.";
+    }
+
+    // Bước 2: Verify OTP
+    @PostMapping("/verify-otp")
+    public String verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        boolean valid = otpService.validateOtp(email, otp);
+        return valid ? "OTP verified! You can now reset password." : "❌ Invalid or expired OTP!";
+    }
+
+    // Bước 3: Reset mật khẩu
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam String email,
+                                @RequestParam String newPassword,
+                                @RequestParam String otp) {
+        boolean valid = otpService.validateOtp(email, otp);
+        if (!valid) {
+            return "❌ Invalid or expired OTP!";
+        }
+
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("❌ Email not found!"));
+
+        customer.setPassword(newPassword); // ⚠️ nhớ hash ở thực tế
+        customerRepository.save(customer);
+
+        otpService.clearOtp(email);
+
+        return "🎉 Password has been reset successfully!";
+    }
+}
