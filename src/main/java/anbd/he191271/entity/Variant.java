@@ -8,13 +8,14 @@ public class Variant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    @Column(name = "name")
     private String name;
 
     @Column(name = "stock_quantity")
     private int stockQuantity;
-
+    @Column(name = "duration")
     private String duration;
+    @Column(name = "price")
     private int price;
 
     // Quan hệ với product

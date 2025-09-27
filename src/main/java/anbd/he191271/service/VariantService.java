@@ -16,6 +16,9 @@ public class VariantService {
     public List<Variant> getVariantsByProduct(int productId) {
         return repo.findByProductId(productId);
     }
+    public List<Variant> getAllVariant() {
+        return repo.findAll();
+    }
 
     public Variant create(Variant variant) {
         return repo.save(variant);

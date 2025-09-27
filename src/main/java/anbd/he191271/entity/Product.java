@@ -1,6 +1,7 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GeneratedColumn;
 
 @Entity
 @Table(name = "product")
@@ -8,7 +9,7 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    @Column(name = "name")
     private String name;
 
     @Column(name = "categories_id")

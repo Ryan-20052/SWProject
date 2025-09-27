@@ -65,10 +65,13 @@
     <table id="productTable">
         <thead>
         <tr>
+            <th>STT</th>
             <th>ID</th>
             <th>Tên sản phẩm</th>
-            <th>Giá</th>
             <th>Thời Hạn</th>
+            <th>Url Img</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
             <th>Hành động</th>
         </tr>
         </thead>
@@ -97,28 +100,29 @@
 </div>
 
 <script>
-    const API_URL = "http://localhost:8080//products"; // đổi theo backend của bạn
 
     async function loadProducts(){
-        const res = await fetch(API_URL);
+        const res = await fetch("http://localhost:8080/manage/loadVariant");
         const data = await res.json();
         renderTable(data);
     }
 
-    function renderTable(products){
+    function renderTable(variantList){
         const tbody = document.querySelector("#productTable tbody");
         tbody.innerHTML = "";
-        products.forEach((p,i)=>{
+        variantList.forEach((v,i)=>{
             const tr = document.createElement("tr");
             tr.innerHTML = `
         <td>${i+1}</td>
-        <td>${p.name}</td>
-        <td>${p.price.toLocaleString()}đ</td>
-        <td>${p.oldPrice.toLocaleString()}đ</td>
-        <td>-${p.discount}%</td>
+        <td>${v.id}</td>
+        <td>${v.name}</td>
+        <td>${v.duration}</td>
+        <td>${v.product.name}</td>
+        <td>${v.price}</td>
+        <td>${v.stockQuantity}</td>
         <td>
-          <button class="btn btn-edit" onclick="editProduct(${p.id})">Sửa</button>
-          <button class="btn btn-del" onclick="deleteProduct(${p.id})">Xóa</button>
+          <button class="btn btn-edit" onclick="editProduct(${v.id})">Sửa</button>
+          <button class="btn btn-del" onclick="deleteProduct(${v.id})">Xóa</button>
         </td>
       `;
             tbody.appendChild(tr);
