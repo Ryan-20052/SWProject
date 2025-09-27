@@ -45,22 +45,26 @@
         try {
             const response = await fetch("http://localhost:8080/auth/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
             });
 
-            const text = await response.text();
-
             if (response.ok) {
+                const user = await response.json(); // 🟢 lấy JSON
+                sessionStorage.setItem("username", username);
                 msg.className = "success";
-                msg.innerText = "✅ " + text + " (Welcome " + username + ")";
-                window.location.href = 'homepage.html';
+                msg.innerText = "✅ Welcome " + user.name;
+
+                setTimeout(() => {
+                    window.location.href = 'homepage.html';
+                }, 1000);
             } else {
+                const text = await response.text();
                 msg.className = "error";
                 msg.innerText = "❌ Login failed! " + text;
             }
+
+
         } catch (error) {
             msg.className = "warning";
             msg.innerText = "⚠️ Error connecting to server: " + error;

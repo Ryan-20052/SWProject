@@ -15,9 +15,10 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public boolean login(String username, String password) {
-        Optional<Customer> customer = customerRepository.findByUsername(username);
-        return customer.isPresent() && customer.get().getPassword().equals(password);
-        // ❗ Với production: dùng BCryptPasswordEncoder.matches() thay vì equals()
+    public Optional<Customer> login(String username, String password) {
+        return customerRepository.findByUsername(username)
+                .filter(c -> c.getPassword().equals(password));
+        // 🚨 Lưu ý: sản phẩm thật thì dùng BCryptPasswordEncoder
     }
 }
+

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>License Shop</title>
+    <link rel="stylesheet" href="homepage.css">
+
     <style>
         :root{--blue:#2563eb;--blue-dark:#1d4ed8}
         body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color:#111 }
@@ -46,12 +48,14 @@
         <div class="search-box">
             <input type="text" placeholder="Tìm kiếm sản phẩm...">
         </div>
-        <div class="actions">
+        <div class="actions" id="actions">
+            <!-- Ban đầu mặc định: nút login/register -->
             <button onclick="window.location.href='/login.html'">Đăng nhập / Đăng ký</button>
             <button id="cartBtn">Giỏ hàng (0)</button>
         </div>
     </div>
 </header>
+
 
 <nav>
     <div class="nav-inner">
@@ -88,6 +92,48 @@
         </div>
     </div>
 </section>
+<script>
+    const actions = document.getElementById("actions");
+    const username = sessionStorage.getItem("username");
+
+    if (username) {
+        actions.innerHTML = `
+        <div class="user-menu">
+            <div class="user-avatar" id="userAvatar">${username.charAt(0).toUpperCase()}</div>
+            <div class="dropdown" id="userDropdown">
+                <a href="profile.html">Profile</a>
+                <a href="purchased.html">Purchased License</a>
+                <a href="#" id="logoutBtn">Log out</a>
+            </div>
+        </div>
+        <button id="cartBtn">Giỏ hàng (0)</button>
+        `;
+
+        const avatar = document.getElementById("userAvatar");
+        const dropdown = document.getElementById("userDropdown");
+
+        avatar.addEventListener("click", () => {
+            dropdown.classList.toggle("show");
+        });
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            sessionStorage.removeItem("username");
+            window.location.href = "login.html";
+        });
+
+        // Click ra ngoài để đóng dropdown
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".user-menu")) {
+                dropdown.classList.remove("show");
+            }
+        });
+    } else {
+        actions.innerHTML = `
+        <button onclick="window.location.href='/login.html'">Đăng nhập / Đăng ký</button>
+        <button id="cartBtn">Giỏ hàng (0)</button>
+        `;
+    }
+</script>
 
 <script>
     const featuredGrid = document.getElementById("featuredGrid");
@@ -142,5 +188,6 @@
 
     loadProducts();
 </script>
+
 </body>
 </html>
