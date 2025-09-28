@@ -1,6 +1,12 @@
 package anbd.he191271.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "manager")
 public class Manager {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
     private String password;
