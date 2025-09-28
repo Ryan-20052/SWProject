@@ -25,6 +25,7 @@ public class ManagerController {
     @PostMapping("/editVariant")
     public Void  editVariant(@RequestBody Variant variant){
 
+        return null;
     }
 
 

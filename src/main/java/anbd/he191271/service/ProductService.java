@@ -29,7 +29,7 @@ public class ProductService {
             List<VariantDTO> variantDTOs = variants.stream()
                     .map(v -> new VariantDTO(v.getId(), v.getName(), v.getPrice(), v.getDuration()))
                     .collect(Collectors.toList());
-            return new ProductDTO(product.getId(), product.getName(), variantDTOs);
+            return new ProductDTO(product.getId(), product.getName(), variantDTOs,product.getImgUrl());
         }).collect(Collectors.toList());
     }
 }
