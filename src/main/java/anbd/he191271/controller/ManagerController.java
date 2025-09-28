@@ -5,10 +5,7 @@ import anbd.he191271.entity.Variant;
 import anbd.he191271.service.VariantService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,5 +22,10 @@ public class ManagerController {
     public List<Variant> LoadVariant(){
         return variantService.getAllVariant();
     }
+    @PostMapping("/editVariant")
+    public Void  editVariant(@RequestBody Variant variant){
+
+    }
+
 
 }

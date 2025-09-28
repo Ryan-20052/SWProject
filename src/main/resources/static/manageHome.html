@@ -41,9 +41,13 @@
 </head>
 <body>
 <header>
-    <div class="header-inner">
-        <h1>Manager Dashboard</h1>
-        <div>Xin chào, Quản lý</div>
+    <div class="header-inner" style="display:flex; align-items:center; gap:20px; width:100%;">
+        <h1 style="margin:0; font-weight:bold;">Manager Dashboard</h1>
+        <div style="margin-left:10px;">Xin chào, Quản lý</div>
+        <button onclick="logout()"
+                style="margin-left:auto; padding:6px 12px; border:none; border-radius:4px; background:red; color:white; cursor:pointer;">
+            Đăng xuất
+        </button>
     </div>
 </header>
 
@@ -66,10 +70,9 @@
         <thead>
         <tr>
             <th>STT</th>
-            <th>ID</th>
+            <th>Ảnh</th>
             <th>Tên sản phẩm</th>
-            <th>Thời Hạn</th>
-            <th>Url Img</th>
+            <th>Thời hạn</th>
             <th>Giá</th>
             <th>Số lượng</th>
             <th>Hành động</th>
@@ -101,6 +104,11 @@
 
 <script>
 
+    function logout() {
+        // Xử lý đăng xuất, ví dụ chuyển về trang login
+        window.location.href = "login.html";
+    }
+
     async function loadProducts(){
         const res = await fetch("http://localhost:8080/manage/loadVariant");
         const data = await res.json();
@@ -114,7 +122,6 @@
             const tr = document.createElement("tr");
             tr.innerHTML = `
         <td>${i+1}</td>
-        <td>${v.id}</td>
         <td><img src="${v.product.urlImg}" alt="Ảnh sản phẩm" style="width:60px; height:auto;"></td>
 
         <td>${v.name}</td>
@@ -166,7 +173,7 @@
     }
 
     async function editProduct(id){
-        const res = await fetch(`${API_URL}/${id}`);
+        const res = await fetch(`http://localhost:8080/manage/loadVariant/${id}`);
         const p = await res.json();
         document.getElementById("modalTitle").textContent="Sửa sản phẩm";
         document.getElementById("editId").value=p.id;
