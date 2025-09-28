@@ -17,6 +17,19 @@ public class Product {
 
     @Column(name = "manager_id")
     private int managerId;
+    @Column(name = "img_url")
+    private String imgUrl;
+
+    public Product() {
+    }
+
+    public Product(int id, String name, int categoryId, int managerId, String imgUrl) {
+        this.id = id;
+        this.name = name;
+        this.categoryId = categoryId;
+        this.managerId = managerId;
+        this.imgUrl = imgUrl;
+    }
 
     // Getters & Setters
     public int getId() { return id; }
@@ -30,4 +43,6 @@ public class Product {
 
     public int getManagerId() { return managerId; }
     public void setManagerId(int managerId) { this.managerId = managerId; }
+   public String getImgUrl() { return imgUrl; }
+    public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
 }

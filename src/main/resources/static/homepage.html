@@ -14,6 +14,13 @@
         header h1 { font-size: 20px; margin: 0; white-space: nowrap; }
         .search-box { flex: 1; display: flex; justify-content: center; }
         .search-box input { width: 100%; max-width: 600px; padding: 10px 14px; border-radius: 6px; border: none; }
+
+        /* search control nhỏ gọn */
+        .search-controls { display:flex; gap:8px; align-items:center; width:100%; max-width:600px; }
+        .search-controls input { flex:1; padding:10px 12px; border-radius:6px; border:none; }
+        .search-clear { background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 10px; border-radius:6px; cursor:pointer;}
+        .search-clear.hidden { display:none; }
+
         header .actions { display: flex; gap: 10px; align-items: center; }
         header button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; }
 
@@ -39,6 +46,11 @@
         .price { color: #059669; font-weight:700 }
         .card .buy, .card .add-to-cart { margin-top:8px; width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:8px; cursor:pointer }
         .card .buy:hover, .card .add-to-cart:hover { background:var(--blue-dark) }
+
+        /* highlight khi tìm kiếm */
+        .highlight { background: linear-gradient(90deg,#fff9c4,#fff3b0); padding: 0 4px; border-radius: 3px; }
+
+        .no-results { text-align:center; color:#666; padding: 24px; width:100% }
     </style>
 </head>
 <body>
@@ -46,7 +58,10 @@
     <div class="header-inner">
         <h1>License Shop</h1>
         <div class="search-box">
-            <input type="text" placeholder="Tìm kiếm sản phẩm...">
+            <div class="search-controls">
+                <input id="searchInput" type="text" placeholder="Tìm sản phẩm theo tên, từ khoá..." />
+                <button id="clearSearch" class="search-clear hidden">X</button>
+            </div>
         </div>
         <div class="actions" id="actions">
             <!-- Ban đầu mặc định: nút login/register -->
@@ -62,9 +77,8 @@
         <span>Giải trí</span>
         <span>Làm việc</span>
         <span>Học tập</span>
-        <span>Steam</span>
+        <span>windows</span>
         <span>VPN</span>
-        <span>Gift Card</span>
     </div>
 </nav>
 
@@ -92,7 +106,9 @@
         </div>
     </div>
 </section>
+
 <script>
+    /* ---------------- user menu logic (giữ nguyên) ---------------- */
     const actions = document.getElementById("actions");
     const username = sessionStorage.getItem("username");
 
@@ -136,9 +152,14 @@
 </script>
 
 <script>
+    /* ---------------- products + search logic ---------------- */
     const featuredGrid = document.getElementById("featuredGrid");
     const allGrid = document.getElementById("allGrid");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearchBtn = document.getElementById("clearSearch");
+
     let cart = [];
+    let allProducts = [];
 
     function addToCart(product, variant){
         cart.push({product, variant, qty:1});
@@ -146,18 +167,36 @@
     }
 
     function updateCartBtn(){
-        document.getElementById("cartBtn").innerText = "Giỏ hàng ("+cart.length+")";
+        const btn = document.getElementById("cartBtn");
+        if (btn) btn.innerText = "Giỏ hàng ("+cart.length+")";
     }
 
-    function createCard(p){
+    // Escape HTML để tránh XSS
+    function escapeHtml(text) {
+        if (!text) return "";
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    // Highlight từ khoá trong text (trả về HTML an toàn)
+    function highlight(text, q) {
+        if (!q) return escapeHtml(text);
+        const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(`(${safeQ})`, 'ig');
+        return escapeHtml(text).replace(re, '<span class="highlight">$1</span>');
+    }
+
+    function createCard(p, searchQuery = '') {
         const div = document.createElement('div');
         div.className = 'card';
 
         const v = p.variants && p.variants.length > 0 ? p.variants[0] : null;
 
         div.innerHTML = `
-          <div class="thumb" style="background:linear-gradient(90deg,#eef2ff,#e0f2fe)"></div>
-          <h3>${p.name}</h3>
+          <div class="thumb"></div>
+          <h3>${highlight(p.name || '', searchQuery)}</h3>
           <div class="meta">
               <div style="text-align:left">
                   ${v ? `<div class="price">${v.price.toLocaleString()}đ</div>` : `<div class="price">Liên hệ</div>`}
@@ -165,7 +204,17 @@
           </div>
           <button class="buy">Mua ngay</button>
           <button class="add-to-cart">Thêm vào giỏ hàng</button>
-      `;
+        `;
+
+        const thumb = div.querySelector('.thumb');
+        if (p.imgUrl) {
+            // set background image an toàn qua JS
+            thumb.style.backgroundImage = `url('${p.imgUrl}')`;
+            thumb.style.backgroundSize = 'cover';
+            thumb.style.backgroundPosition = 'center';
+        } else {
+            thumb.style.background = 'linear-gradient(90deg,#eef2ff,#e0f2fe)';
+        }
 
         if(v){
             div.querySelector(".buy").addEventListener("click", ()=> {
@@ -178,12 +227,101 @@
         return div;
     }
 
-    async function loadProducts(){
-        const res = await fetch("http://localhost:8080/api/product");
-        const products = await res.json();
+    // render danh sách (featured + all)
+    function renderProducts(list, query = '') {
+        featuredGrid.innerHTML = '';
+        allGrid.innerHTML = '';
 
-        products.slice(0,4).forEach(p => featuredGrid.appendChild(createCard(p)));
-        products.forEach(p => allGrid.appendChild(createCard(p)));
+        if (!list || list.length === 0) {
+            const no = document.createElement('div');
+            no.className = 'no-results';
+            no.innerText = 'Không tìm thấy sản phẩm nào phù hợp.';
+            allGrid.appendChild(no);
+            return;
+        }
+
+        const featured = list.slice(0,4);
+        featured.forEach(p => featuredGrid.appendChild(createCard(p, query)));
+        list.forEach(p => allGrid.appendChild(createCard(p, query)));
+    }
+
+    // filter cục bộ theo tên, variant name hoặc imgUrl
+    function filterProducts(query) {
+        if (!query || query.trim() === '') return allProducts.slice();
+        const q = query.trim().toLowerCase();
+        return allProducts.filter(p => {
+            const name = (p.name || '').toLowerCase();
+            const variants = (p.variants || []).map(v => (v.name || '').toLowerCase()).join(' ');
+            const img = (p.imgUrl || '').toLowerCase();
+            return name.includes(q) || variants.includes(q) || img.includes(q);
+        });
+    }
+
+    // debounce helper
+    function debounce(fn, delay = 300) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    // xử lý tìm kiếm
+    const onSearchChange = debounce(() => {
+        const q = searchInput.value;
+        toggleClearBtn(q);
+        const filtered = filterProducts(q);
+        renderProducts(filtered, q);
+    }, 250);
+
+    function toggleClearBtn(q) {
+        if (!q || q.trim() === '') {
+            clearSearchBtn.classList.add('hidden');
+        } else {
+            clearSearchBtn.classList.remove('hidden');
+        }
+    }
+
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        toggleClearBtn('');
+        renderProducts(allProducts);
+        searchInput.focus();
+    });
+
+    // Enter: nếu chỉ 1 kết quả -> redirect (tuỳ bạn implement page detail)
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const q = searchInput.value.trim();
+            const filtered = filterProducts(q);
+            if (filtered.length === 1) {
+                window.location.href = `/product.html?id=${filtered[0].id}`;
+            } else {
+                renderProducts(filtered, q);
+            }
+        }
+    });
+
+    searchInput.addEventListener('input', onSearchChange);
+
+    // load products từ API
+    async function loadProducts(){
+        try {
+            const res = await fetch("http://localhost:8080/api/product");
+            if (!res.ok) {
+                console.error('Fetch failed', res.status, res.statusText);
+                allGrid.innerHTML = '<div class="no-results">Không thể tải sản phẩm. Kiểm tra server hoặc CORS.</div>';
+                return;
+            }
+            const products = await res.json();
+            console.log('products:', products);
+            allProducts = products || [];
+            renderProducts(allProducts);
+        } catch (err) {
+            console.error('Error loading products:', err);
+            allGrid.innerHTML = '<div class="no-results">Lỗi khi tải sản phẩm. Mở console để xem chi tiết.</div>';
+        }
     }
 
     loadProducts();
