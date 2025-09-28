@@ -22,10 +22,10 @@ public class ManagerController {
     public List<Variant> LoadVariant(){
         return variantService.getAllVariant();
     }
-    @PostMapping("/editVariant")
-    public Void  editVariant(@RequestBody Variant variant){
-
-    }
+//    @PostMapping("/editVariant")
+//    public Void  editVariant(@RequestBody Variant variant){
+//
+//    }
 
 
 }

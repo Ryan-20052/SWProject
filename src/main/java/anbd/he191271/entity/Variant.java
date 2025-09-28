@@ -23,6 +23,18 @@ public class Variant {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    public Variant() {
+    }
+
+    public Variant(int id, String name, int stockQuantity, String duration, int price, Product product) {
+        this.id = id;
+        this.name = name;
+        this.stockQuantity = stockQuantity;
+        this.duration = duration;
+        this.price = price;
+        this.product = product;
+    }
+
     // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

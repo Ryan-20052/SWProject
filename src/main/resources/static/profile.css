@@ -1,127 +1,122 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f8f9fa;
-    margin: 0;
-    padding: 20px;
+    background: #f9f9f9;
     display: flex;
     justify-content: center;
+    padding: 40px;
 }
 
 .profile-container {
-    position: relative;
     background: white;
     padding: 30px;
-    border-radius: 12px;
-    width: 400px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center; /* căn giữa toàn bộ */
 }
 
 h2 {
-    text-align: center;
     margin-bottom: 20px;
 }
 
 .avatar-section {
-    text-align: center;
+    display: flex;
+    justify-content: center;
     margin-bottom: 20px;
+}
+
+.avatar-img, .avatar-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    cursor: pointer;
+    object-fit: cover;
+}
+
+.avatar-circle {
+    background: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: white;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* căn giữa label + input */
+    margin: 15px 0;
+    border-bottom: 1px solid #ddd; /* gạch dưới màu xám nhạt */
+    padding-bottom: 10px;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.info-row input {
+    width: 80%; /* input rộng 80% form */
+    padding: 8px;
+    border: none;
+    outline: none;
+    text-align: center;
+    background: transparent;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.save-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-#avatarPreview {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #2563eb;
-    transition: 0.3s;
+.cancel-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-#avatarPreview:hover {
-    opacity: 0.7;
-}
-
-.field-section {
-    margin-bottom: 15px;
-    position: relative;
-}
-
-.field-section label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.field-section span {
-    display: inline-block;
-    padding: 6px 0;
-}
-
-.field-section input {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-.button-row {
+.action-buttons {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
-#editInfoBtn {
-    background: #9ca3af; /* xám */
+.edit-btn {
+    background: #007bff;
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    padding: 8px 14px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-#editInfoBtn:hover {
-    background: #6b7280;
-}
-
-#saveBtn {
-    background: #2563eb;
+.back-btn {
+    background: #6c757d;
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    padding: 8px 14px;
+    border-radius: 5px;
     cursor: pointer;
-}
-
-#saveBtn:hover {
-    background: #1d4ed8;
-}
-
-#cancelBtn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-
-#cancelBtn:hover {
-    background: #dc2626;
-}
-
-.back-home {
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    font-size: 12px;
-    background: silver;
-    color: white;
-    border-radius: 6px;
-    padding: 4px 10px;
-    text-decoration: none;
-}
-
-.back-home:hover {
-    background: #a1a1a1;
 }

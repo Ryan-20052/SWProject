@@ -1,6 +1,7 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "customer")
@@ -8,10 +9,18 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String name;
     private String email;
     private String username;
     private String password;
+
+    private LocalDate dob; // ngày sinh
+    @Column(name = "avatar")
+    private String avatar;
+
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }// đường dẫn file ảnh
 
     public int getId() {
         return id;
@@ -52,10 +61,23 @@ public class Customer {
     public void setPassword(String password) {
         this.password = password;
     }
-    public Customer(){}
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+
+
+    public Customer() {}
+
     public Customer(String name, String email, String username, String password) {
         this.name = name;
         this.email = email;
         this.username = username;
+        this.password = password;
     }
 }

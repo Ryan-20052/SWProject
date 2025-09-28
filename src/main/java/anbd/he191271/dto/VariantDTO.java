@@ -6,6 +6,9 @@ public class VariantDTO {
     private int price;
     private String duration;
 
+    public VariantDTO() {
+    }
+
     // Constructor
     public VariantDTO(int id, String name, int price, String duration) {
         this.id = id;

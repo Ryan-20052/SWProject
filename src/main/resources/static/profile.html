@@ -7,104 +7,172 @@
 </head>
 <body>
 <div class="profile-container">
-    <a href="homepage.html" class="back-home">Back to Home</a>
     <h2>Thông tin cá nhân</h2>
 
     <div class="avatar-section">
-        <img id="avatarPreview" src="default-avatar.png" alt="Avatar">
-        <input type="file" id="avatarInput" name="avatar" hidden>
+        <img id="avatarPreview" class="avatar-img" src="default-avatar.png" alt="Avatar" style="display:none;">
+        <div id="avatarCircle" class="avatar-circle" style="display:none;"></div>
+        <input type="file" id="avatar" name="avatar" style="display:none;">
     </div>
 
-    <form id="profileForm">
-        <div class="field-section">
-            <label>Họ tên:</label>
-            <span id="nameDisplay"></span>
-            <input type="text" id="nameInput" name="name" hidden>
+    <!-- View mode -->
+    <div class="info-section" id="infoView">
+        <div class="info-row">
+            <span class="label">Họ tên:</span>
+            <span id="nameText"></span>
         </div>
+        <div class="info-row">
+            <span class="label">Email:</span>
+            <span id="emailText"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Ngày sinh:</span>
+            <span id="dobText"></span>
+        </div>
+    </div>
 
-        <div class="field-section">
-            <label>Email:</label>
-            <span id="emailDisplay"></span>
-            <input type="email" id="emailInput" name="email" hidden>
+    <!-- Edit mode -->
+    <div class="info-section" id="infoEdit" style="display:none;">
+        <div class="info-row">
+            <span class="label">Họ tên:</span>
+            <input type="text" id="nameInput">
         </div>
+        <div class="info-row">
+            <span class="label">Email:</span>
+            <input type="email" id="emailInput">
+        </div>
+        <div class="info-row">
+            <span class="label">Ngày sinh:</span>
+            <input type="date" id="dobInput">
+        </div>
+        <div class="button-group">
+            <button class="save-btn" id="saveBtn">Save</button>
+            <button class="cancel-btn" id="cancelBtn">Cancel</button>
+        </div>
+    </div>
 
-        <div class="field-section">
-            <label>Ngày sinh:</label>
-            <span id="dobDisplay"></span>
-            <input type="date" id="dobInput" name="dob" hidden>
-        </div>
-
-        <div class="button-row">
-            <button type="button" id="editInfoBtn">Edit thông tin</button>
-            <button type="submit" id="saveBtn" hidden>Lưu thay đổi</button>
-            <button type="button" id="cancelBtn" hidden>Hủy thay đổi</button>
-        </div>
-    </form>
+    <div class="action-buttons">
+        <button class="edit-btn" id="editBtn">Edit</button>
+        <button class="back-btn" onclick="window.location.href='homepage.html'">⬅ Back to Home</button>
+    </div>
 </div>
 
 <script>
-    const customerId = sessionStorage.getItem("customerId");
+    const customerId = sessionStorage.getItem("customerId") || 1;
+    let customerData = {};
 
-    // Load dữ liệu từ DB
-    fetch(`/api/customer/${customerId}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("nameDisplay").innerText = data.name;
-            document.getElementById("emailDisplay").innerText = data.email;
-            document.getElementById("dobDisplay").innerText = data.dob || '';
-            if(data.avatar) document.getElementById("avatarPreview").src = data.avatar;
+    async function loadProfile() {
+        try {
+            const res = await fetch(`/api/customer/${customerId}`);
+            if (!res.ok) throw new Error("Không lấy được dữ liệu");
+            const data = await res.json();
+            customerData = data;
 
-            document.getElementById("nameInput").value = data.name;
-            document.getElementById("emailInput").value = data.email;
-            document.getElementById("dobInput").value = data.dob || '';
-        });
+            document.getElementById("nameText").innerText = data.name || "";
+            document.getElementById("emailText").innerText = data.email || "";
+            document.getElementById("dobText").innerText = data.dob || "";
 
-    // Click avatar để đổi ảnh
-    document.getElementById("avatarPreview").addEventListener("click", () => {
-        document.getElementById("avatarInput").click();
+            // Avatar: nếu có file ảnh thì hiển thị ảnh, nếu không thì hiển thị chữ cái đầu tiên
+            if (data.avatar && (data.avatar.endsWith(".png") || data.avatar.endsWith(".jpg") || data.avatar.endsWith(".jpeg"))) {
+                document.getElementById("avatarPreview").style.display = "block";
+                document.getElementById("avatarPreview").src = "/" + data.avatar;
+                document.getElementById("avatarCircle").style.display = "none";
+            } else {
+                document.getElementById("avatarCircle").style.display = "flex";
+                document.getElementById("avatarCircle").innerText = data.avatar || (data.name ? data.name[0].toUpperCase() : "?");
+                document.getElementById("avatarPreview").style.display = "none";
+            }
+        } catch (e) {
+            console.error("Lỗi load profile:", e);
+        }
+    }
+    loadProfile();
+
+    // Edit
+    document.getElementById("editBtn").addEventListener("click", () => {
+        document.getElementById("infoView").style.display = "none";
+        document.getElementById("infoEdit").style.display = "block";
+        document.getElementById("editBtn").style.display = "none";
+
+        document.getElementById("nameInput").value = customerData.name || "";
+        document.getElementById("emailInput").value = customerData.email || "";
+        document.getElementById("dobInput").value = customerData.dob || "";
     });
 
-    document.getElementById("avatarInput").addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if(file) document.getElementById("avatarPreview").src = URL.createObjectURL(file);
-    });
-
-    // Bật edit thông tin
-    document.getElementById("editInfoBtn").addEventListener("click", () => {
-        ["nameInput","emailInput","dobInput"].forEach(id => {
-            document.getElementById(id).hidden = false;
-            document.getElementById(id.replace("Input","Display")).hidden = true;
-        });
-        document.getElementById("saveBtn").hidden = false;
-        document.getElementById("cancelBtn").hidden = false;
-        document.getElementById("editInfoBtn").hidden = true;
-    });
-
-    // Nút hủy thay đổi -> reload lại profile
+    // Cancel
     document.getElementById("cancelBtn").addEventListener("click", () => {
-        location.reload();
+        document.getElementById("infoView").style.display = "block";
+        document.getElementById("infoEdit").style.display = "none";
+        document.getElementById("editBtn").style.display = "inline-block";
     });
 
-    // Submit update
-    document.getElementById("profileForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("name", document.getElementById("nameInput").value);
-        formData.append("email", document.getElementById("emailInput").value);
-        formData.append("dob", document.getElementById("dobInput").value);
-        const avatarFile = document.getElementById("avatarInput").files[0];
-        if(avatarFile) formData.append("avatar", avatarFile);
+    // Save
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        customerData.name = document.getElementById("nameInput").value;
+        customerData.email = document.getElementById("emailInput").value;
+        customerData.dob = document.getElementById("dobInput").value;
 
-        const res = await fetch(`/api/customer/${customerId}/update`, {
-            method: "POST",
-            body: formData
-        });
+        await saveProfile();
 
-        if(res.ok){
-            alert("Cập nhật thành công!");
-            location.reload();
-        } else alert("Cập nhật thất bại!");
+        document.getElementById("infoView").style.display = "block";
+        document.getElementById("infoEdit").style.display = "none";
+        document.getElementById("editBtn").style.display = "inline-block";
+
+        document.getElementById("nameText").innerText = customerData.name;
+        document.getElementById("emailText").innerText = customerData.email;
+        document.getElementById("dobText").innerText = customerData.dob;
     });
+
+    // Avatar click (cả ảnh lẫn vòng tròn)
+    document.getElementById("avatarPreview").addEventListener("click", () => {
+        document.getElementById("avatar").click();
+    });
+    document.getElementById("avatarCircle").addEventListener("click", () => {
+        document.getElementById("avatar").click();
+    });
+
+    document.getElementById("avatar").addEventListener("change", () => {
+        const file = document.getElementById("avatar").files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById("avatarPreview").style.display = "block";
+                document.getElementById("avatarPreview").src = e.target.result;
+                document.getElementById("avatarCircle").style.display = "none";
+            };
+            reader.readAsDataURL(file);
+            saveProfile(file);
+        }
+    });
+
+    // API update
+    async function saveProfile(file) {
+        try {
+            const formData = new FormData();
+            formData.append("name", customerData.name || "");
+            formData.append("email", customerData.email || "");
+            formData.append("dob", customerData.dob || "");
+            if (file) {
+                formData.append("avatar", file);
+            }
+
+            const res = await fetch(`/api/customer/${customerId}/update`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (res.ok) {
+                const updated = await res.json();
+                customerData = updated; // cập nhật lại dữ liệu mới từ server
+                console.log("Cập nhật thành công!");
+            } else {
+                const errorText = await res.text();
+                console.error("Lỗi cập nhật:", errorText);
+            }
+        } catch (e) {
+            console.error("Exception khi update:", e);
+        }
+    }
 </script>
 </body>
 </html>

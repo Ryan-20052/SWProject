@@ -42,28 +42,43 @@
         const password = document.getElementById("password").value;
         const msg = document.getElementById("message");
 
-        try {
-            const response = await fetch("http://localhost:8080/auth/login", {
+        // Hàm gọi API login
+        async function tryLogin(url) {
+            return fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
             });
+        }
+
+        try {
+            // 🟢 Thử login Customer trước
+            let response = await tryLogin("http://localhost:8080/auth/customer/login");
 
             if (response.ok) {
-                const user = await response.json(); // 🟢 lấy JSON
-                sessionStorage.setItem("username", username);
+                const customer = await response.json();
+                sessionStorage.setItem("username", customer.username);
                 msg.className = "success";
-                msg.innerText = "✅ Welcome " + user.name;
-
-                setTimeout(() => {
-                    window.location.href = 'homepage.html';
-                }, 1000);
-            } else {
-                const text = await response.text();
-                msg.className = "error";
-                msg.innerText = "❌ Login failed! " + text;
+                msg.innerText = "✅ Welcome " + customer.username + " (Customer)";
+                setTimeout(() => window.location.href = "homepage.html", 1000);
+                return;
             }
 
+            // 🔄 Nếu Customer thất bại → thử Manager
+            response = await tryLogin("http://localhost:8080/auth/manager/login");
+
+            if (response.ok) {
+                const manager = await response.json();
+                sessionStorage.setItem("username", manager.username);
+                msg.className = "success";
+                msg.innerText = "✅ Welcome " + manager.username + " (Manager)";
+                setTimeout(() => window.location.href = "manageHome.html", 1000);
+                return;
+            }
+
+            // ❌ Nếu cả 2 đều fail
+            msg.className = "error";
+            msg.innerText = "❌ Login failed! Invalid username or password.";
 
         } catch (error) {
             msg.className = "warning";
