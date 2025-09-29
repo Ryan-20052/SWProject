@@ -7,50 +7,243 @@
     <link rel="stylesheet" href="homepage.css">
 
     <style>
-        :root{--blue:#2563eb;--blue-dark:#1d4ed8}
-        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color:#111 }
-        header { background: var(--blue); color: white; padding: 15px 20px; display: flex; justify-content: center; align-items: center; }
-        .header-inner { width: 1200px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-        header h1 { font-size: 20px; margin: 0; white-space: nowrap; }
-        .search-box { flex: 1; display: flex; justify-content: center; }
-        .search-box input { width: 100%; max-width: 600px; padding: 10px 14px; border-radius: 6px; border: none; }
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #111
+        }
+
+        header {
+            background: var(--blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .search-box {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-box input {
+            width: 100%;
+            max-width: 600px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+        }
 
         /* search control nhỏ gọn */
-        .search-controls { display:flex; gap:8px; align-items:center; width:100%; max-width:600px; }
-        .search-controls input { flex:1; padding:10px 12px; border-radius:6px; border:none; }
-        .search-clear { background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 10px; border-radius:6px; cursor:pointer;}
-        .search-clear.hidden { display:none; }
+        .search-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
 
-        header .actions { display: flex; gap: 10px; align-items: center; }
-        header button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; }
+        .search-controls input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: none;
+        }
 
-        nav { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-        .nav-inner { width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 24px; padding: 10px 20px; font-weight: 600; }
+        .search-clear {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-        .banner { margin: 20px auto; padding: 34px; border-radius: 12px; background: linear-gradient(90deg, #4ade80, #3b82f6); color: white; text-align: center; max-width:1200px }
+        .search-clear.hidden {
+            display: none;
+        }
 
-        .products { padding: 20px; text-align: center; max-width:1200px; margin:0 auto }
-        .section-inner { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
-        .content-inner { display: flex; flex-direction: column; align-items: flex-start; width: max-content; }
-        .content-inner h2 { margin-bottom: 8px; text-align: left; }
-        .content-inner .sub { color:#666; font-size:14px; margin-bottom:14px; text-align:left }
+        header .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-        .grid-featured { display: grid; grid-template-columns: repeat(4, 260px); gap: 30px; justify-content: center; align-items: start; }
-        .grid-all { display: grid; grid-template-columns: repeat(4, 260px); gap: 30px; justify-content: center; align-items: start; }
+        header button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-        .card { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: 0.25s; width:100%; }
-        .card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-        .thumb { height: 140px; border-radius: 8px; background-size: cover; background-position: center; margin-bottom: 10px; }
-        .card h3 { font-size: 15px; margin: 6px 0; height: 40px; overflow: hidden; text-align:left }
-        .meta { display:flex; gap:8px; align-items:center; justify-content:space-between; }
-        .price { color: #059669; font-weight:700 }
-        .card .buy, .card .add-to-cart { margin-top:8px; width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:8px; cursor:pointer }
-        .card .buy:hover, .card .add-to-cart:hover { background:var(--blue-dark) }
+        nav {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-inner {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+
+        .banner {
+            margin: 20px auto;
+            padding: 34px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #4ade80, #3b82f6);
+            color: white;
+            text-align: center;
+            max-width: 1200px
+        }
+
+        .products {
+            padding: 20px;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .section-inner {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: max-content;
+        }
+
+        .content-inner h2 {
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .content-inner .sub {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 14px;
+            text-align: left
+        }
+
+        .grid-featured {
+            display: grid;
+            grid-template-columns: repeat(4, 260px);
+            gap: 30px;
+            justify-content: center;
+            align-items: start;
+        }
+
+        .grid-all {
+            display: grid;
+            grid-template-columns: repeat(4, 260px);
+            gap: 30px;
+            justify-content: center;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transition: 0.25s;
+            width: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .thumb {
+            height: 140px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            font-size: 15px;
+            margin: 6px 0;
+            height: 40px;
+            overflow: hidden;
+            text-align: left
+        }
+
+        .meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .price {
+            color: #059669;
+            font-weight: 700
+        }
+
+        .card .buy, .card .add-to-cart {
+            margin-top: 8px;
+            width: 100%;
+            padding: 10px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .card .buy:hover, .card .add-to-cart:hover {
+            background: var(--blue-dark)
+        }
 
         /* highlight khi tìm kiếm */
-        .highlight { background: linear-gradient(90deg,#fff9c4,#fff3b0); padding: 0 4px; border-radius: 3px; }
+        .highlight {
+            background: linear-gradient(90deg, #fff9c4, #fff3b0);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
 
-        .no-results { text-align:center; color:#666; padding: 24px; width:100% }
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 24px;
+            width: 100%
+        }
     </style>
 </head>
 <body>
@@ -59,7 +252,7 @@
         <h1>License Shop</h1>
         <div class="search-box">
             <div class="search-controls">
-                <input id="searchInput" type="text" placeholder="Tìm sản phẩm theo tên, từ khoá..." />
+                <input id="searchInput" type="text" placeholder="Tìm sản phẩm theo tên, từ khoá..."/>
                 <button id="clearSearch" class="search-clear hidden">X</button>
             </div>
         </div>
@@ -161,14 +354,14 @@
     let cart = [];
     let allProducts = [];
 
-    function addToCart(product, variant){
-        cart.push({product, variant, qty:1});
+    function addToCart(product, variant) {
+        cart.push({product, variant, qty: 1});
         updateCartBtn();
     }
 
-    function updateCartBtn(){
+    function updateCartBtn() {
         const btn = document.getElementById("cartBtn");
-        if (btn) btn.innerText = "Giỏ hàng ("+cart.length+")";
+        if (btn) btn.innerText = "Giỏ hàng (" + cart.length + ")";
     }
 
     // Escape HTML để tránh XSS
@@ -216,11 +409,12 @@
             thumb.style.background = 'linear-gradient(90deg,#eef2ff,#e0f2fe)';
         }
 
-        if(v){
-            div.querySelector(".buy").addEventListener("click", ()=> {
-                alert("Mua ngay: " + v.name + " - " + v.price.toLocaleString() + "đ");
+        if (v) {
+            div.querySelector(".buy").addEventListener("click", () => {
+                // chuyển tới trang chi tiết sản phẩm
+                window.location.href = `/product.html?id=${p.id}`;
             });
-            div.querySelector(".add-to-cart").addEventListener("click", ()=> {
+            div.querySelector(".add-to-cart").addEventListener("click", () => {
                 addToCart(p, v);
             });
         }
@@ -240,7 +434,7 @@
             return;
         }
 
-        const featured = list.slice(0,4);
+        const featured = list.slice(0, 4);
         featured.forEach(p => featuredGrid.appendChild(createCard(p, query)));
         list.forEach(p => allGrid.appendChild(createCard(p, query)));
     }
@@ -306,9 +500,8 @@
     searchInput.addEventListener('input', onSearchChange);
 
     // load products từ API
-    async function loadProducts(){
+    async function loadProducts() {
         try {
-            const res = await fetch("http://localhost:8080/api/product");
             if (!res.ok) {
                 console.error('Fetch failed', res.status, res.statusText);
                 allGrid.innerHTML = '<div class="no-results">Không thể tải sản phẩm. Kiểm tra server hoặc CORS.</div>';
