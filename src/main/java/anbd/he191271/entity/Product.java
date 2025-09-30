@@ -1,64 +1,88 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.GeneratedColumn;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "product")
 public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(name = "name")
     private String name;
 
+    @Column(name = "categories_id")
+    private int category_id;
+
     @Column(name = "manager_id")
-    private int managerId;
+    private int manager_id;
+
     @Column(name = "img_url")
-    private String imgUrl;
+    private String img_url;
 
-    @ManyToOne
-    @JoinColumn(name = "categories_id", nullable = false)
-    private Categories category;
+    // <-- Thêm trường variants
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Variant> variants = new ArrayList<>();
 
-    public Product() {
+    public Product() {}
+
+    // constructor, getters và setters (đảm bảo có getter/setter cho variants)
+    public List<Variant> getVariants() {
+        return variants;
     }
 
-    public Product(int id, String name, Categories category, int managerId, String imgUrl) {
+    public void setVariants(List<Variant> variants) {
+        this.variants = variants;
+    }
+
+    public Product(int id, String name, int category_id, int manager_id, String img_url, List<Variant> variants) {
         this.id = id;
         this.name = name;
-        this.category = category;
-        this.managerId = managerId;
-        this.imgUrl = imgUrl;
+        this.category_id = category_id;
+        this.manager_id = manager_id;
+        this.img_url = img_url;
+        this.variants = variants;
     }
 
-    public Product(String name, int managerId, String imgUrl, Categories category) {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
         this.name = name;
-        this.managerId = managerId;
-        this.imgUrl = imgUrl;
-        this.category = category;
     }
 
-    // Getters & Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public Categories getCategory() {
-        return category;
+    public int getCategory_id() {
+        return category_id;
     }
 
-    public void setCategory(Categories category) {
-        this.category = category;
+    public void setCategory_id(int category_id) {
+        this.category_id = category_id;
     }
 
-    public int getManagerId() { return managerId; }
-    public void setManagerId(int managerId) { this.managerId = managerId; }
-   public String getImgUrl() { return imgUrl; }
-    public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
+    public int getManager_id() {
+        return manager_id;
+    }
+
+    public void setManager_id(int manager_id) {
+        this.manager_id = manager_id;
+    }
+
+    public String getImg_url() {
+        return img_url;
+    }
+
+    public void setImg_url(String img_url) {
+        this.img_url = img_url;
+    }
 }
