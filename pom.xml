@@ -68,15 +68,13 @@
             <artifactId>spring-boot-starter-mail</artifactId>
             <version>3.5.6</version>
         </dependency>
+        <!-- Thymeleaf -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
-		</dependency>
-    </dependencies>
+
+	</dependencies>
 
 	<build>
 		<plugins>

@@ -1,32 +1,22 @@
 package anbd.he191271.controller;
 
-import anbd.he191271.entity.Product;
-import anbd.he191271.entity.Categories;
-import anbd.he191271.repository.CategoryRepository;
+import anbd.he191271.dto.ProductDTO;
 import anbd.he191271.service.ProductService;
-import jdk.jfr.Category;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/api/product")
+@CrossOrigin("*")
 public class ProductController {
-
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable("id") int id, Model model) {
-        Product product = productService.findProductById(id); // đã có trong service
-        model.addAttribute("product", product);
-        model.addAttribute("variants", product.getVariants());
-        return "product"; // => product.html
+    private final ProductService productService;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
+    @GetMapping
+    public List<ProductDTO> getAllProducts() {
+        return productService.getAllProducts(); // trả DTO có variants
+    }
 }
