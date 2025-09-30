@@ -1,6 +1,9 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.entity.Customer;
+import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.service.ProductService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,15 +14,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HomeController {
 
     private final ProductService productService;
+    private final CustomerRepository customerRepository;
 
-    // Constructor injection
-    public HomeController(ProductService productService) {
+    public HomeController(ProductService productService,
+                          CustomerRepository customerRepository) {
         this.productService = productService;
+        this.customerRepository = customerRepository;
     }
 
     @GetMapping("/homepage")
-    public String homepage(Model model) {
+    public String homepage(Model model, HttpSession session) {
         model.addAttribute("products", productService.findAllProducts());
-        return "homepage"; // trả về file homepage.html trong templates
+
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer != null) {
+            model.addAttribute("customer", customer);
+        }
+        return "homepage";
     }
 }
