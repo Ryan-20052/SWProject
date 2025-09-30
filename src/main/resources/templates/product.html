@@ -4,29 +4,56 @@
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
     <link rel="stylesheet" th:href="@{/product.css}">
+    <script src="/product.js"></script>
 </head>
 <body>
+<header id="siteHeader">
+    <div class="header-inner">
+        <h1>License Shop</h1>
+
+        <!-- Actions (Login / Register / Cart) -->
+        <div class="actions" id="actions">
+            <button class="auth-login" onclick="window.location.href='/login.html'" aria-label="Đăng nhập">Đăng nhập</button>
+            <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">Đăng ký</button>
+            <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
+        </div>
+    </div>
+</header>
+
 <div class="container">
     <div class="product-header">
         <div class="thumb" th:style="|background-image: url('${product.img_url}')|"></div>
         <div class="info">
             <h1 th:text="${product.name}">Tên sản phẩm</h1>
+
+            <!-- Hiển thị giá theo selectedVariant (controller sẽ cung cấp selectedVariant) -->
             <div class="price"
-                 th:text="${#lists.isEmpty(variants) ? 'Liên hệ' : variants[0].price + ' đ'}">Giá</div>
+                 th:text="${selectedVariant != null ? selectedVariant.price + ' đ' : (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
+                Giá
+            </div>
 
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
-                <div class="options">
-                    <label class="variant-option"
-                           th:each="v : ${variants}"
-                           th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng'}">
-                        <input type="radio" name="variant" th:value="${v.id}">
-                        <span>
-                            <span th:text="${v.duration}">Thời hạn</span> -
-                            <span th:text="${v.price + ' đ'}">Giá</span>
-                        </span>
-                    </label>
-                </div>
+
+                <!-- Form GET gửi về cùng URL /product/{id}?variantId=xxx -->
+                <form method="get"
+                      th:action="@{/product/{id}(id=${product.id})}">
+                    <div class="options">
+                        <label class="variant-option"
+                               th:each="v : ${variants}"
+                               th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng' or v.duration == '1 năm'}">
+                            <input type="radio"
+                                   name="variantId"
+                                   th:value="${v.id}"
+                                   th:checked="${selectedVariant != null and selectedVariant.id == v.id}"
+                                   onchange="this.form.submit()">
+                            <span>
+                                <span th:text="${v.duration}">Thời hạn</span> -
+                                <span th:text="${v.price + ' đ'}">Giá</span>
+                            </span>
+                        </label>
+                    </div>
+                </form>
             </div>
 
             <div class="actions">
