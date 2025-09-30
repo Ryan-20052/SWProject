@@ -12,7 +12,7 @@ public class Variant {
     private String name;
 
     @Column(name = "stock_quantity")
-    private int stockQuantity;
+    private int stock_quantity;
     @Column(name = "duration")
     private String duration;
     @Column(name = "price")
@@ -26,31 +26,60 @@ public class Variant {
     public Variant() {
     }
 
-    public Variant(int id, String name, int stockQuantity, String duration, int price, Product product) {
+    public Variant(int id, String name, int stock_quantity, String duration, int price, Product product) {
         this.id = id;
         this.name = name;
-        this.stockQuantity = stockQuantity;
+        this.stock_quantity = stock_quantity;
         this.duration = duration;
         this.price = price;
         this.product = product;
     }
 
-    // Getters & Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public int getStockQuantity() { return stockQuantity; }
-    public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+    public String getName() {
+        return name;
+    }
 
-    public String getDuration() { return duration; }
-    public void setDuration(String duration) { this.duration = duration; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
+    public int getStock_quantity() {
+        return stock_quantity;
+    }
 
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    public void setStock_quantity(int stock_quantity) {
+        this.stock_quantity = stock_quantity;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }
