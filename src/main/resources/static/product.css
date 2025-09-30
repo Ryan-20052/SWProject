@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0px;
     background: #f8f9fa;
 }
 .container {
@@ -79,3 +79,102 @@ button {
 }
 .buy { background: #f43f5e; color: white; }
 .cart { background: #2563eb; color: white; }
+/* --------------------
+   Header cơ bản
+-------------------- */
+/* Header bình thường */
+#siteHeader {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: #fff;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    margin-bottom: 50px; /* cách ra dưới 50px khi bình thường */
+    background-color: #007bff;
+    margin-top: -30px;
+
+
+}
+
+#siteHeader .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    transition: padding 0.3s ease, height 0.3s ease;
+}
+#siteHeader .actions {
+    display: flex;
+    align-items: center;       /* căn giữa nút theo trục dọc */
+
+}
+
+#siteHeader h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: white;
+    transition: font-size 0.3s ease;
+}
+/* --- Options: 2 columns x 2 rows --- */
+.variants .options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 cột đều nhau */
+    gap: 12px;                               /* khoảng cách giữa ô */
+    align-items: stretch;
+}
+
+/* Mỗi option là 1 ô */
+.variant-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    background: #fff;
+    min-height: 56px;     /* chiều cao đồng đều */
+    box-sizing: border-box;
+}
+
+/* Khi hover hoặc active */
+.variant-option:hover {
+    background: #f1f5f9;
+    border-color: #2563eb;
+    transform: translateY(-2px);
+}
+
+/* Radio to dễ thao tác, căn thẳng */
+.variant-option input[type="radio"] {
+    margin: 0;
+    accent-color: #2563eb;
+    transform: scale(1.15);
+    width: 1.2em;
+    height: 1.2em;
+}
+
+/* Nội dung text trong ô (giữ chiều cao dòng, ngắt gọn) */
+.variant-option > span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+/* Giá nhỏ hơn tiêu đề */
+.variant-option > span span:last-child {
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+/* Responsive: nhỏ hơn 600px thì 1 cột */
+@media (max-width: 600px) {
+    .variants .options {
+        grid-template-columns: 1fr;
+    }
+}
+
+
