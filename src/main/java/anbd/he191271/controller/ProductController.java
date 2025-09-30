@@ -21,21 +21,12 @@ public class ProductController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @GetMapping("/")
-    public String homepage(Model model) {
-        List<Product> products = productService.findAllProducts();
-        List<Categories> categories = categoryRepository.findAll();
-
-        model.addAttribute("products", products);
-        model.addAttribute("categories", categories);
-
-        return "homepage"; // homepage.html
-    }
-
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable int id, Model model) {
-        Product product = productService.findProductById(id);
+    public String productDetail(@PathVariable("id") int id, Model model) {
+        Product product = productService.findProductById(id); // đã có trong service
         model.addAttribute("product", product);
-        return "product"; // product.html
+        model.addAttribute("variants", product.getVariants());
+        return "product"; // => product.html
     }
+
 }

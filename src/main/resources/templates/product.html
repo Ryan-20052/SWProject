@@ -1,158 +1,122 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title th:text="${product.name} + ' — License Shop'">Product — License Shop</title>
-
+    <meta charset="UTF-8">
+    <title th:text="${product.name}">Chi tiết sản phẩm</title>
     <style>
-        :root { --accent:#f43f5e; --blue:#2563eb; --muted:#666; }
-        body{font-family:Inter, Arial, sans-serif;margin:0;background:#f6f7fb;color:#111}
-        .container{max-width:1100px;margin:28px auto;padding:0 16px}
-        .back{margin-bottom:12px;color:var(--muted);text-decoration:none}
-
-        /* Navbar */
-        header{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.05);padding:10px 18px;position:sticky;top:0;z-index:1000}
-        .nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
-        .nav .logo a{font-size:20px;font-weight:800;color:var(--blue);text-decoration:none}
-        .nav .search{flex:1;display:flex}
-        .nav .search input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px 0 0 8px}
-        .nav .search button{padding:8px 12px;border:none;background:var(--blue);color:#fff;border-radius:0 8px 8px 0;cursor:pointer}
-        .nav .links{display:flex;gap:12px}
-        .nav .links a{padding:8px 12px;color:#111;text-decoration:none;font-weight:600;border-radius:8px}
-        .nav .links a:hover{background:#f0f2f5}
-        .cart-count{background:var(--accent);color:#fff;font-size:12px;padding:2px 6px;border-radius:50%;margin-left:4px}
-
-        /* Layout chính: ảnh bên trái, info bên phải */
-        .product-row{display:flex;gap:28px;align-items:flex-start}
-        .thumb-wrap{flex:0 0 420px}
-        .thumb{width:420px;height:320px;border-radius:12px;background-size:cover;background-position:center;box-shadow:0 8px 30px rgba(20,20,30,0.06)}
-        /* gallery đã bị loại bỏ */
-
-        .info{flex:1;min-width:260px}
-        .title{font-size:20px;font-weight:700;margin:0 0 8px}
-        .meta{color:var(--muted);margin-bottom:14px}
-        .price-area{display:flex;align-items:center;gap:16px;margin-bottom:14px}
-        .price{font-size:22px;color:#059669;font-weight:800}
-        .old-price{color:var(--muted);text-decoration:line-through}
-
-        .variants{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-        .variant-btn{padding:10px 12px;border-radius:10px;border:1px solid #e6e8ef;background:#fff;cursor:pointer;font-weight:700}
-        .variant-btn.active{background:linear-gradient(90deg,#fff0f1,#fff);border-color:var(--accent);box-shadow:0 6px 18px rgba(244,63,94,0.08)}
-
-        .actions-row{display:flex;gap:12px;margin-bottom:6px}
-        .btn{padding:12px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
-        .btn.cart{background:transparent;border:2px solid var(--accent);color:var(--accent)}
-        .btn.buy{background:var(--accent);color:#fff}
-
-        .section{margin-top:28px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
-        .section h3{margin:0 0 8px}
-        .product-desc{color:#222;line-height:1.6}
-
-        .comments{margin-top:18px}
-        .comment{padding:12px;border-radius:8px;border:1px solid #eef2f7;background:#fff;margin-bottom:10px}
-        .comment .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-        .comment .author{font-weight:700}
-        .stars{display:inline-flex;gap:4px}
-        .star{width:18px;height:18px;display:inline-block}
-
-        .comment-form{display:flex;flex-direction:column;gap:8px}
-        .comment-form textarea{min-height:90px;padding:10px;border-radius:8px;border:1px solid #e6e8ef}
-        .comment-form .rating-picker{display:flex;gap:6px}
-        .small{color:var(--muted);font-size:13px}
-
-        @media (max-width:880px){
-            .product-row{flex-direction:column}
-            .thumb{width:100%;height:260px}
-            .thumb-wrap{flex:1}
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
         }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .product-header {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .thumb {
+            width: 300px;
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .info { flex: 1; }
+
+        h1 { margin: 0 0 10px; }
+        .price {
+            color: #059669;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Biến thể xếp ngang dạng nút */
+        .variants { margin-top: 20px; }
+        .variants .options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .variant-option {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .variant-option input[type="radio"] {
+            margin-right: 8px;
+            accent-color: #2563eb; /* màu xanh */
+            transform: scale(1.2);
+        }
+        .variant-option:hover {
+            background: #f1f5f9;
+            border-color: #2563eb;
+        }
+
+        /* Hành động */
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .buy { background: #f43f5e; color: white; }
+        .cart { background: #2563eb; color: white; }
     </style>
 </head>
 <body>
-<header>
-    <div class="nav">
-        <div class="logo"><a href="/static">LicenseShop</a></div>
-        <form class="search" action="/search" method="get">
-            <input type="text" name="q" placeholder="Tìm sản phẩm..." />
-            <button type="submit">Tìm</button>
-        </form>
-        <div class="links">
-            <a href="/login">Đăng nhập</a>
-            <a href="/register">Đăng ký</a>
-            <a href="/cart">Giỏ hàng <span id="cartCount" class="cart-count">0</span></a>
-        </div>
-    </div>
-</header>
-
 <div class="container">
-    <a class="back" href="/static">← Quay về cửa hàng</a>
-
-    <div class="product-row">
-        <div class="thumb-wrap">
-            <div id="mainThumb" class="thumb" th:style="|background-image: url('${product.img_url}')|"></div>
-            <!-- gallery đã bị loại bỏ -->
-        </div>
-
+    <div class="product-header">
+        <div class="thumb" th:style="|background-image: url('${product.img_url}')|"></div>
         <div class="info">
-            <h1 class="title" th:text="${product.name}">Tên sản phẩm</h1>
-            <div class="meta">Mã sản phẩm: <span th:text="${product.sku}">SKU123</span> • <span class="small" th:text="${product.category}">Thể loại</span></div>
+            <h1 th:text="${product.name}">Tên sản phẩm</h1>
+            <div class="price"
+                 th:text="${#lists.isEmpty(variants) ? 'Liên hệ' : variants[0].price + ' đ'}">Giá</div>
 
-            <div class="price-area">
-                <div class="price" id="priceDisplay">-- đ</div>
-                <div class="old-price" id="oldPrice" style="display:none">-- đ</div>
-            </div>
-
-            <div class="variants" id="variants">
-                <button th:each="v : ${product.variants}" th:attr="data-variant-id=${v.id},data-price=${v.price},data-duration=${v.duration}" th:text="${v.duration} + ' tháng'" class="variant-btn" type="button">3 tháng</button>
-            </div>
-
-            <div class="actions-row">
-                <button id="addToCartBtn" class="btn cart" type="button">Thêm vào giỏ hàng</button>
-                <button id="buyNowBtn" class="btn buy" type="button">Mua ngay</button>
-            </div>
-
-            <div class="small">Bảo hành & Hỗ trợ: <span th:text="${product.support}">Hỗ trợ 24/7</span></div>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>Thông tin sản phẩm</h3>
-        <div class="product-desc" th:utext="${product.fullDescription}">Mô tả chi tiết sản phẩm sẽ hiển thị ở đây.</div>
-    </div>
-
-    <div class="section comments" id="commentsSection">
-        <h3>Đánh giá và bình luận</h3>
-        <div id="commentsList">
-            <div th:each="c : ${comments}" class="comment">
-                <div class="head">
-                    <div class="author" th:text="${c.author ?: 'Khách'}">Người dùng</div>
-                    <div class="stars" th:utext="${#strings.repeat('★', c.rating)}">★ ★ ★</div>
+            <div class="variants">
+                <h3>Chọn gói/phiên bản:</h3>
+                <div class="options">
+                    <label class="variant-option"
+                           th:each="v : ${variants}"
+                           th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng' or v.duration == '1 năm'}">
+                        <input type="radio" name="variant" th:value="${v.id}">
+                        <span>
+                            <span th:text="${v.duration}">Thời hạn</span> -
+                            <span th:text="${v.price + ' đ'}">Giá</span>
+                        </span>
+                    </label>
                 </div>
-                <div class="body small" th:text="${c.text}">Nội dung bình luận</div>
-            </div>
-        </div>
-        <div class="comment-form" id="commentForm">
-            <label class="small">Đánh giá của bạn</label>
-            <div class="rating-picker" id="ratingPicker">
-                <button type="button" class="star-btn" data-value="1">☆</button>
-                <button type="button" class="star-btn" data-value="2">☆</button>
-                <button type="button" class="star-btn" data-value="3">☆</button>
-                <button type="button" class="star-btn" data-value="4">☆</button>
-                <button type="button" class="star-btn" data-value="5">☆</button>
             </div>
 
-            <textarea id="commentText" placeholder="Viết bình luận..."></textarea>
-            <div style="display:flex;gap:8px;align-items:center">
-                <input id="commentAuthor" placeholder="Tên (tùy chọn)" class="small" />
-                <button id="submitComment" class="btn buy" type="button">Gửi bình luận</button>
+            <div class="actions">
+                <button class="cart">Thêm vào giỏ</button>
+                <button class="buy">Mua ngay</button>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Nếu trước đó bạn có function selectGallery(), bây giờ có thể xóa hoặc để trống.
-    // Giữ lại script xử lý variant, cart, comments nếu cần.
-</script>
 </body>
 </html>
