@@ -60,7 +60,7 @@
                 sessionStorage.setItem("username", customer.username);
                 msg.className = "success";
                 msg.innerText = "✅ Welcome " + customer.username + " (Customer)";
-                setTimeout(() => window.location.href = "homepage.html", 1000);
+                setTimeout(() => window.location.href = "/home/homepage", 1000);
                 return;
             }
 
@@ -76,7 +76,19 @@
                 return;
             }
 
-            // ❌ Nếu cả 2 đều fail
+            // 🔄 Nếu Manager thất bại → thử Admin
+            response = await tryLogin("http://localhost:8080/auth/admin/login");
+
+            if (response.ok) {
+                const admin = await response.json();
+                sessionStorage.setItem("username", admin.username);
+                msg.className = "success";
+                msg.innerText = "✅ Welcome Admin";
+                setTimeout(() => window.location.href = "adminDashboard.html", 1000);
+                return;
+            }
+
+            // ❌ Nếu cả 3 đều fail
             msg.className = "error";
             msg.innerText = "❌ Login failed! Invalid username or password.";
 
