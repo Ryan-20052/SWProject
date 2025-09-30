@@ -5,7 +5,6 @@ import anbd.he191271.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,10 +23,6 @@ public class CustomerService {
     public Optional<Customer> getById(int id) {
         return customerRepository.findById(id);
     }
-    public Customer getCustomerById(int id) {
-        return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
 
     public String getAvatarOrInitial(Customer customer) {
         if (customer.getAvatar() != null && !customer.getAvatar().isEmpty()) {
@@ -37,16 +32,5 @@ public class CustomerService {
             return customer.getName().substring(0, 1).toUpperCase();
         }
         return "?";
-    }
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
-    }
-
-    public void deleteCustomer(int id) {
-        if (customerRepository.existsById(id)) {
-            customerRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Customer not found with id " + id);
-        }
     }
 }

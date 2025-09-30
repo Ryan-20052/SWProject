@@ -1,17 +1,13 @@
-/* === User menu + avatar + cart === */
 .user-menu {
     position: relative;
-    display: flex;           /* avatar và cartBtn cùng hàng */
-    align-items: center;     /* căn giữa theo chiều dọc */
-    gap: 12px;               /* khoảng cách giữa avatar và nút */
-    flex-wrap: nowrap;       /* không cho xuống dòng */
+    display: inline-block;
 }
 
 .user-avatar {
     width: 40px;
     height: 40px;
     background-color: #2563eb;
-    color: #fff;
+    color: white;
     font-weight: bold;
     font-size: 18px;
     border-radius: 50%;
@@ -19,77 +15,32 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;          /* giữ nguyên kích thước, không bị co */
 }
 
-.user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Dropdown menu */
 .user-menu .dropdown {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
+    top: 50px;
     right: 0;
-    background: #fff;
+    background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    min-width: 180px;
-    z-index: 9999;
+    min-width: 150px;
+    z-index: 999;
 }
 
 .user-menu .dropdown.show {
     display: block;
 }
 
-.user-menu .dropdown a,
-.user-menu .dropdown .item {
+.user-menu .dropdown a {
     display: block;
-    padding: 10px 14px;
+    padding: 10px;
     text-decoration: none;
-    color: #111;
-    font-size: 14px;
+    color: black;
 }
 
-.user-menu .dropdown a:hover,
-.user-menu .dropdown .item:hover {
+.user-menu .dropdown a:hover {
     background: #f2f2f2;
-}
-
-/* Nút Login / Register trong header */
-.actions a.auth-login,
-.actions a.auth-register {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.2s ease;
-}
-
-.actions a.auth-login {
-    color: rgba(255,255,255,0.9);
-    border: 1.5px solid rgba(255,255,255,0.18);
-    background: transparent;
-}
-
-.actions a.auth-login:hover {
-    background: rgba(255,255,255,0.12);
-}
-
-.actions a.auth-register {
-    background: #fff;
-    color: var(--blue);
-}
-
-.actions a.auth-register:hover {
-    background: #f9f9f9;
 }
