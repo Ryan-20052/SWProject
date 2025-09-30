@@ -1,7 +1,6 @@
 package anbd.he191271.controller;
 
 import anbd.he191271.entity.Customer;
-import anbd.he191271.service.AdminLogService;
 import anbd.he191271.service.CustomerService;
 
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +13,10 @@ import java.util.List;
 public class AdminCustomerController {
 
     private final CustomerService customerService;
-    private final AdminLogService logService;
 
-    public AdminCustomerController(CustomerService customerService, AdminLogService logService) {
+    public AdminCustomerController(CustomerService customerService) {
         this.customerService = customerService;
-        this.logService = logService;
     }
-
 
     // Lấy danh sách customer
     @GetMapping
@@ -31,7 +27,6 @@ public class AdminCustomerController {
     // Xóa customer theo id
     @DeleteMapping("/{id}")
     public String deleteCustomer(@PathVariable int id) {
-        logService.saveLog("delete customer name:"+customerService.getCustomerById(id).getUsername(),"customer");
         customerService.deleteCustomer(id);
         return "Customer deleted successfully";
     }

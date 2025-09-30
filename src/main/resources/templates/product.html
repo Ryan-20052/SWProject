@@ -3,89 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .product-header {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        .thumb {
-            width: 300px;
-            height: 300px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-
-        .info { flex: 1; }
-
-        h1 { margin: 0 0 10px; }
-        .price {
-            color: #059669;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        /* Biến thể xếp ngang dạng nút */
-        .variants { margin-top: 20px; }
-        .variants .options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .variant-option {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .variant-option input[type="radio"] {
-            margin-right: 8px;
-            accent-color: #2563eb; /* màu xanh */
-            transform: scale(1.2);
-        }
-        .variant-option:hover {
-            background: #f1f5f9;
-            border-color: #2563eb;
-        }
-
-        /* Hành động */
-        .actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 12px;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .buy { background: #f43f5e; color: white; }
-        .cart { background: #2563eb; color: white; }
-    </style>
+    <link rel="stylesheet" th:href="@{/product.css}">
 </head>
 <body>
 <div class="container">
@@ -101,7 +19,7 @@
                 <div class="options">
                     <label class="variant-option"
                            th:each="v : ${variants}"
-                           th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng' or v.duration == '1 năm'}">
+                           th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng'}">
                         <input type="radio" name="variant" th:value="${v.id}">
                         <span>
                             <span th:text="${v.duration}">Thời hạn</span> -

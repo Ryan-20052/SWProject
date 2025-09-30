@@ -229,42 +229,14 @@
         }
     </style>
 </head>
-<script>
-    function updateCartCountUI() {
-        const cart = loadCart();
-        const total = cart.reduce((s, it) => s + (it.qty||1), 0);
-        document.querySelectorAll('#cartBtn').forEach(btn => {
-            btn.innerText = `Giỏ hàng (${total})`;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const avatar = document.getElementById('userAvatar');
-        const dropdown = document.getElementById('userDropdown');
-
-        if (avatar && dropdown) {
-            avatar.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdown.classList.toggle('show');
-                dropdown.setAttribute('aria-hidden', dropdown.classList.contains('show') ? 'false' : 'true');
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target) && !avatar.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                    dropdown.setAttribute('aria-hidden', 'true');
-                }
-            });
-        }
-
-        updateCartCountUI();
-    });
-</script>
 <body>
 <header id="siteHeader">
     <div class="header-inner">
         <h1>License Shop</h1>
 
+        <!-- Search controls: input + clear button.
+             Lưu ý: input có id="searchInput" để script tìm kiếm dùng.
+         -->
         <div class="search-box" aria-hidden="false">
             <div class="search-controls" role="search" aria-label="Tìm sản phẩm">
                 <input id="searchInput" type="text" placeholder="Tìm sản phẩm theo tên, từ khoá..." aria-label="Tìm sản phẩm"/>
@@ -273,41 +245,11 @@
         </div>
 
         <!-- Actions (Login / Register / Cart) -->
-        <div class="actions">
-            <!-- Nếu chưa đăng nhập -->
-            <div th:if="${customer == null}">
-                <a th:href="@{/login.html}" class="auth-login" role="button">Đăng nhập</a>
-                <a th:href="@{/register.html}" class="auth-register" role="button">Đăng ký</a>
-                <button id="cartBtn" class="cart-btn">Giỏ hàng (0)</button>
-            </div>
-
-            <!-- Nếu đã đăng nhập -->
-            <div class="user-menu" th:if="${customer != null}">
-                <div id="userAvatar" class="user-avatar" title="Tài khoản">
-                    <!-- Nếu có ảnh avatar thì hiển thị -->
-                    <img th:if="${customer.avatar != null and #strings.isNotEmpty(customer.avatar)}"
-                         th:src="@{${customer.avatar}}" alt="avatar"/>
-                    <!-- Nếu không có ảnh thì lấy chữ cái đầu -->
-                    <span th:if="${customer.avatar == null or #strings.isEmpty(customer.avatar)}"
-                          th:text="${#strings.substring(customer.name,0,1).toUpperCase()}">U</span>
-                </div>
-
-                <div id="userDropdown" class="dropdown">
-                    <div class="item item-name" th:text="${customer.name}">Tên user</div>
-                    <a th:href="@{/profile.html}" class="item">Profile</a>
-                    <a th:href="@{/purchased.html}" class="item">Purchased License</a>
-
-                    <!-- Sử dụng form POST tới /auth/customer/logout -->
-                    <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
-                        <button type="submit" class="item" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;">
-                            Log out
-                        </button>
-                    </form>
-                </div>
-
-                <button id="cartBtnL" class="cart-btn">Giỏ hàng (0)</button>
-            </div>
-
+        <div class="actions" id="actions">
+            <!-- Đã tách thành 2 nút: login (outline) + register (filled) -->
+            <button class="auth-login" onclick="window.location.href='/login.html'" aria-label="Đăng nhập">Đăng nhập</button>
+            <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">Đăng ký</button>
+            <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
         </div>
     </div>
 </header>

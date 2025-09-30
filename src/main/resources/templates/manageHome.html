@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    <style>
+        :root{--blue:#2563eb;--blue-dark:#1d4ed8;--red:#dc2626;--green:#059669}
+        body { font-family: Arial, sans-serif; margin:0; background:#f8f9fa; color:#111 }
+        header { background: var(--blue); color:white; padding:15px 20px; display:flex; justify-content:center; align-items:center; }
+        .header-inner { width:1200px; display:flex; justify-content:space-between; align-items:center; }
+        header h1 { font-size:20px; margin:0; }
+
+        nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.06); }
+        .nav-inner { width:1200px; margin:0 auto; display:flex; gap:24px; padding:10px 20px; font-weight:600; }
+
+        .dashboard { max-width:1200px; margin:20px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08) }
+        .dashboard h2 { margin-bottom:16px }
+        .actions { margin-bottom:14px }
+        .actions button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; background:var(--green); color:white; }
+        .actions button:hover { background:#047857 }
+
+        table { width:100%; border-collapse:collapse; margin-top:10px }
+        th, td { border:1px solid #ddd; padding:10px; text-align:left }
+        th { background:#f3f4f6 }
+        tr:hover { background:#f9fafb }
+
+        .btn { padding:6px 10px; border:none; border-radius:4px; cursor:pointer; font-size:13px }
+        .btn-edit { background:var(--blue); color:white }
+        .btn-edit:hover { background:var(--blue-dark) }
+        .btn-del { background:var(--red); color:white }
+        .btn-del:hover { background:#b91c1c }
+
+        .header-inner div {
+            margin-left: 20px;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Manager Dashboard</h1>
+        <div>Xin chào, Quản lý</div>
+        <a th:href="@{/logout}" style="margin-left:auto; padding:6px 12px; border:none; border-radius:4px; background:red; color:white; cursor:pointer;">Đăng xuất</a>
+    </div>
+</header>
+
+<nav>
+    <div class="nav-inner">
+        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
+        <a th:href="@{/orders}">Đơn hàng</a>
+        <a th:href="@{/financial}">Báo cáo tài chính</a>
+        <a th:href="@{/report}">Báo cáo khách hàng</a>
+    </div>
+</nav>
+<div id="messagePopup" th:if="${msg}"
+     style="position:fixed; top:20px; right:20px; background:#28a745; color:#fff;
+            padding:12px 20px; border-radius:6px; z-index:1000;">
+    <span th:text="${msg}"></span>
+</div>
+<script>
+    // Ẩn popup sau 3s
+    setTimeout(() => {
+        const popup = document.getElementById("messagePopup");
+        if (popup) popup.style.display = "none";
+    }, 3000);
+</script>
+<div class="dashboard">
+    <h2>Danh sách sản phẩm</h2>
+
+    <!-- Form Thêm sản phẩm -->
+    <h3>Thêm sản phẩm</h3>
+    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post">
+        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm">
+        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh">
+        <select th:field="*{categoryId}">
+            <option value="">-- Chọn danh mục --</option>
+            <option th:each="c : ${categories}"
+                    th:value="${c.id}"
+                    th:text="${c.name}">
+            </option>
+        </select>
+        <input type="number" th:field="*{managerId}" placeholder="Manager ID">
+        <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p, iterStat : ${productList}">
+            <td th:text="${iterStat.count}"></td>
+            <td><img th:src="${p.img_url}" style="width:60px;"></td>
+            <td th:text="${p.name}"></td>
+            <td>
+                <a th:href="@{/manage/deleteProduct/{id}(id=${p.id})}" class="btn btn-del">Xóa</a>
+            </td>
+        </tr>
+<!--        <tr>-->
+<!--                        <td colspan="4">-->
+<!--                            <form th:action="@{/manage/updateProduct}" method="post" th:object="${newProduct}">-->
+<!--                                <input type="hidden" th:field="*{id}" th:value="${p.id}">-->
+<!--                                <input type="text" th:field="*{name}" th:value="${p.name}" style="width:100px;">-->
+<!--                                <input type="text" th:field="*{imgUrl}" th:value="${p.imgUrl}" style="width:200px;">-->
+<!--                                <button type="submit" class="btn btn-edit">Sửa</button>-->
+<!--                            </form>-->
+<!--            </td>-->
+<!--        </tr>-->
+
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

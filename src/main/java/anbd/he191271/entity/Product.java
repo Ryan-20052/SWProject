@@ -13,20 +13,28 @@ public class Product {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "categories_id")
-    private int category_id;
 
     @Column(name = "manager_id")
     private int manager_id;
 
     @Column(name = "img_url")
     private String img_url;
+    @ManyToOne
+    @JoinColumn(name = "categories_id", nullable = false)
+    private Categories category;
 
     // <-- Thêm trường variants
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Variant> variants = new ArrayList<>();
 
     public Product() {}
+
+    public Product(String name, int managerId, String imgUrl, Categories category) {
+        this.name = name;
+        this.manager_id = managerId;
+        this.img_url = imgUrl;
+        this.category = category;
+    }
 
     // constructor, getters và setters (đảm bảo có getter/setter cho variants)
     public List<Variant> getVariants() {
@@ -40,7 +48,7 @@ public class Product {
     public Product(int id, String name, int category_id, int manager_id, String img_url, List<Variant> variants) {
         this.id = id;
         this.name = name;
-        this.category_id = category_id;
+        this.category = category;
         this.manager_id = manager_id;
         this.img_url = img_url;
         this.variants = variants;
@@ -62,12 +70,12 @@ public class Product {
         this.name = name;
     }
 
-    public int getCategory_id() {
-        return category_id;
+    public Categories getCategory() {
+        return category;
     }
 
-    public void setCategory_id(int category_id) {
-        this.category_id = category_id;
+    public void setCategory(Categories category) {
+        this.category = category;
     }
 
     public int getManager_id() {
