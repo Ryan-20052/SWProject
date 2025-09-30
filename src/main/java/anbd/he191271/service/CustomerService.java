@@ -41,9 +41,6 @@ public class CustomerService {
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }
-    public Customer saveCustomer(Customer customer) {
-        return customerRepository.save(customer);
-    }
 
     public void deleteCustomer(int id) {
         if (customerRepository.existsById(id)) {

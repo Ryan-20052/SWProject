@@ -1,12 +1,19 @@
 package anbd.he191271.entity;
 
-import java.util.Date;
+import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+@Entity
+@Table(name = "admin_log")
 public class Admin_log {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String action;
+    @Column(name = "table_affected")
     private String table_affected;
-    private Date date;
+    private LocalDateTime time;
 
     public int getId() {
         return id;
@@ -32,11 +39,19 @@ public class Admin_log {
         this.table_affected = table_affected;
     }
 
-    public Date getDate() {
-        return date;
+    public LocalDateTime getTime() {
+        return time;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setTime(LocalDateTime time) {
+        this.time = time;
+    }
+
+    public Admin_log(String action, String table_affected) {
+        this.action = action;
+        this.table_affected = table_affected;
+        this.time = LocalDateTime.now();
+    }
+    public Admin_log() {
     }
 }
