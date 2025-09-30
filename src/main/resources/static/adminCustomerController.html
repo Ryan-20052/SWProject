@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Customer - Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+        /* Navbar */
+        .navbar {
+            background: #1976d2;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .navbar h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .navbar a:hover {
+            background: #1259a6;
+        }
+        .navbar-menu {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Nội dung */
+        .container {
+            padding: 30px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: #1976d2;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        button {
+            background: #e53935;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #c62828;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h1>Admin Dashboard</h1>
+    <div class="navbar-menu">
+        <a href="adminDashboard.html">🏠 Dashboard</a>
+        <a href="adminCustomerController.html">👤 Quản lý Customer</a>
+        <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
+        <a href="adminLogs.html">📜 Logs</a>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="container">
+    <h2>Quản lý tài khoản Customer</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody id="customerTable"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/admin/customers";
+
+    // Lấy danh sách customers
+    async function loadCustomers() {
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+
+            const table = document.getElementById("customerTable");
+            table.innerHTML = "";
+
+            data.forEach(c => {
+                const row = `<tr>
+          <td>${c.id}</td>
+          <td>${c.username}</td>
+          <td>${c.email}</td>
+          <td>
+            <button onclick="deleteCustomer(${c.id})">Xóa</button>
+          </td>
+        </tr>`;
+                table.innerHTML += row;
+            });
+        } catch (err) {
+            console.error("Lỗi khi load customers:", err);
+        }
+    }
+
+    // Xóa customer
+    async function deleteCustomer(id) {
+        if (confirm("Bạn có chắc muốn xóa customer này không?")) {
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            loadCustomers(); // Refresh lại danh sách
+        }
+    }
+
+    // Tự động load khi mở trang
+    window.onload = loadCustomers;
+</script>
+
+</body>
+</html>
