@@ -10,9 +10,6 @@ public class Variant {
     private int id;
     @Column(name = "name")
     private String name;
-
-    @Column(name = "stock_quantity")
-    private int stock_quantity;
     @Column(name = "duration")
     private String duration;
     @Column(name = "price")
@@ -26,10 +23,9 @@ public class Variant {
     public Variant() {
     }
 
-    public Variant(int id, String name, int stock_quantity, String duration, int price, Product product) {
+    public Variant(int id, String name, String duration, int price, Product product) {
         this.id = id;
         this.name = name;
-        this.stock_quantity = stock_quantity;
         this.duration = duration;
         this.price = price;
         this.product = product;
@@ -49,14 +45,6 @@ public class Variant {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getStock_quantity() {
-        return stock_quantity;
-    }
-
-    public void setStock_quantity(int stock_quantity) {
-        this.stock_quantity = stock_quantity;
     }
 
     public String getDuration() {
