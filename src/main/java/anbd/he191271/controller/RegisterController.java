@@ -6,6 +6,7 @@ import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.service.EmailService;
 import anbd.he191271.service.OtpService;
 import jakarta.mail.MessagingException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,11 +16,13 @@ public class RegisterController {
     private final OtpService otpService;
     private final EmailService emailService; // Service gửi mail
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public RegisterController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository) {
+    public RegisterController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.otpService = otpService;
         this.emailService = emailService;
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     private RegisterRequest pendingUser;
 
@@ -50,7 +53,9 @@ public class RegisterController {
             customer.setName(pendingUser.getName());
             customer.setEmail(pendingUser.getEmail());
             customer.setUsername(pendingUser.getUsername());
-            customer.setPassword(pendingUser.getPassword()); // 👉 thực tế nên hash password trước
+            // 👉 Hash mật khẩu trước khi lưu
+            String hashedPassword = passwordEncoder.encode(pendingUser.getPassword());
+            customer.setPassword(hashedPassword);
 
             customerRepository.save(customer);
 

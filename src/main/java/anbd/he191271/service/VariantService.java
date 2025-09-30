@@ -24,4 +24,20 @@ public class VariantService {
     public Variant findById(int id) {
         return variantRepository.findById(id).orElse(null);
     }
+
+    public List<Variant> getVariantsByProduct(int productId) {
+        return variantRepository.findByProductId(productId);
+    }
+    public List<Variant> getAllVariant() {
+        return variantRepository.findAll();
+    }
+    public Variant getVariantById(int id) {
+        return variantRepository.findById(id).get();
+    }
+    public void deleteVariant(int id) {
+        variantRepository.deleteById(id);
+    }
+    public Variant create(Variant variant) {
+        return variantRepository.save(variant);
+    }
 }

@@ -2,6 +2,7 @@ package anbd.he191271.service;
 
 import anbd.he191271.entity.Customer;
 import anbd.he191271.repository.CustomerRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -11,14 +12,16 @@ import java.util.Optional;
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<Customer> login(String username, String password) {
+    public Optional<Customer> login(String username, String rawPassword) {
         return customerRepository.findByUsername(username)
-                .filter(c -> c.getPassword().equals(password));
+                .filter(customer -> passwordEncoder.matches(rawPassword, customer.getPassword()));
     }
 
     public Optional<Customer> getById(int id) {
