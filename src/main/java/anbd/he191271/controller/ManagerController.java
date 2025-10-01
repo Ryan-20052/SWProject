@@ -2,10 +2,12 @@ package anbd.he191271.controller;
 
 import anbd.he191271.dto.CreateProductRequest;
 import anbd.he191271.entity.Categories;
+import anbd.he191271.entity.Manager;
 import anbd.he191271.entity.Product;
 import anbd.he191271.service.CategoryService;
 import anbd.he191271.service.ProductService;
 import anbd.he191271.service.VariantService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -52,17 +54,20 @@ public class ManagerController {
     @Autowired
     private CategoryService categoryService;
     @GetMapping("/manageHome")
-    public String manageHome(Model model) {
+    public String manageHome(Model model, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
         model.addAttribute("productList", productService.getAllProduct());
         model.addAttribute("newProduct", new CreateProductRequest());
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("manager", manager);
         return "manageHome";
     }
 
     @PostMapping("/addProduct")
-    public String addProduct(@ModelAttribute("newProduct") CreateProductRequest request) {
+    public String addProduct(@ModelAttribute("newProduct") CreateProductRequest request, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
         Categories category = categoryService.getCategoryById(request.getCategoryId());
-        Product product=new Product(request.getName(),request.getManagerId(),request.getImgUrl(),category);
+        Product product=new Product(request.getName(), manager.getId(), request.getImgUrl(),category);
         productService.saveProduct(product);
         return "redirect:/manage/manageHome";
     }
@@ -86,6 +91,7 @@ public class ManagerController {
         redirectAttributes.addFlashAttribute("msg", "Đã xóa thành công");
         return "redirect:/manage/manageHome";
     }
+
 }
 
 
