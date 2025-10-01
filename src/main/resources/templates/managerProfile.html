@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    main.page {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 0;
+    }
+    .profile-card {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    .card-title {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    .avatar-wrap {
+      text-align: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+    .avatar-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ccc;
+    }
+    .avatar-fallback {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #007bff;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      margin: 0 auto;
+    }
+    .info-row, .edit-row {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .info-value {
+      font-size: 15px;
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+    }
+    .input-underline {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 6px;
+      font-size: 15px;
+      outline: none;
+    }
+    .input-underline:focus {
+      border-bottom-color: #007bff;
+    }
+    .readonly {
+      background: #f4f4f4;
+      color: #888;
+    }
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn, .link-edit {
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .btn.save {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .btn.save:hover {
+      background: #0056b3;
+    }
+    .btn.cancel, .btn.ghost, .link-edit {
+      background: #f1f1f1;
+      color: #333;
+      border: none;
+      cursor: pointer;
+    }
+    .btn.cancel:hover, .btn.ghost:hover, .link-edit:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <section class="profile-card">
+    <h2 class="card-title">Thông tin cá nhân</h2>
+
+    <!-- Avatar -->
+    <div class="avatar-wrap" id="avatarDisplay">
+      <img th:if="${manager.avatar != null}"
+           th:src="@{/manager/avatar/{id}(id=${manager.id})}"
+           alt="avatar"
+           class="avatar-img"/>
+      <div th:if="${manager.avatar == null}"
+           class="avatar-fallback"
+           th:text="${manager.username != null ? #strings.substring(manager.username,0,1).toUpperCase() : 'U'}">
+        U
+      </div>
+    </div>
+    <!-- Form ẩn upload avatar -->
+    <form id="avatarForm" th:action="@{/manager/profile/update-avatar}"
+          method="post" enctype="multipart/form-data" style="display:none;">
+      <input type="file" id="avatarInput" name="avatar" accept="image/*"/>
+    </form>
+
+    <!-- VIEW mode -->
+    <div th:if="${!editMode}" class="info-view">
+      <div class="info-row">
+        <label>Họ tên:</label>
+        <div class="info-value" th:text="${manager.name != null ? manager.name : ''}">Name</div>
+      </div>
+      <div class="info-row">
+        <label>Email:</label>
+        <div class="info-value" th:text="${manager.email != null ? manager.email : ''}">email@example.com</div>
+      </div>
+      <div class="info-row">
+        <label>Số điện thoại:</label>
+        <div class="info-value" th:text="${manager.phone != null ? manager.phone : ''}">0123456789</div>
+      </div>
+      <div class="controls-row">
+        <a th:href="@{/manager/profile(editMode=true)}" class="link-edit">Edit</a>
+        <a th:href="@{/manage/manageHome}" class="btn ghost">Back To Manager Homepage</a>
+      </div>
+    </div>
+
+    <!-- EDIT mode -->
+    <form th:if="${editMode}" th:action="@{/manager/profile/update}" method="post" class="info-edit">
+      <div class="edit-row">
+        <label for="name">Họ tên</label>
+        <input id="name" name="name" type="text" th:value="${manager.name}" class="input-underline"/>
+      </div>
+      <div class="edit-row">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" th:value="${manager.email}" readonly class="input-underline readonly"/>
+      </div>
+      <div class="edit-row">
+        <label for="phone">Số điện thoại</label>
+        <input id="phone" name="phone" type="text" th:value="${manager.phone}" class="input-underline"/>
+      </div>
+      <div class="controls-row">
+        <button type="submit" class="btn save">Save</button>
+        <a th:href="@{/manager/profile}" class="btn cancel">Cancel</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const avatarDisplay = document.getElementById("avatarDisplay");
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarForm = document.getElementById("avatarForm");
+
+    if (avatarDisplay) {
+      avatarDisplay.addEventListener("click", () => {
+        avatarInput.click();
+      });
+    }
+
+    avatarInput.addEventListener("change", () => {
+      if (avatarInput.files.length > 0) {
+        const confirmChange = confirm("Bạn có chắc muốn đổi avatar không?");
+        if (confirmChange) {
+          avatarForm.submit();
+        } else {
+          avatarInput.value = "";
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

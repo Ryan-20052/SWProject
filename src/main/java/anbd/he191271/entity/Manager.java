@@ -5,15 +5,28 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "manager")
 public class Manager {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "user_name")
     private String username;
+
     private String password;
+
     private String name;
+
     private String email;
+
+    @Lob   // dùng để lưu dữ liệu lớn (Large OBject)
+    @Column(name = "img", columnDefinition = "LONGBLOB")
+    private byte[] avatar;   // đổi từ String -> byte[]
+
+    @Column(name = "phone_number")
     private String phone;
 
+    // ===== Getter & Setter =====
     public int getId() {
         return id;
     }
@@ -52,6 +65,14 @@ public class Manager {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
     }
 
     public String getPhone() {

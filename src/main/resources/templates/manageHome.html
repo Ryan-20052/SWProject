@@ -42,10 +42,49 @@
     <div class="header-inner">
         <h1>Manager Dashboard</h1>
         <div th:text="|Xin chào, ${manager.username}|"></div>
+        <div style="display:flex; align-items:center; gap:12px; margin-left:20px;">
+            <!-- Avatar có ảnh -->
+            <div class="avatar"
+                 th:if="${manager.avatar != null}"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}" alt="Avatar">
+            </div>
+
+            <!-- Avatar fallback (chữ cái đầu từ username) -->
+            <div class="avatar-fallback"
+                 th:if="${manager.avatar == null}"
+                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
+                 onclick="window.location.href='/manager/profile'">
+            </div>
+        </div>
         <a th:href="@{/login.html}" style="margin-left:auto; padding:6px 12px; border:none; border-radius:4px; background:red; color:white; cursor:pointer;">Đăng xuất</a>
     </div>
 </header>
-
+<style>
+    .avatar, .avatar-fallback {
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        overflow:hidden;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+    }
+    .avatar img {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    }
+    .avatar-fallback {
+        background:#fff;   /* nền trắng */
+        color:#000;        /* chữ đen */
+        font-weight:bold;
+        font-size:18px;
+        border:1px solid #ccc;
+    }
+    .avatar:hover, .avatar-fallback:hover { opacity:0.85; }
+</style>
 <nav>
     <div class="nav-inner">
         <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
