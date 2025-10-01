@@ -3,7 +3,6 @@ package anbd.he191271.dto;
 public class CreateProductRequest {
     private String name;
     private Integer categoryId;
-    private Integer managerId;
     private String imgUrl;
 
     public CreateProductRequest() {
@@ -23,14 +22,6 @@ public class CreateProductRequest {
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
-    }
-
-    public Integer getManagerId() {
-        return managerId;
-    }
-
-    public void setManagerId(int managerId) {
-        this.managerId = managerId;
     }
 
     public String getImgUrl() {

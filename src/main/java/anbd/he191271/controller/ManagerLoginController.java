@@ -5,6 +5,7 @@ import anbd.he191271.entity.Customer;
 import anbd.he191271.entity.Manager;
 import anbd.he191271.service.CustomerService;
 import anbd.he191271.service.ManagerService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +24,17 @@ public class ManagerLoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Manager> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<Manager> login(@RequestBody LoginRequest request, HttpSession session) {
         return managerService.login(request.getUsername(), request.getPassword())
-                .map(manager -> ResponseEntity.ok(manager))
+                .map(manager -> {
+                    session.setAttribute("manager", manager);
+                    return ResponseEntity.ok(manager);
+                })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/home/homepage";
     }
 }
