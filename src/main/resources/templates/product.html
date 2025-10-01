@@ -13,9 +13,23 @@
 
         <!-- Actions (Login / Register / Cart) -->
         <div class="actions" id="actions">
-            <button class="auth-login" onclick="window.location.href='/login.html'" aria-label="Đăng nhập">Đăng nhập</button>
-            <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">Đăng ký</button>
-            <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
+
+            <!-- Nếu chưa đăng nhập -->
+            <div th:if="${session.customer == null}">
+                <button class="auth-login" onclick="window.location.href='/login.html'" aria-label="Đăng nhập">
+                    Đăng nhập
+                </button>
+                <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">
+                    Đăng ký
+                </button>
+
+            </div>
+
+            <!-- Nếu đã đăng nhập -->
+            <div th:if="${session.customer != null}">
+                <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
+            </div>
+
         </div>
     </div>
 </header>
