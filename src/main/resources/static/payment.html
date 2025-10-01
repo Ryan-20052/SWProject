@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Thanh toán VNPAY</title>
+</head>
+<body>
+<h2>Thanh toán VNPAY Demo</h2>
+
+<form id="paymentForm">
+    <label>Số tiền: </label>
+    <input type="number" id="amount" value="100000"><br><br>
+
+    <label>Thông tin đơn hàng: </label>
+    <input type="text" id="orderInfo" value="Thanh toán đơn hàng #123"><br><br>
+
+    <button type="submit">Thanh toán</button>
+</form>
+
+<p id="message"></p>
+<p id="paymentUrl"></p>
+
+<script>
+    document.getElementById("paymentForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const amount = document.getElementById("amount").value;
+        const orderInfo = document.getElementById("orderInfo").value;
+
+        const payload = {
+            amount: parseInt(amount),
+            orderInfo: orderInfo,
+            orderType: "other",
+            locale: "vn"
+        };
+
+        try {
+            const response = await fetch("http://localhost:8080/api/payment/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.code === "00") {
+                document.getElementById("message").innerText = "Tạo thanh toán thành công!";
+                document.getElementById("paymentUrl").innerHTML = `<a href="${data.paymentUrl}" target="_blank">${data.paymentUrl}</a>`;
+
+                // Redirect trực tiếp đến VNPAY
+                window.location.href = data.paymentUrl;
+            } else {
+                document.getElementById("message").innerText = "Lỗi: " + data.message;
+            }
+        } catch (err) {
+            document.getElementById("message").innerText = "Có lỗi khi gọi API: " + err;
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>Kết quả thanh toán VNPAY (Test)</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; }
+        .success { color: green; font-size: 20px; font-weight: bold; }
+        .fail { color: red; font-size: 20px; font-weight: bold; }
+        .info { margin-top: 20px; font-size: 16px; text-align: left; display: inline-block; min-width: 320px; }
+        .meta { margin-top: 12px; color: #666; font-size: 13px; }
+        button { margin-top: 18px; padding: 8px 14px; border-radius: 6px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; }
+        .note { color: #555; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+<h2>Kết quả thanh toán</h2>
+<p id="result"></p>
+
+<div class="info" id="orderInfo"></div>
+
+<div class="meta" id="metaInfo"></div>
+
+<div>
+    <button onclick="goHome()">Quay về trang chủ</button>
+    <button onclick="reload()">Làm mới</button>
+</div>
+
+<script>
+    function parseQuery() {
+        const params = {};
+        const query = window.location.search.substring(1);
+        if (!query) return params;
+        const pairs = query.split('&');
+        for (const pair of pairs) {
+            if (!pair) continue;
+            const [rawKey, rawVal] = pair.split('=');
+            const key = decodeURIComponent(rawKey || '').trim();
+            const val = decodeURIComponent(rawVal || '').trim();
+            if (key) params[key] = val;
+        }
+        return params;
+    }
+
+    function formatAmount(amountString) {
+        if (!amountString) return "Không có";
+        // VNPAY gửi amount theo *100
+        const num = Number(amountString);
+        if (isNaN(num)) return amountString;
+        // if amount looks large, divide by 100
+        if (num % 100 === 0) {
+            return (num / 100).toLocaleString('vi-VN') + " VND";
+        }
+        return num.toLocaleString('vi-VN') + " (raw)";
+    }
+
+    function goHome() {
+        window.location.href = '/';
+    }
+    function reload() {
+        window.location.reload();
+    }
+
+    const params = parseQuery();
+    const resultEl = document.getElementById('result');
+    const orderInfoEl = document.getElementById('orderInfo');
+    const metaEl = document.getElementById('metaInfo');
+
+    // Determine source:
+    const isVnpay = params.hasOwnProperty('vnp_ResponseCode') || params.hasOwnProperty('vnp_TxnRef') || params.hasOwnProperty('vnp_Amount');
+    const isManual = params.hasOwnProperty('status') || params.hasOwnProperty('orderId');
+
+    let statusText = '';
+    if (isVnpay) {
+        // Real VNPAY fields
+        const code = params['vnp_ResponseCode'] || '';
+        if (code === '00') {
+            resultEl.textContent = 'Thanh toán thành công!';
+            resultEl.className = 'success';
+        } else {
+            const showCode = code || 'Không rõ';
+            resultEl.textContent = 'Thanh toán thất bại! (Mã lỗi: ' + showCode + ')';
+            resultEl.className = 'fail';
+        }
+
+        orderInfoEl.innerHTML = `
+        <p><strong>Mã đơn hàng (vnp_TxnRef):</strong> ${params['vnp_TxnRef'] || 'Không có'}</p>
+        <p><strong>Số tiền (vnp_Amount):</strong> ${formatAmount(params['vnp_Amount'])}</p>
+        <p><strong>Mã giao dịch VNPAY (vnp_TransactionNo):</strong> ${params['vnp_TransactionNo'] || 'Không có'}</p>
+        <p><strong>Mã phản hồi (vnp_ResponseCode):</strong> ${params['vnp_ResponseCode'] || 'Không có'}</p>
+      `;
+
+        metaEl.innerHTML = `Nguồn: VNPAY sandbox (đọc các tham số vnp_...).`;
+    } else if (isManual) {
+        // Manual test using status & orderId
+        const status = (params['status'] || '').toLowerCase();
+        if (status === 'success' || status === 'ok' || status === 'true') {
+            resultEl.textContent = 'Thanh toán (TEST) thành công!';
+            resultEl.className = 'success';
+        } else {
+            resultEl.textContent = 'Thanh toán (TEST) thất bại!';
+            resultEl.className = 'fail';
+        }
+
+        orderInfoEl.innerHTML = `
+        <p><strong>Mã đơn hàng (orderId):</strong> ${params['orderId'] || 'Không có'}</p>
+        <p><strong>Ghi chú:</strong> Đây là chế độ test sử dụng tham số "status" và "orderId".</p>
+      `;
+
+        metaEl.innerHTML = `Nguồn: Test manual (status/orderId).`;
+    } else {
+        resultEl.textContent = 'Không tìm thấy tham số kết quả thanh toán.';
+        resultEl.className = 'fail';
+        orderInfoEl.innerHTML = `<p>URL hiện tại: <code>${window.location.href}</code></p>
+                               <p class="note">Nếu bạn test real từ VNPAY, VNPAY sẽ gửi các tham số bắt đầu bằng <code>vnp_</code> như <code>vnp_ResponseCode</code>, <code>vnp_TxnRef</code>, <code>vnp_Amount</code>.</p>
+                               <p class="note">Nếu bạn test thủ công, thêm <code>?status=success&orderId=123</code> vào URL.</p>`;
+        metaEl.innerHTML = '';
+    }
+
+    // For debugging: show all params (optional)
+    console.log("Query params:", params);
+</script>
+</body>
+</html>
+
