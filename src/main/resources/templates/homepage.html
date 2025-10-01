@@ -284,17 +284,18 @@
             <!-- Nếu đã đăng nhập -->
             <div class="user-menu" th:if="${customer != null}">
                 <div id="userAvatar" class="user-avatar" title="Tài khoản">
-                    <!-- Nếu có ảnh avatar thì hiển thị -->
-                    <img th:if="${customer.avatar != null and #strings.isNotEmpty(customer.avatar)}"
-                         th:src="@{${customer.avatar}}" alt="avatar"/>
+                    <!-- Nếu có ảnh avatar thì hiển thị từ endpoint -->
+                    <img th:if="${customer.avatar != null}"
+                         th:src="@{'/customer/avatar/' + ${customer.id}}" alt="avatar" class="avatar-img"/>
+
                     <!-- Nếu không có ảnh thì lấy chữ cái đầu -->
-                    <span th:if="${customer.avatar == null or #strings.isEmpty(customer.avatar)}"
+                    <span th:if="${customer.avatar == null}"
                           th:text="${#strings.substring(customer.name,0,1).toUpperCase()}">U</span>
                 </div>
 
                 <div id="userDropdown" class="dropdown">
                     <div class="item item-name" th:text="${customer.name}">Tên user</div>
-                    <a th:href="@{/profile.html}" class="item">Profile</a>
+                    <a th:href="@{/customer/profile}" class="item">Profile</a>
                     <a th:href="@{/purchased.html}" class="item">Purchased License</a>
 
                     <!-- Sử dụng form POST tới /auth/customer/logout -->

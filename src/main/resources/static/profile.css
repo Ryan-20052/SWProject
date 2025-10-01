@@ -12,13 +12,14 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
     margin: 0 auto;
-    text-align: center; /* căn giữa toàn bộ */
+    text-align: left; /* text thẳng hàng trái */
 }
 
 h2 {
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .avatar-section {
@@ -44,59 +45,44 @@ h2 {
     color: white;
 }
 
+/* ----------- View mode ----------- */
 .info-section {
     margin-bottom: 20px;
 }
 
 .info-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* căn giữa label + input */
-    margin: 15px 0;
-    border-bottom: 1px solid #ddd; /* gạch dưới màu xám nhạt */
-    padding-bottom: 10px;
+    margin: 12px 0;
+    border-bottom: 1px solid #ddd; /* gạch xám nhạt */
+    padding-bottom: 8px;
 }
 
-.label {
+.info-label {
     font-weight: bold;
-    margin-bottom: 5px;
-    text-align: center;
+    color: #333;
+    display: block;
+    margin-bottom: 4px;
 }
 
+.info-value {
+    color: #111;
+}
+
+/* ----------- Edit mode ----------- */
 .info-row input {
-    width: 80%; /* input rộng 80% form */
-    padding: 8px;
+    width: 100%;
+    padding: 6px;
     border: none;
+    border-bottom: 1px solid #ddd;
     outline: none;
-    text-align: center;
     background: transparent;
+    color: #111;
 }
 
-.button-group {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
+.info-row input[readonly] {
+    color: #777; /* email xám nhạt */
 }
 
-.save-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.cancel-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
+/* ----------- Buttons ----------- */
 .action-buttons {
     display: flex;
     justify-content: space-between;
@@ -104,7 +90,7 @@ h2 {
 }
 
 .edit-btn {
-    background: #007bff;
+    background: #6c757d; /* xám */
     color: white;
     border: none;
     padding: 8px 14px;
@@ -114,6 +100,31 @@ h2 {
 
 .back-btn {
     background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.save-btn {
+    background: #28a745; /* xanh lá */
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background: #dc3545; /* đỏ */
     color: white;
     border: none;
     padding: 8px 14px;

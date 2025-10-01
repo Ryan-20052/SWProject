@@ -6,6 +6,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "customer")
 public class Customer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -16,11 +17,20 @@ public class Customer {
     private String password;
 
     private LocalDate dob; // ngày sinh
-    @Column(name = "avatar")
-    private String avatar;
 
-    public String getAvatar() { return avatar; }
-    public void setAvatar(String avatar) { this.avatar = avatar; }// đường dẫn file ảnh
+    // Lưu ảnh avatar dạng byte[] trong DB
+    @Lob
+    @Column(name = "avatar", columnDefinition = "LONGBLOB")
+    private byte[] avatar;
+
+    // ====== GETTER / SETTER ======
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
+    }
 
     public int getId() {
         return id;
@@ -70,8 +80,7 @@ public class Customer {
         this.dob = dob;
     }
 
-
-
+    // ====== CONSTRUCTORS ======
     public Customer() {}
 
     public Customer(String name, String email, String username, String password) {

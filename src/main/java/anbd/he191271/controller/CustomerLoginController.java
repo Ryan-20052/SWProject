@@ -20,15 +20,16 @@ public class CustomerLoginController {
     }
 
     @PostMapping("/login")
-    @ResponseBody // vẫn trả JSON
+    @ResponseBody
     public ResponseEntity<Customer> login(@RequestBody LoginRequest request, HttpSession session) {
         return customerService.login(request.getUsername(), request.getPassword())
                 .map(customer -> {
-                    session.setAttribute("customer", customer);
+                    session.setAttribute("customer", customer); // lưu vào session
                     return ResponseEntity.ok(customer);
                 })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
+
 
     @PostMapping("/logout")
     public String logout(HttpSession session) {
