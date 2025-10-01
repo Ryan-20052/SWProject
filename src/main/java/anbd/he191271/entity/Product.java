@@ -27,6 +27,11 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Variant> variants = new ArrayList<>();
 
+    public void addVariant(Variant variant) {
+        variants.add(variant);
+        variant.setProduct(this);
+    }
+
     public Product() {}
 
     public Product(String name, int managerId, String imgUrl, Categories category) {
