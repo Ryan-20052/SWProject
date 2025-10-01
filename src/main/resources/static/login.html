@@ -78,12 +78,11 @@
 
             // 🔄 Nếu Manager thất bại → thử Admin
             response = await tryLogin("http://localhost:8080/auth/admin/login");
-
             if (response.ok) {
                 const admin = await response.json();
                 sessionStorage.setItem("username", admin.username);
                 msg.className = "success";
-                msg.innerText = "✅ Welcome Admin";
+                msg.innerText = "✅ Welcome " + admin.username + " (Admin)";
                 setTimeout(() => window.location.href = "adminDashboard.html", 1000);
                 return;
             }

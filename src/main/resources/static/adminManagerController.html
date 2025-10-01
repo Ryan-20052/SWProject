@@ -4,109 +4,42 @@
     <meta charset="UTF-8">
     <title>Quản lý Manager - Admin</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6f8;
-        }
-        /* Navbar */
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; }
         .navbar {
-            background: #1976d2;
-            overflow: hidden;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
+            background: #1976d2; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
         }
-        .navbar h1 {
-            color: white;
-            font-size: 20px;
-            margin: 0;
+        .navbar h1 { color: white; font-size: 20px; margin: 0; }
+        .navbar a, .logout-btn {
+            color: white; text-decoration: none; padding: 14px 20px;
+            display: inline-block; transition: background 0.3s; border: none;
+            background: transparent; cursor: pointer; font-size: 14px;
         }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 14px 20px;
-            display: inline-block;
-            transition: background 0.3s;
+        .navbar a:hover, .logout-btn:hover { background: #1259a6; }
+        .navbar-menu { display: flex; gap: 10px; }
+        .container { padding: 30px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        form { margin-bottom: 20px; }
+        input {
+            padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;
         }
-        .navbar a:hover {
-            background: #1259a6;
+        button {
+            padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer;
         }
-        .navbar-menu {
-            display: flex;
-            gap: 10px;
-        }
-
-        .container {
-            padding: 30px;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        form {
-            margin-bottom: 20px;
-            background: #fff;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 6px;
-        }
-
-        form input {
-            padding: 8px;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        form button {
-            padding: 8px 14px;
-            border: none;
-            background: #388e3c;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background: #2e7d32;
-        }
-
+        .add-btn { background: #43a047; color: white; }
+        .add-btn:hover { background: #2e7d32; }
+        .delete-btn { background: #e53935; color: white; }
+        .delete-btn:hover { background: #c62828; }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
+            width: 100%; border-collapse: collapse; background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background: #1976d2;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        button.delete {
-            background: #e53935;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button.delete:hover {
-            background: #c62828;
-        }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #1976d2; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
     </style>
 </head>
 <body>
-
-<!-- Navbar -->
 <div class="navbar">
     <h1>Admin Dashboard</h1>
     <div class="navbar-menu">
@@ -114,29 +47,21 @@
         <a href="adminCustomerController.html">👤 Quản lý Customer</a>
         <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
         <a href="adminLogs.html">📜 Logs</a>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
 </div>
 
 <div class="container">
     <h2>Quản lý tài khoản Manager</h2>
-
-    <!-- Form thêm Manager -->
-    <form id="addManagerForm">
-        <input type="text" id="username" placeholder="Username" required>
+    <form onsubmit="addManager(event)">
+        <input type="text" id="username" placeholder="Tên đăng nhập" required>
         <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Thêm Manager</button>
+        <button class="add-btn" type="submit">Thêm Manager</button>
     </form>
 
-    <!-- Bảng danh sách Managers -->
     <table>
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Hành động</th>
-        </tr>
+        <tr><th>ID</th><th>Username</th><th>Email</th><th>Hành động</th></tr>
         </thead>
         <tbody id="managerTable"></tbody>
     </table>
@@ -145,30 +70,49 @@
 <script>
     const API_URL = "http://localhost:8080/api/admin/managers";
 
-    // Load managers list
+    async function checkSession() {
+        const res = await fetch("/auth/admin/check");
+        const data = await res.json();
+        if (!data.isAdmin) {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial;">
+                    <h2>⚠️ Vui lòng đăng nhập trước!</h2>
+                    <button onclick="goLogin()" style="padding:10px 20px;margin-top:20px;cursor:pointer;background:#1976d2;color:white;border:none;border-radius:4px;">OK</button>
+                </div>`;
+        }
+    }
+
+    function goLogin() { window.location.href = "login.html"; }
+
     async function loadManagers() {
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-
             const table = document.getElementById("managerTable");
             table.innerHTML = "";
-
             data.forEach(m => {
-                const row = `<tr>
-                    <td>${m.id}</td>
-                    <td>${m.username}</td>
-                    <td>${m.email}</td>
-                    <td><button class="delete" onclick="deleteManager(${m.id})">Xóa</button></td>
+                table.innerHTML += `<tr>
+                    <td>${m.id}</td><td>${m.username}</td><td>${m.email}</td>
+                    <td><button class="delete-btn" onclick="deleteManager(${m.id})">Xóa</button></td>
                 </tr>`;
-                table.innerHTML += row;
             });
-        } catch (err) {
-            console.error("Lỗi khi load managers:", err);
-        }
+        } catch (err) { console.error("Lỗi khi load managers:", err); }
     }
 
-    // Xóa manager
+    async function addManager(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email })
+        });
+        document.getElementById("username").value = "";
+        document.getElementById("email").value = "";
+        loadManagers();
+    }
+
     async function deleteManager(id) {
         if (confirm("Bạn có chắc muốn xóa manager này không?")) {
             await fetch(`${API_URL}/${id}`, { method: "DELETE" });
@@ -176,26 +120,14 @@
         }
     }
 
-    // Thêm manager mới
-    document.getElementById("addManagerForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+    async function logout() {
+        if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+            await fetch("/auth/admin/logout", { method: "GET" });
+            window.location.href = "/home/homepage";
+        }
+    }
 
-        const username = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password })
-        });
-
-        e.target.reset();
-        loadManagers();
-    });
-
-    // Tự động load khi mở trang
-    window.onload = loadManagers;
+    window.onload = () => { checkSession(); loadManagers(); }
 </script>
 </body>
 </html>

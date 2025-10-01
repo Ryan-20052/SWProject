@@ -4,47 +4,21 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6f8;
-        }
-        /* Thanh navbar */
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; }
         .navbar {
-            background: #1976d2;
-            overflow: hidden;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
+            background: #1976d2; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
         }
-        .navbar h1 {
-            color: white;
-            font-size: 20px;
-            margin: 0;
+        .navbar h1 { color: white; font-size: 20px; margin: 0; }
+        .navbar a, .logout-btn {
+            color: white; text-decoration: none; padding: 14px 20px;
+            display: inline-block; transition: background 0.3s; border: none;
+            background: transparent; cursor: pointer; font-size: 14px;
         }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 14px 20px;
-            display: inline-block;
-            transition: background 0.3s;
-        }
-        .navbar a:hover {
-            background: #1259a6;
-        }
-        .navbar-menu {
-            display: flex;
-            gap: 10px;
-        }
-        /* Nội dung chính */
-        .content {
-            padding: 30px;
-            text-align: center;
-        }
-        .content h2 {
-            color: #333;
-        }
+        .navbar a:hover, .logout-btn:hover { background: #1259a6; }
+        .navbar-menu { display: flex; gap: 10px; }
+        .content { padding: 30px; text-align: center; }
+        .content h2 { color: #333; }
     </style>
 </head>
 <body>
@@ -55,6 +29,7 @@
         <a href="adminCustomerController.html">👤 Quản lý Customer</a>
         <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
         <a href="adminLogs.html">📜 Logs</a>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
 </div>
 
@@ -62,5 +37,30 @@
     <h2>Chào mừng bạn đến với Admin Dashboard</h2>
     <p>Hãy chọn chức năng cần quản lý ở thanh menu phía trên.</p>
 </div>
+
+<script>
+    async function checkSession() {
+        const res = await fetch("/auth/admin/check");
+        const data = await res.json();
+        if (!data.isAdmin) {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial;">
+                    <h2>⚠️ Vui lòng đăng nhập trước!</h2>
+                    <button onclick="goLogin()" style="padding:10px 20px;margin-top:20px;cursor:pointer;background:#1976d2;color:white;border:none;border-radius:4px;">OK</button>
+                </div>`;
+        }
+    }
+
+    function goLogin() { window.location.href = "login.html"; }
+
+    async function logout() {
+        if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+            await fetch("/auth/admin/logout", { method: "GET" });
+            window.location.href = "/home/homepage";
+        }
+    }
+
+    window.onload = checkSession;
+</script>
 </body>
 </html>

@@ -2,68 +2,30 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Logs - Admin</title>
+    <title>Logs - Admin</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6f8;
-        }
-        /* Thanh navbar */
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; }
         .navbar {
-            background: #1976d2;
-            overflow: hidden;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
+            background: #1976d2; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
         }
-        .navbar h1 {
-            color: white;
-            font-size: 20px;
-            margin: 0;
+        .navbar h1 { color: white; font-size: 20px; margin: 0; }
+        .navbar a, .logout-btn {
+            color: white; text-decoration: none; padding: 14px 20px;
+            display: inline-block; transition: background 0.3s; border: none;
+            background: transparent; cursor: pointer; font-size: 14px;
         }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 14px 20px;
-            display: inline-block;
-            transition: background 0.3s;
-        }
-        .navbar a:hover {
-            background: #1259a6;
-        }
-        .navbar-menu {
-            display: flex;
-            gap: 10px;
-        }
-        /* Nội dung chính */
-        .content {
-            padding: 30px;
-        }
-        h2 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        .navbar a:hover, .logout-btn:hover { background: #1259a6; }
+        .navbar-menu { display: flex; gap: 10px; }
+        .container { padding: 30px; }
+        h2 { color: #333; margin-bottom: 20px; }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
+            width: 100%; border-collapse: collapse; background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background: #1976d2;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #1976d2; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
     </style>
 </head>
 <body>
@@ -74,52 +36,62 @@
         <a href="adminCustomerController.html">👤 Quản lý Customer</a>
         <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
         <a href="adminLogs.html">📜 Logs</a>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
 </div>
 
-<div class="content">
-    <h2>Lịch sử hành động của Admin</h2>
+<div class="container">
+    <h2>Lịch sử hoạt động (Logs)</h2>
     <table>
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Action</th>
-            <th>Table Affected</th>
-            <th>Thời gian</th>
-        </tr>
+        <tr><th>ID</th><th>Hành động</th><th>Người thực hiện</th><th>Thời gian</th></tr>
         </thead>
-        <tbody id="logsTable"></tbody>
+        <tbody id="logTable"></tbody>
     </table>
 </div>
 
 <script>
     const API_URL = "http://localhost:8080/api/admin/logs";
 
+    async function checkSession() {
+        const res = await fetch("/auth/admin/check");
+        const data = await res.json();
+        if (!data.isAdmin) {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Arial;">
+                    <h2>⚠️ Vui lòng đăng nhập trước!</h2>
+                    <button onclick="goLogin()" style="padding:10px 20px;margin-top:20px;cursor:pointer;background:#1976d2;color:white;border:none;border-radius:4px;">OK</button>
+                </div>`;
+        }
+    }
+
+    function goLogin() { window.location.href = "login.html"; }
+
     async function loadLogs() {
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
-
-            const table = document.getElementById("logsTable");
+            const table = document.getElementById("logTable");
             table.innerHTML = "";
-
             data.forEach(log => {
-                const row = `
-                    <tr>
-                        <td>${log.id}</td>
-                        <td>${log.action}</td>
-                        <td>${log.table_affected}</td>
-                        <td>${log.time ? log.time.replace("T", " ") : ""}</td>
-                    </tr>
-                `;
-                table.innerHTML += row;
+                table.innerHTML += `<tr>
+                    <td>${log.id}</td>
+                    <td>${log.action}</td>
+                    <td>${log.user}</td>
+                    <td>${log.timestamp}</td>
+                </tr>`;
             });
-        } catch (err) {
-            console.error("Lỗi khi load logs:", err);
+        } catch (err) { console.error("Lỗi khi load logs:", err); }
+    }
+
+    async function logout() {
+        if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+            await fetch("/auth/admin/logout", { method: "GET" });
+            window.location.href = "/home/homepage";
         }
     }
 
-    window.onload = loadLogs;
+    window.onload = () => { checkSession(); loadLogs(); }
 </script>
 </body>
 </html>
