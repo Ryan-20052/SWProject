@@ -45,6 +45,12 @@
                  th:text="${selectedVariant != null ? selectedVariant.price + ' đ' : (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
                 Giá
             </div>
+            <section class="product-description">
+                <h2>Mô tả sản phẩm</h2>
+                <p th:text="${product.description}">
+                    Nội dung mô tả sản phẩm từ database sẽ hiển thị tại đây.
+                </p>
+            </section>
 
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
@@ -74,8 +80,12 @@
                 <button class="cart">Thêm vào giỏ</button>
                 <button class="buy">Mua ngay</button>
             </div>
+
         </div>
+
     </div>
+
 </div>
+
 </body>
 </html>

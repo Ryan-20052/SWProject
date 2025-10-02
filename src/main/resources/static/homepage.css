@@ -183,3 +183,34 @@ nav { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.06); margin-top: 0; 
     .nav-inner { padding: 8px 12px; gap: 12px; overflow-x:auto; }
     .grid-featured, .grid-all { grid-template-columns: repeat(2, 1fr); }
 }
+.auth-login, .auth-register {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.12);
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.auth-login:hover, .auth-register:hover {
+    background: rgba(255,255,255,0.16);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Riêng nút Đăng ký nổi bật hơn 1 chút */
+.auth-register {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+}
+.auth-register:hover {
+    background: #d6334b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(244,63,94,0.3);
+}

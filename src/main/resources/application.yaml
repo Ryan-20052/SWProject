@@ -6,7 +6,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/project_swp
+    url: jdbc:mysql://localhost:3306/SWProject
     username: root
     password: sa123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,14 +22,6 @@ spring:
           auth: true
           starttls:
             enable: true
-
-vnpay:
-  tmnCode: K3HKZRGO
-  hashSecret: XLOMXOCMCMDTWKIT4ZKZ5CYMU1VLWBD5
-  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  returnUrl: http://localhost:8080/api/payment/vnpay-return
-  ipnUrl: http://localhost:8080/api/payment/vnpay-ipn
-
 
   security:
     user:
@@ -57,3 +49,9 @@ vnpay:
 logging:
   level:
     org.springframework: DEBUG
+vnpay:
+  tmnCode: K3HKZRGO
+  hashSecret: XLOMXOCMCMDTWKIT4ZKZ5CYMU1VLWBD5
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: http://localhost:8080/api/payment/vnpay-return
+  ipnUrl: http://localhost:8080/api/payment/vnpay-ipn
