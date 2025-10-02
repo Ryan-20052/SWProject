@@ -72,11 +72,11 @@ public class ManagerController {
         return "redirect:/manage/manageHome";
     }
 
-    @PostMapping("/updateProduct")
-    public String updateProduct(@ModelAttribute("newProduct") Product product) {
-        productService.saveProduct(product);
-        return "redirect:/manage/manageHome";
-    }
+//    @PostMapping("/updateProduct")
+//    public String updateProduct(@ModelAttribute("newProduct") CreateProductRequest request) {
+//        productService.saveProduct(request);
+//        return "redirect:/manage/manageHome";
+//    }
 
     @GetMapping("/deleteVariant/{id}")
     public String deleteVariant(@PathVariable int id, RedirectAttributes redirectAttributes) {
