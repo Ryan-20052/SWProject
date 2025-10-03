@@ -3,6 +3,7 @@ package anbd.he191271.service;
 import anbd.he191271.entity.Variant;
 import anbd.he191271.repository.VariantRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

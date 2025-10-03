@@ -229,6 +229,20 @@
         <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
     </form>
 
+    <h3>Thêm Variant</h3>
+    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post">
+        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm">
+        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh">
+        <select th:field="*{categoryId}">
+            <option value="">-- Chọn danh mục --</option>
+            <option th:each="c : ${categories}"
+                    th:value="${c.id}"
+                    th:text="${c.name}">
+            </option>
+        </select>
+        <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
+    </form>
+
     <table border="1">
         <thead>
         <tr>
@@ -262,6 +276,7 @@
                         <td th:text="${v.price}"></td>
                         <td>
                             <a th:href="@{/manage/deleteVariant/{id}(id=${v.id})}" class="btn btn-del">Xóa</a>
+                            <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}" class="btn btn-edit" th:color="blue">Sửa</a>
                         </td>
                     </tr>
                     </tbody>
@@ -269,6 +284,7 @@
             </td>
             <td>
                 <a th:href="@{/manage/deleteProduct/{id}(id=${p.id})}" class="btn btn-del">Xóa</a>
+                <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}" class="btn btn-edit">Sửa</a>
             </td>
         </tr>
         </tbody>

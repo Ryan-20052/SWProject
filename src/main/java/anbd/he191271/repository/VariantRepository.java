@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface VariantRepository extends JpaRepository<Variant, Integer> {
     List<Variant> findByProductId(int productId);
-    @Transactional
-    void deleteByProductId(int productId);
+//    @Transactional
+//    void deleteByProductId(int productId);
 }

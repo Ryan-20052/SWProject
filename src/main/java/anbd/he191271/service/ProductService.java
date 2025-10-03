@@ -35,9 +35,7 @@ public class ProductService {
 
 
 
-    @Transactional
     public void deleteProduct(int productId) {
-        variantRepository.deleteByProductId(productId); // Xóa tất cả variants trước
         productRepository.deleteById(productId);        // Xóa product
     }
 }

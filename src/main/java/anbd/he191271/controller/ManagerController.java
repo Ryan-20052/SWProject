@@ -72,11 +72,29 @@ public class ManagerController {
         return "redirect:/manage/manageHome";
     }
 
-//    @PostMapping("/updateProduct")
-//    public String updateProduct(@ModelAttribute("newProduct") CreateProductRequest request) {
-//        productService.saveProduct(request);
-//        return "redirect:/manage/manageHome";
-//    }
+    @PostMapping("/updateProduct")
+    public String updateProduct(@ModelAttribute("newProduct") CreateProductRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
+        Product product = productService.findProductById(request.getProductId());
+        Manager manager=(Manager)session.getAttribute("manager");
+        product.setName(request.getName());
+        product.setManager_id(manager.getId());
+        product.setImg_url(request.getImgUrl());
+        product.setCategory(categoryService.getCategoryById(request.getCategoryId()));
+        productService.saveProduct(product);
+        redirectAttributes.addFlashAttribute("msg", "Đã cập nhật sản phẩm");
+        return "redirect:/manage/manageHome";
+    }
+
+    @GetMapping("/updateProduct/{id}")
+    public String deleteProduct(@PathVariable("id") int id,   Model model, HttpSession session) {
+        Product product = productService.findProductById(id);
+        CreateProductRequest request=new CreateProductRequest(product.getId(), product.getName(), product.getCategory().getId(), product.getImg_url());
+        Manager manager=(Manager)session.getAttribute("manager");
+        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("manager", manager);
+        model.addAttribute("request", request);
+        return "productUpdatePage";
+    }
 
     @GetMapping("/deleteVariant/{id}")
     public String deleteVariant(@PathVariable int id, RedirectAttributes redirectAttributes) {
