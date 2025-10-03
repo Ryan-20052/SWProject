@@ -1,10 +1,31 @@
 package anbd.he191271.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "orders_detail")
 public class OrderDetail {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int variant_id;
+
+    // N-1: nhiều OrderDetail thuộc về 1 Order
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    // N-1: nhiều OrderDetail thuộc về 1 Variant
+    @ManyToOne
+    @JoinColumn(name = "variant_id", nullable = false)
+    private Variant variant;
+
+    @Column(name = "amount", nullable = false)
     private int amount;
-    private int order_id;
+
+    // 1-1: 1 OrderDetail có 1 LicenseKey
+    @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL)
+    private LicenseKey licenseKey;
 
     public int getId() {
         return id;
@@ -14,12 +35,20 @@ public class OrderDetail {
         this.id = id;
     }
 
-    public int getVariant_id() {
-        return variant_id;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setVariant_id(int variant_id) {
-        this.variant_id = variant_id;
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public Variant getVariant() {
+        return variant;
+    }
+
+    public void setVariant(Variant variant) {
+        this.variant = variant;
     }
 
     public int getAmount() {
@@ -30,11 +59,11 @@ public class OrderDetail {
         this.amount = amount;
     }
 
-    public int getOrder_id() {
-        return order_id;
+    public LicenseKey getLicenseKey() {
+        return licenseKey;
     }
 
-    public void setOrder_id(int order_id) {
-        this.order_id = order_id;
+    public void setLicenseKey(LicenseKey licenseKey) {
+        this.licenseKey = licenseKey;
     }
 }

@@ -5,15 +5,20 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "variant")
 public class Variant {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(name = "name")
     private String name;
+
     @Column(name = "duration")
     private String duration;
+
     @Column(name = "price")
     private int price;
+
 
     // Quan hệ với product
     @ManyToOne
@@ -28,9 +33,11 @@ public class Variant {
         this.name = name;
         this.duration = duration;
         this.price = price;
+
         this.product = product;
     }
 
+    // Getters & Setters
     public int getId() {
         return id;
     }
@@ -62,6 +69,8 @@ public class Variant {
     public void setPrice(int price) {
         this.price = price;
     }
+
+
 
     public Product getProduct() {
         return product;

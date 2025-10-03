@@ -1,13 +1,31 @@
 package anbd.he191271.entity;
 
+import jakarta.persistence.*;
 import java.util.Date;
 
+@Entity
+@Table(name = "license_key")
 public class LicenseKey {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "key_value", nullable = false, unique = true)
     private String key;
-    private int order_detail_id;
-    private Date activated_at;
-    private Date expired_at;
+
+    @Column(name = "activated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date activatedAt;
+
+    @Column(name = "expired_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expiredAt;
+
+    // 1-1 với OrderDetail
+    @OneToOne
+    @JoinColumn(name = "order_detail_id", nullable = false)
+    private OrderDetail orderDetail;
 
     public int getId() {
         return id;
@@ -25,27 +43,27 @@ public class LicenseKey {
         this.key = key;
     }
 
-    public int getOrder_detail_id() {
-        return order_detail_id;
+    public Date getActivatedAt() {
+        return activatedAt;
     }
 
-    public void setOrder_detail_id(int order_detail_id) {
-        this.order_detail_id = order_detail_id;
+    public void setActivatedAt(Date activatedAt) {
+        this.activatedAt = activatedAt;
     }
 
-    public Date getActivated_at() {
-        return activated_at;
+    public Date getExpiredAt() {
+        return expiredAt;
     }
 
-    public void setActivated_at(Date activated_at) {
-        this.activated_at = activated_at;
+    public void setExpiredAt(Date expiredAt) {
+        this.expiredAt = expiredAt;
     }
 
-    public Date getExpired_at() {
-        return expired_at;
+    public OrderDetail getOrderDetail() {
+        return orderDetail;
     }
 
-    public void setExpired_at(Date expired_at) {
-        this.expired_at = expired_at;
+    public void setOrderDetail(OrderDetail orderDetail) {
+        this.orderDetail = orderDetail;
     }
 }
