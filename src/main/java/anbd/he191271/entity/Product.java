@@ -26,7 +26,7 @@ public class Product {
     // <-- Thêm trường variants
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Variant> variants = new ArrayList<>();
-
+    private String description;
     public void addVariant(Variant variant) {
         variants.add(variant);
         variant.setProduct(this);
@@ -50,13 +50,14 @@ public class Product {
         this.variants = variants;
     }
 
-    public Product(int id, String name, int category_id, int manager_id, String img_url, List<Variant> variants) {
+    public Product(int id, String name, int manager_id, String img_url, Categories category, List<Variant> variants, String description) {
         this.id = id;
         this.name = name;
-        this.category = category;
         this.manager_id = manager_id;
         this.img_url = img_url;
+        this.category = category;
         this.variants = variants;
+        this.description = description;
     }
 
     public int getId() {
@@ -97,5 +98,13 @@ public class Product {
 
     public void setImg_url(String img_url) {
         this.img_url = img_url;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
