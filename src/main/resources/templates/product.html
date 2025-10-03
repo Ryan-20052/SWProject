@@ -5,6 +5,31 @@
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
     <link rel="stylesheet" th:href="@{/product.css}">
     <script src="/product.js"></script>
+    <style>
+        /* CSS cho thông báo */
+        .alert {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .alert p { margin: 0; }
+        .alert-success {
+            background-color: #e6ffed;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffeeba;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+    </style>
 </head>
 <body>
 <header id="siteHeader">
@@ -22,7 +47,6 @@
                 <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">
                     Đăng ký
                 </button>
-
             </div>
 
             <!-- Nếu đã đăng nhập -->
@@ -40,24 +64,40 @@
         <div class="info">
             <h1 th:text="${product.name}">Tên sản phẩm</h1>
 
-            <!-- Hiển thị giá theo selectedVariant (controller sẽ cung cấp selectedVariant) -->
+            <div th:if="${message != null}">
+                <!-- Thành công -->
+                <div th:if="${#strings.contains(message, 'thành công')}"
+                     class="alert alert-success"
+                     th:text="${message}"></div>
+
+                <!-- Cảnh báo đăng nhập -->
+                <div th:if="${#strings.contains(message, 'Vui lòng đăng nhập')}"
+                     class="alert alert-warning"
+                     th:text="${message}"></div>
+
+                <!-- Lỗi khác -->
+                <div th:if="${!(#strings.contains(message, 'thành công') or #strings.contains(message, 'Vui lòng đăng nhập'))}"
+                     class="alert alert-error"
+                     th:text="${message}"></div>
+            </div>
+
+            <!-- Hiển thị giá -->
             <div class="price"
-                 th:text="${selectedVariant != null ? selectedVariant.price + ' đ' : (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
+                 th:text="${selectedVariant != null ? selectedVariant.price + ' đ' :
+                          (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
                 Giá
             </div>
+
             <section class="product-description">
                 <h2>Mô tả sản phẩm</h2>
-                <p th:text="${product.description}">
-                    Nội dung mô tả sản phẩm từ database sẽ hiển thị tại đây.
-                </p>
+
             </section>
 
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
 
-                <!-- Form GET gửi về cùng URL /product/{id}?variantId=xxx -->
-                <form method="get"
-                      th:action="@{/product/{id}(id=${product.id})}">
+                <!-- Form GET chọn variant -->
+                <form method="get" th:action="@{/product/{id}(id=${product.id})}">
                     <div class="options">
                         <label class="variant-option"
                                th:each="v : ${variants}"
@@ -78,13 +118,29 @@
 
             <div class="actions">
                 <button class="cart">Thêm vào giỏ</button>
-                <button class="buy">Mua ngay</button>
+
+                <!-- Nếu chưa login -->
+                <div th:if="${session.customer == null}" style="display:inline;">
+                    <button type="button" class="buy"
+                            onclick="alert('Vui lòng đăng nhập để mua sản phẩm!'); window.location.href='/login.html';">
+                        Mua ngay
+                    </button>
+                </div>
+
+                <!-- Nếu đã login -->
+                <div th:if="${session.customer != null}" style="display:inline;">
+                    <form th:action="@{/purchase}" method="post" style="display:inline;">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
+                        <input type="hidden" name="variantId"
+                               th:value="${selectedVariant != null ? selectedVariant.id : 0}"/>
+                        <input type="hidden" name="amount" value="1"/>
+                        <button type="submit" class="buy">Mua ngay</button>
+                    </form>
+                </div>
             </div>
 
         </div>
-
     </div>
-
 </div>
 
 </body>

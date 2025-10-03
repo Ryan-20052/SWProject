@@ -11,7 +11,7 @@ public class LicenseKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "key_value", nullable = false, unique = true)
+    @Column(name = "code", nullable = false, unique = true)
     private String key;
 
     @Column(name = "activated_at")

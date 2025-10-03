@@ -296,7 +296,7 @@
                 <div id="userDropdown" class="dropdown">
                     <div class="item item-name" th:text="${customer.name}">Tên user</div>
                     <a th:href="@{/customer/profile}" class="item">Profile</a>
-                    <a th:href="@{/purchased.html}" class="item">Purchased License</a>
+                    <a th:href="@{/purchasedlicenses}" class="item">Purchased License</a>
 
                     <!-- Sử dụng form POST tới /auth/customer/logout -->
                     <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">

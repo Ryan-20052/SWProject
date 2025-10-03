@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>License đã mua</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+        header { background: #2d89ef; color: white; padding: 15px 30px; }
+        header h1 { margin: 0; font-size: 22px; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; }
+        .actions button { background: white; color: #2d89ef; border: none; padding: 8px 15px; margin-left: 10px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .actions button:hover { background: #e0e0e0; }
+        .container { padding: 30px; max-width: 900px; margin: auto; background: white; margin-top: 20px;
+            border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #2d89ef; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table thead { background: #2d89ef; color: white; }
+        table th, table td { padding: 12px 15px; text-align: center; border: 1px solid #ddd; }
+        table tr:nth-child(even) { background: #f4f4f4; }
+        p { text-align: center; font-size: 16px; margin-top: 20px; }
+        .alert { text-align:center; padding:10px; margin:10px auto; max-width:600px; border-radius:6px; }
+        .alert-warning { background:#fff3cd; color:#856404; border:1px solid #ffeeba; }
+        .alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+<header id="siteHeader">
+    <div class="header-inner">
+        <h1>License Shop</h1>
+
+    </div>
+</header>
+
+<div class="container">
+    <h2>Danh sách license đã mua</h2>
+
+    <!-- Hiển thị thông báo -->
+    <div th:if="${message != null}" class="alert alert-warning" th:text="${message}"></div>
+
+    <table th:if="${!#lists.isEmpty(purchasedLicenses)}">
+        <thead>
+        <tr>
+            <th>Tên sản phẩm</th>
+            <th>Gói/Dung lượng</th>
+            <th>Ngày mua</th>
+            <th>Ngày hết hạn</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="license : ${purchasedLicenses}">
+            <td th:text="${license.orderDetail.variant.product.name}">Tên sản phẩm</td>
+            <td th:text="${license.orderDetail.variant.name}">Gói</td>
+            <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}">01/10/2025</td>
+            <td th:text="${#dates.format(license.expiredAt, 'dd/MM/yyyy')}">01/11/2025</td>
+        </tr>
+        <div style="margin-bottom:15px; text-align:left;">
+            <button onclick="window.location.href='/home/homepage'"
+                    style="background:#2d89ef;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
+                ⬅ Về trang chủ
+            </button>
+        </div>
+        </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(purchasedLicenses)}">
+        <p>Bạn chưa mua license nào.</p>
+    </div>
+
+
+</div>
+</body>
+</html>
