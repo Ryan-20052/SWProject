@@ -3,81 +3,177 @@ package anbd.he191271.service;
 import anbd.he191271.config.VNPAYConfig;
 import anbd.he191271.dto.PaymentRequestDTO;
 import anbd.he191271.dto.PaymentResponseDTO;
+import anbd.he191271.entity.Customer;
+import anbd.he191271.entity.Order;
+import anbd.he191271.entity.OrderDetail;
+import anbd.he191271.entity.Variant;
+import anbd.he191271.repository.CustomerRepository;
+import anbd.he191271.repository.OrderDetailRepository;
+import anbd.he191271.repository.OrderRepository;
+import anbd.he191271.repository.VariantRepository;
 import anbd.he191271.util.VNPAYUtil;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
+
+    private final VariantRepository variantRepo;
+    private final OrderRepository orderRepo;
+    private final OrderDetailRepository orderDetailRepo;
+    private final CustomerRepository customerRepo;
 
     @Autowired
     private VNPAYConfig vnpConfig;
 
     @Override
+    @Transactional
     public PaymentResponseDTO createPayment(PaymentRequestDTO requestDTO, String clientIp) throws Exception {
-        String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
+        // 1) Tạo đơn PENDING
+        Order order = new Order();
+        order.setStatus("PENDING");
+        order.setOrderDate(LocalDateTime.now());
+        order.setCode(UUID.randomUUID().toString().replace("-", "").substring(0, 12));
 
+        // Liên kết Customer
+        if (requestDTO.getCustomerId() != null) {
+            Customer customer = customerRepo.findById(requestDTO.getCustomerId())
+                    .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + requestDTO.getCustomerId()));
+            order.setCustomer(customer);
+        } else {
+            throw new IllegalArgumentException("Customer ID is required");
+        }
+
+        order = orderRepo.save(order);
+
+        // 2) Tính tiền từ variants
+        long total = 0L;
+        for (PaymentRequestDTO.Item it : requestDTO.getItems()) {
+            Variant v = variantRepo.findById(it.getVariantId())
+                    .orElseThrow(() -> new IllegalArgumentException("Variant not found: " + it.getVariantId()));
+            int qty = it.getQuantity();
+            total += v.getPrice() * qty;
+
+            OrderDetail od = new OrderDetail();
+            od.setOrder(order);
+            od.setVariant(v);
+            od.setAmount(qty);
+            orderDetailRepo.save(od);
+        }
+        order.setTotalAmount(total);
+        orderRepo.save(order);
+
+        // 3) Build tham số VNPAY
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");
         vnp_Params.put("vnp_TmnCode", vnpConfig.getTmnCode());
-        vnp_Params.put("vnp_Amount", String.valueOf(requestDTO.getAmount() * 100));
+        vnp_Params.put("vnp_Amount", String.valueOf(order.getTotalAmount() * 100));
         vnp_Params.put("vnp_CurrCode", "VND");
-        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", requestDTO.getOrderInfo());
+        vnp_Params.put("vnp_TxnRef", order.getCode());
+        vnp_Params.put("vnp_OrderInfo", requestDTO.getOrderInfo() != null
+                ? requestDTO.getOrderInfo() : ("Thanh toan don #" + order.getCode()));
         vnp_Params.put("vnp_OrderType", requestDTO.getOrderType() != null ? requestDTO.getOrderType() : "other");
         vnp_Params.put("vnp_Locale", requestDTO.getLocale() != null ? requestDTO.getLocale() : "vn");
         vnp_Params.put("vnp_ReturnUrl", vnpConfig.getReturnUrl());
-        vnp_Params.put("vnp_IpAddr", clientIp);
+        vnp_Params.put("vnp_IpAddr", extractClientIp(clientIp));
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        String vnp_CreateDate = formatter.format(cld.getTime());
-        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-
-        cld.add(Calendar.MINUTE, 15);
-        String vnp_ExpireDate = formatter.format(cld.getTime());
-        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+        ZoneId tz = ZoneId.of("Asia/Ho_Chi_Minh");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        vnp_Params.put("vnp_CreateDate", LocalDateTime.now(tz).format(fmt));
+        vnp_Params.put("vnp_ExpireDate", LocalDateTime.now(tz).plusMinutes(15).format(fmt));
 
         String paymentUrl = VNPAYUtil.getPaymentURL(vnp_Params, vnpConfig.getPayUrl(), vnpConfig.getHashSecret());
 
-        return new PaymentResponseDTO("00", "Success", paymentUrl);
+        return new PaymentResponseDTO("00", "Success", paymentUrl,
+                order.getId(), order.getCode(), order.getTotalAmount(),
+                order.getCustomer().getUsername(),
+                order.getCustomer().getEmail());
     }
 
     @Override
     public PaymentResponseDTO handleReturn(Map<String, String> params) throws Exception {
-        boolean check = VNPAYUtil.validateSignature(params, vnpConfig.getHashSecret());
-        if (check) {
-            String responseCode = params.get("vnp_ResponseCode");
-            if ("00".equals(responseCode)) {
-                return new PaymentResponseDTO("00", "Thanh toán thành công", null);
-            } else {
-                return new PaymentResponseDTO(responseCode, "Thanh toán thất bại", null);
-            }
-        } else {
-            return new PaymentResponseDTO("97", "Sai chữ ký", null);
+        boolean ok = VNPAYUtil.validateSignature(params, vnpConfig.getHashSecret());
+        if (!ok) return new PaymentResponseDTO("97", "Sai chữ ký", null, null, null, null, null, null);
+
+        String rsp = params.get("vnp_ResponseCode");
+        String txnRef = params.get("vnp_TxnRef");
+
+        Order order = orderRepo.findByCode(txnRef).orElse(null);
+        if (order == null) return new PaymentResponseDTO("01", "Order not found", null, null, null, null, null, null);
+
+        if ("00".equals(rsp)) {
+            return new PaymentResponseDTO("00", "Thanh toán thành công", null,
+                    order.getId(), order.getCode(), order.getTotalAmount(),
+                    order.getCustomer().getUsername(),
+                    order.getCustomer().getEmail());
         }
+        return new PaymentResponseDTO(rsp, "Thanh toán thất bại", null,
+                order.getId(), order.getCode(), order.getTotalAmount(),
+                order.getCustomer().getUsername(),
+                order.getCustomer().getEmail());
     }
 
     @Override
+    @Transactional
     public PaymentResponseDTO handleIpn(Map<String, String> params) throws Exception {
-        boolean check = VNPAYUtil.validateSignature(params, vnpConfig.getHashSecret());
-        if (check) {
-            String responseCode = params.get("vnp_ResponseCode");
-            if ("00".equals(responseCode)) {
-                // TODO: cập nhật trạng thái đơn hàng trong DB
-                return new PaymentResponseDTO("00", "IPN thành công", null);
-            } else {
-                return new PaymentResponseDTO(responseCode, "IPN thất bại", null);
-            }
-        } else {
-            return new PaymentResponseDTO("97", "Sai chữ ký IPN", null);
+        boolean ok = VNPAYUtil.validateSignature(params, vnpConfig.getHashSecret());
+        if (!ok) {
+            return new PaymentResponseDTO("97", "Invalid signature", null, null, null, null, null, null);
         }
+
+        String txnRef = params.get("vnp_TxnRef");
+        String rsp = params.get("vnp_ResponseCode");
+        long amountXu = Long.parseLong(params.get("vnp_Amount"));
+
+        Order order = orderRepo.findByCode(txnRef).orElse(null);
+        if (order == null) {
+            return new PaymentResponseDTO("01", "Order not found", null, null, null, null, null, null);
+        }
+
+        if (amountXu != order.getTotalAmount() * 100) {
+            return new PaymentResponseDTO("04", "Invalid amount", null,
+                    order.getId(), order.getCode(), order.getTotalAmount(),
+                    order.getCustomer().getUsername(),
+                    order.getCustomer().getEmail());
+        }
+
+        if ("00".equals(rsp)) {
+            if (!"PAID".equals(order.getStatus())) {
+                order.setStatus("PAID");
+                orderRepo.save(order);
+            }
+            return new PaymentResponseDTO("00", "Confirm Success", null,
+                    order.getId(), order.getCode(), order.getTotalAmount(),
+                    order.getCustomer().getUsername(),
+                    order.getCustomer().getEmail());
+        } else {
+            order.setStatus("FAILED");
+            orderRepo.save(order);
+            return new PaymentResponseDTO("00", "Confirm Failed", null,
+                    order.getId(), order.getCode(), order.getTotalAmount(),
+                    order.getCustomer().getUsername(),
+                    order.getCustomer().getEmail());
+        }
+    }
+
+    private String extractClientIp(String remoteAddr) {
+        return remoteAddr;
+    }
+    @Transactional
+    public void updateOrderStatus(String orderCode, String newStatus) {
+        Order order = orderRepo.findByCode(orderCode)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderCode));
+        order.setStatus(newStatus);
+        orderRepo.save(order);
     }
 }

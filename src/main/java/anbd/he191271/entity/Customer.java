@@ -2,6 +2,7 @@ package anbd.he191271.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "customer")
@@ -17,6 +18,16 @@ public class Customer {
     private String password;
 
     private LocalDate dob; // ngày sinh
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Order> orders;
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
 
     // Lưu ảnh avatar dạng byte[] trong DB
     @Lob

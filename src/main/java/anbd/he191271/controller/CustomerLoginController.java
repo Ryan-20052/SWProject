@@ -1,5 +1,6 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.dto.CustomerDTO;
 import anbd.he191271.dto.LoginRequest;
 import anbd.he191271.entity.Customer;
 import jakarta.servlet.http.HttpSession;
@@ -21,11 +22,18 @@ public class CustomerLoginController {
 
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<Customer> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<CustomerDTO> login(@RequestBody LoginRequest request, HttpSession session) {
         return customerService.login(request.getUsername(), request.getPassword())
                 .map(customer -> {
-                    session.setAttribute("customer", customer); // lưu vào session
-                    return ResponseEntity.ok(customer);
+                    session.setAttribute("customer", customer); // lưu nguyên bản vào session
+
+                    // chỉ trả JSON gọn gàng ra FE
+                    CustomerDTO dto = new CustomerDTO(
+                            customer.getId(),
+                            customer.getUsername(),
+                            customer.getEmail()
+                    );
+                    return ResponseEntity.ok(dto);
                 })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }

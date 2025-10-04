@@ -23,6 +23,16 @@ public class Product {
     @JoinColumn(name = "categories_id", nullable = false)
     private Categories category;
 
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     // <-- Thêm trường variants
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Variant> variants = new ArrayList<>();

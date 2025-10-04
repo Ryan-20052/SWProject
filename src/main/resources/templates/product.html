@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
     <link rel="stylesheet" th:href="@{/product.css}">
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script th:if="${session.customer != null}">
+        const sessionCustomerId = [[${session.customer.id}]];
+    </script>
     <script src="/product.js"></script>
     <style>
         /* CSS cho thông báo */
@@ -129,16 +134,9 @@
 
                 <!-- Nếu đã login -->
                 <div th:if="${session.customer != null}" style="display:inline;">
-                    <form th:action="@{/purchase}" method="post" style="display:inline;">
-                        <input type="hidden" name="productId" th:value="${product.id}"/>
-                        <input type="hidden" name="variantId"
-                               th:value="${selectedVariant != null ? selectedVariant.id : 0}"/>
-                        <input type="hidden" name="amount" value="1"/>
-                        <button type="submit" class="buy">Mua ngay</button>
-                    </form>
+                    <button type="button" class="buy">Mua ngay</button>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

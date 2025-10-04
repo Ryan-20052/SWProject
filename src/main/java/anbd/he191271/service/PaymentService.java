@@ -9,4 +9,5 @@ public interface PaymentService {
     PaymentResponseDTO createPayment(PaymentRequestDTO requestDTO, String clientIp) throws Exception;
     PaymentResponseDTO handleReturn(Map<String, String> params) throws Exception;
     PaymentResponseDTO handleIpn(Map<String, String> params) throws Exception;
+    void updateOrderStatus(String orderCode, String status);
 }
