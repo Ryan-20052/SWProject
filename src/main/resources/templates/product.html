@@ -6,8 +6,10 @@
     <link rel="stylesheet" th:href="@{/product.css}">
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <script th:if="${session.customer != null}">
-        const sessionCustomerId = [[${session.customer.id}]];
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const sessionCustomerId = /*[[${session.customer != null ? session.customer.id : 'null'}]]*/ null;
+        /*]]>*/
     </script>
     <script src="/product.js"></script>
     <style>
@@ -140,6 +142,64 @@
         </div>
     </div>
 </div>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const buyBtn = document.querySelector(".buy");
+
+        if (buyBtn) {
+            buyBtn.addEventListener("click", async function() {
+                if (typeof sessionCustomerId === "undefined" || !sessionCustomerId || sessionCustomerId === 'null') {
+                    alert("Vui lòng đăng nhập để mua sản phẩm!");
+                    window.location.href = "/login.html";
+                    return;
+                }
+
+                const selectedVariant = document.querySelector("input[name='variantId']:checked");
+                if (!selectedVariant) {
+                    alert("Vui lòng chọn gói sản phẩm trước khi mua!");
+                    return;
+                }
+
+                // ✅ Gửi JSON đúng theo PaymentRequestDTO
+                const body = {
+                    customerId: parseInt(sessionCustomerId),
+                    items: [
+                        {
+                            variantId: parseInt(selectedVariant.value),
+                            quantity: 1
+                        }
+                    ],
+                    orderInfo: "Thanh toán [[${product.name}]]"
+                };
+
+                try {
+                    const res = await fetch("/api/payment/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+
+                    if (!res.ok) {
+                        alert("Không thể tạo thanh toán. Vui lòng thử lại.");
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data && data.paymentUrl) {
+                        window.location.href = data.paymentUrl; // ✅ Chuyển qua VNPAY
+                    } else {
+                        alert("Không thể tạo thanh toán: Không có URL trả về.");
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Có lỗi xảy ra khi tạo thanh toán!");
+                }
+            });
+        }
+    });
+</script>
+
 
 </body>
 </html>
