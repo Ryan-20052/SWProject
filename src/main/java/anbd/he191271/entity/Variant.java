@@ -1,6 +1,7 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "variant")
@@ -30,14 +31,14 @@ public class Variant {
     public Variant() {
     }
 
-    public Variant(int id, String name, String duration, int price, String status, Product product) {
-        this.id = id;
+    public Variant(String name, String duration, int price, Product product) {
         this.name = name;
         this.duration = duration;
         this.price = price;
-        this.status = status;
         this.product = product;
+        this.status = "available";
     }
+
 
     public Variant(int id, String name, String duration, int price, Product product) {
         this.id = id;
@@ -47,6 +48,7 @@ public class Variant {
 
         this.product = product;
     }
+
 
     // Getters & Setters
     public int getId() {

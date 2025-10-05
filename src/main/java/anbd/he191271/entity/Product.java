@@ -1,6 +1,8 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +55,7 @@ public class Product {
         this.manager_id = managerId;
         this.img_url = imgUrl;
         this.category = category;
+        this.status = "available";
     }
 
     // constructor, getters và setters (đảm bảo có getter/setter cho variants)
