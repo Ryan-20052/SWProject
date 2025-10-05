@@ -14,34 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-//@RestController
-//@RequestMapping("/manage")
-//public class ManagerController {
-//    private final VariantService variantService;
-//
-//    public ManagerController(VariantService variantService) {
-//        this.variantService = variantService;
-//    }
-//@GetMapping("/loadVariant")
-//    public List<Variant> LoadVariant(){
-//        return variantService.getAllVariant();
-//    }
-////    @PostMapping("/editVariant")
-////    public Void  editVariant(@RequestBody Variant variant){
-////
-////    }
-//
-//    @DeleteMapping("/deleteVariant/{id}")
-//    public String  deleteVariant(@PathVariable int id){
-//        variantService.deleteVariant(id);
-//        return "Đã xóa thành công";
-//    }
-//
-//    @GetMapping("/getVariant/{id}")
-//    public Variant getVariant(@PathVariable int id){
-//        return variantService.getVariantById(id);
-//    }
-//}
+
 
 @Controller
 @RequestMapping("/manage")

@@ -19,6 +19,8 @@ public class Variant {
     @Column(name = "price")
     private int price;
 
+    @Column(name = "status")
+    private String status;
 
     // Quan hệ với product
     @ManyToOne
@@ -26,6 +28,15 @@ public class Variant {
     private Product product;
 
     public Variant() {
+    }
+
+    public Variant(int id, String name, String duration, int price, String status, Product product) {
+        this.id = id;
+        this.name = name;
+        this.duration = duration;
+        this.price = price;
+        this.status = status;
+        this.product = product;
     }
 
     public Variant(int id, String name, String duration, int price, Product product) {
@@ -70,7 +81,13 @@ public class Variant {
         this.price = price;
     }
 
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public Product getProduct() {
         return product;

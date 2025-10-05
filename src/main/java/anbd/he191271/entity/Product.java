@@ -19,6 +19,10 @@ public class Product {
 
     @Column(name = "img_url")
     private String img_url;
+
+    @Column(name = "status")
+    private  String status;
+
     @ManyToOne
     @JoinColumn(name = "categories_id", nullable = false)
     private Categories category;
@@ -67,6 +71,25 @@ public class Product {
         this.manager_id = manager_id;
         this.img_url = img_url;
         this.variants = variants;
+    }
+
+    public Product(int id, String name, int manager_id, String img_url, String status, Categories category, String description, List<Variant> variants) {
+        this.id = id;
+        this.name = name;
+        this.manager_id = manager_id;
+        this.img_url = img_url;
+        this.status = status;
+        this.category = category;
+        this.description = description;
+        this.variants = variants;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public int getId() {

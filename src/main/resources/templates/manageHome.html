@@ -204,12 +204,44 @@
             padding:12px 20px; border-radius:6px; z-index:1000;">
     <span th:text="${msg}"></span>
 </div>
+
+<div id="editModal" style="display: none">
+    <form th:action="@{/manage/updateProduct}" th:object="${request}" method="post">
+        <input type="hidden" name="productId" id="editId">
+        <label>Tên</label>
+        <input type="text" name="name" id="editName">
+        <label>Ảnh</label>
+        <input type="text" name="imgUrl" id="editUrl">
+        <label>Danh mục</label>
+        <select name="category" id="editCategory">
+            <option>-- Chọn danh mục --</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}">
+            </option>
+        </select>
+    </form>
+    <button type="submit" class="btn-edit">Cập nhật</button>
+
+</div>
+
 <script>
     // Ẩn popup sau 3s
     setTimeout(() => {
         const popup = document.getElementById("messagePopup");
         if (popup) popup.style.display = "none";
     }, 3000);
+
+
+    function openEditModal(id, name, imgUrl, categoryId) {
+        document.getElementById("editId").value = id;
+        document.getElementById("editName").value = name;
+        document.getElementById("editUrl").value = imgUrl;
+        document.getElementById("editCategory").value = categoryId;
+        document.getElementById("editModal").style.display = "block";
+    }
+
+
 </script>
 <div class="dashboard">
     <h2>Danh sách sản phẩm</h2>
