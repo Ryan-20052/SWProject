@@ -6,9 +6,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/swp_project
+    url: jdbc:mysql://localhost:3306/SWProject
     username: root
-    password: 123
+    password: sa123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
