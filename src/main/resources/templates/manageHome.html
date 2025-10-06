@@ -20,8 +20,8 @@
         }
 
         header {
-            background: linear-gradient(90deg,#4ade80,#3b82f6);
-            color: white;
+            background: #2563eb;
+            color: #28a745;
             padding: 15px 20px;
             display: flex;
             justify-content: center;
@@ -41,8 +41,8 @@
         }
 
         nav {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+            background: #1e3a8a; /* xanh đậm hơn header cho nổi */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .nav-inner {
@@ -50,8 +50,21 @@
             margin: 0 auto;
             display: flex;
             gap: 24px;
-            padding: 10px 20px;
-            font-weight: 600;
+            padding: 12px 20px;
+        }
+
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-inner a:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
         }
 
         .dashboard {
@@ -142,12 +155,12 @@
          style="display:flex; align-items:center; justify-content:space-between;">
 
         <!-- Tiêu đề -->
-        <h1 style="margin:0; font-size:22px; color:#222233;">Manager Dashboard</h1>
+        <h1 style="margin:0; font-size:22px; color:white;">Manager Dashboard</h1>
 
         <!-- Khu vực bên phải -->
         <div style="display:flex; align-items:center; gap:16px;">
             <!-- Lời chào -->
-            <div style="font-size:16px; color:#222233;"
+            <div style="font-size:16px; color:white;"
                  th:text="|Xin chào, ${manager.username}|">
             </div>
 
