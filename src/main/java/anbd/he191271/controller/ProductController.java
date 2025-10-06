@@ -56,4 +56,16 @@ public class ProductController {
 
         return "product";
     }
+    @GetMapping("/shoppingcart/{id}")
+    public String showProduct(
+            @PathVariable("id") Long productId,
+            @RequestParam(value = "message", required = false) String message,
+            Model model) {
+
+        Product product = productService.findProductById(productId.intValue());
+        model.addAttribute("product", product);
+        model.addAttribute("variants", product.getVariants());
+        if (message != null) model.addAttribute("message", message);
+        return "product";
+    }
 }
