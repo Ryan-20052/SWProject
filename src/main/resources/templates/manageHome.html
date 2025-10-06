@@ -20,7 +20,7 @@
         }
 
         header {
-            background: var(--blue);
+            background: linear-gradient(90deg,#4ade80,#3b82f6);
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -138,28 +138,47 @@
 </head>
 <body>
 <header>
-    <div class="header-inner">
-        <h1>Manager Dashboard</h1>
-        <div th:text="|Xin chào, ${manager.username}|"></div>
-        <div style="display:flex; align-items:center; gap:12px; margin-left:20px;">
-            <!-- Avatar có ảnh -->
-            <div class="avatar"
-                 th:if="${manager.avatar != null}"
-                 onclick="window.location.href='/manager/profile'">
-                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}" alt="Avatar">
+    <div class="header-inner"
+         style="display:flex; align-items:center; justify-content:space-between;">
+
+        <!-- Tiêu đề -->
+        <h1 style="margin:0; font-size:22px; color:#222233;">Manager Dashboard</h1>
+
+        <!-- Khu vực bên phải -->
+        <div style="display:flex; align-items:center; gap:16px;">
+            <!-- Lời chào -->
+            <div style="font-size:16px; color:#222233;"
+                 th:text="|Xin chào, ${manager.username}|">
             </div>
 
-            <!-- Avatar fallback (chữ cái đầu từ username) -->
-            <div class="avatar-fallback"
-                 th:if="${manager.avatar == null}"
+            <!-- Avatar -->
+            <div th:if="${manager.avatar != null}" class="avatar"
+                 style="width:40px; height:40px; border-radius:50%; overflow:hidden; cursor:pointer;"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}"
+                     alt="Avatar" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+
+            <!-- Avatar fallback -->
+            <div th:if="${manager.avatar == null}" class="avatar-fallback"
+                 style="width:40px; height:40px; border-radius:50%; background:#555; color:white;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:bold; cursor:pointer;"
                  th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
                  onclick="window.location.href='/manager/profile'">
             </div>
+
+            <!-- Logout button -->
+            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                           border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
         </div>
-        <a th:href="@{/login.html}"
-           style="margin-left:auto; padding:6px 12px; border:none; border-radius:4px; background:red; color:white; cursor:pointer;">Đăng
-            xuất</a>
     </div>
+
 </header>
 <style>
     .avatar, .avatar-fallback {
@@ -199,17 +218,21 @@
         <a th:href="@{/report}">Báo cáo khách hàng</a>
     </div>
 </nav>
+
 <div id="messagePopup" th:if="${msg}"
      style="position:fixed; top:20px; right:20px; background:#28a745; color:#fff;
             padding:12px 20px; border-radius:6px; z-index:1000;">
     <span th:text="${msg}"></span>
 </div>
+
+
 <script>
     // Ẩn popup sau 3s
     setTimeout(() => {
         const popup = document.getElementById("messagePopup");
         if (popup) popup.style.display = "none";
     }, 3000);
+
 </script>
 <div class="dashboard">
     <h2>Danh sách sản phẩm</h2>
@@ -230,14 +253,15 @@
     </form>
 
     <h3>Thêm Variant</h3>
-    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post">
+    <form th:action="@{/manage/addVariant}" th:object="${newVariant}" method="post">
         <input type="text" th:field="*{name}" placeholder="Tên sản phẩm">
-        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh">
-        <select th:field="*{categoryId}">
-            <option value="">-- Chọn danh mục --</option>
-            <option th:each="c : ${categories}"
-                    th:value="${c.id}"
-                    th:text="${c.name}">
+        <input type="text" th:field="*{duration}" placeholder="Thời hạn">
+        <input type="text" th:field="*{price}" placeholder="Giá">
+        <select th:field="*{productId}">
+            <option value="">-- Chọn sản phẩm --</option>
+            <option th:each="p : ${productListAvai}"
+                    th:value="${p.id}"
+                    th:text="${p.name}">
             </option>
         </select>
         <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
@@ -250,6 +274,7 @@
             <th>Ảnh</th>
             <th>Tên sản phẩm</th>
             <th>Variants</th>
+            <th>Trạng thái</th>
             <th>Hành động</th>
         </tr>
         </thead>
@@ -266,6 +291,7 @@
                         <th>Tên variant</th>
                         <th>Thời hạn</th>
                         <th>Giá</th>
+                        <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
                     </thead>
@@ -274,6 +300,7 @@
                         <td th:text="${v.name}"></td>
                         <td th:text="${v.duration}"></td>
                         <td th:text="${v.price}"></td>
+                        <td th:text="${v.status}"></td>
                         <td>
                             <a th:href="@{/manage/deleteVariant/{id}(id=${v.id})}" class="btn btn-del">Xóa</a>
                             <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}" class="btn btn-edit" th:color="blue">Sửa</a>
@@ -282,8 +309,24 @@
                     </tbody>
                 </table>
             </td>
+            <td th:text="${p.status}" ></td>
             <td>
-                <a th:href="@{/manage/deleteProduct/{id}(id=${p.id})}" class="btn btn-del">Xóa</a>
+                <!-- Nút Ẩn (khi đang available) -->
+                <a th:if="${p.status == 'available'}"
+                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"
+                   class="btn btn-del"
+                   style="margin-right: 8px;">
+                    Ẩn
+                </a>
+
+                <!-- Nút Hiện lại (khi đang unavailable) -->
+                <a th:if="${p.status == 'unavailable'}"
+                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"
+                   class="btn btn-edit"
+                style="margin-right: 8px; background-color: #28a745">
+                    Hiện
+                </a>
+
                 <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}" class="btn btn-edit">Sửa</a>
             </td>
         </tr>

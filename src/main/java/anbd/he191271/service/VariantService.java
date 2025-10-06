@@ -38,6 +38,9 @@ public class VariantService {
     public void deleteVariant(int id) {
         variantRepository.deleteById(id);
     }
+    public void  saveVariant(Variant variant) {
+        variantRepository.save(variant);
+    }
     public Variant create(Variant variant) {
         return variantRepository.save(variant);
     }
