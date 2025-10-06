@@ -1,6 +1,7 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "variant")
@@ -19,6 +20,8 @@ public class Variant {
     @Column(name = "price")
     private int price;
 
+    @Column(name = "status")
+    private String status;
 
     // Quan hệ với product
     @ManyToOne
@@ -28,6 +31,15 @@ public class Variant {
     public Variant() {
     }
 
+    public Variant(String name, String duration, int price, Product product) {
+        this.name = name;
+        this.duration = duration;
+        this.price = price;
+        this.product = product;
+        this.status = "available";
+    }
+
+
     public Variant(int id, String name, String duration, int price, Product product) {
         this.id = id;
         this.name = name;
@@ -36,6 +48,7 @@ public class Variant {
 
         this.product = product;
     }
+
 
     // Getters & Setters
     public int getId() {
@@ -70,7 +83,13 @@ public class Variant {
         this.price = price;
     }
 
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public Product getProduct() {
         return product;

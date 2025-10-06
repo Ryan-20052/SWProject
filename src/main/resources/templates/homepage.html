@@ -260,6 +260,34 @@
         updateCartCountUI();
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get("status");
+        if (!status) return;
+
+        const alertBox = document.createElement("div");
+        alertBox.innerText = status === "success"
+            ? "🎉 Thanh toán thành công! Cảm ơn bạn đã mua hàng."
+            : "❌ Thanh toán thất bại hoặc bị hủy.";
+        alertBox.style.position = "fixed";
+        alertBox.style.top = "20px";
+        alertBox.style.left = "50%";
+        alertBox.style.transform = "translateX(-50%)";
+        alertBox.style.backgroundColor = status === "success" ? "#28a745" : "#dc3545";
+        alertBox.style.color = "white";
+        alertBox.style.padding = "12px 24px";
+        alertBox.style.borderRadius = "8px";
+        alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+        alertBox.style.zIndex = "9999";
+        alertBox.style.fontWeight = "600";
+        alertBox.style.fontSize = "15px";
+        document.body.appendChild(alertBox);
+
+        setTimeout(() => alertBox.remove(), 2000);
+    });
+</script>
+
 <body>
 <header id="siteHeader">
     <div class="header-inner">
