@@ -1,21 +1,21 @@
 package anbd.he191271.dto;
 
-public class ProductDTO {
+public class CreateProductRequest {
     private Integer productId;
     private String name;
     private Integer categoryId;
     private String imgUrl;
 
-    public ProductDTO() {
+    public CreateProductRequest() {
     }
 
-    public ProductDTO(String name, Integer categoryId, String imgUrl) {
+    public CreateProductRequest(String name, Integer categoryId, String imgUrl) {
         this.name = name;
         this.categoryId = categoryId;
         this.imgUrl = imgUrl;
     }
 
-    public ProductDTO(Integer productId, String name, Integer categoryId, String imgUrl) {
+    public CreateProductRequest(Integer productId, String name, Integer categoryId, String imgUrl) {
         this.productId = productId;
         this.name = name;
         this.categoryId = categoryId;

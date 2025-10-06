@@ -35,9 +35,7 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public List<Product> getAllProductByStatus(String status) {
-        return productRepository.findByStatus(status);
-    }
+
 
     public void deleteProduct(int productId) {
         productRepository.deleteById(productId);        // Xóa product

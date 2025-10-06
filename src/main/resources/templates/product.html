@@ -6,8 +6,11 @@
     <link rel="stylesheet" th:href="@{/product.css}">
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <script th:if="${session.customer != null}">
-        const sessionCustomerId = [[${session.customer.id}]];
+    <!-- DÙng th:inline="javascript" để Thymeleaf in giá trị JS an toàn -->
+    <script th:if="${session.customer != null}" th:inline="javascript">
+        /*[[*/
+        const sessionCustomerId = /*[[${session.customer.id}]]*/ 0;
+        /*]]*/
     </script>
     <script src="/product.js"></script>
     <style>
@@ -34,6 +37,64 @@
             color: #842029;
             border: 1px solid #f5c2c7;
         }
+
+        /* Chọn số lượng + nút */
+        .purchase-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .amount-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .amount-wrapper label {
+            font-weight: bold;
+            color: #333;
+        }
+        .amount-wrapper input {
+            width: 80px;
+            padding: 6px;
+            font-size: 16px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .action-buttons button {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        button.cart {
+            background-color: #007bff;
+            color: white;
+        }
+        button.cart:hover {
+            background-color: #0069d9;
+        }
+        button.buy-now {
+            background-color: #28a745;
+            color: white;
+        }
+        button.buy-now:hover {
+            background-color: #218838;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -56,7 +117,8 @@
 
             <!-- Nếu đã đăng nhập -->
             <div th:if="${session.customer != null}">
-                <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
+                <button id="cartBtnL" class="cart-btn"
+                        th:onclick="|window.location.href='/cart/view'|">Giỏ hàng</button>
             </div>
 
         </div>
@@ -95,13 +157,15 @@
 
             <section class="product-description">
                 <h2>Mô tả sản phẩm</h2>
-
+                <p th:text="${product.description}">
+                    Nội dung mô tả sản phẩm từ database sẽ hiển thị tại đây.
+                </p>
             </section>
 
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
 
-                <!-- Form GET chọn variant -->
+                <!-- Form GET chọn variant (reload trang khi đổi variant) -->
                 <form method="get" th:action="@{/product/{id}(id=${product.id})}">
                     <div class="options">
                         <label class="variant-option"
@@ -121,22 +185,37 @@
                 </form>
             </div>
 
-            <div class="actions">
-                <button class="cart">Thêm vào giỏ</button>
+            <!-- Chọn số lượng + nút hành động -->
+            <div class="purchase-section">
+                <form th:action="@{/cart/add}" method="post" class="purchase-form">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <!-- Nếu chưa login -->
-                <div th:if="${session.customer == null}" style="display:inline;">
-                    <button type="button" class="buy"
-                            onclick="alert('Vui lòng đăng nhập để mua sản phẩm!'); window.location.href='/login.html';">
-                        Mua ngay
-                    </button>
-                </div>
+                    <input type="hidden" name="variantId"
+                           th:value="${selectedVariant != null ? selectedVariant.id : ''}" />
 
-                <!-- Nếu đã login -->
-                <div th:if="${session.customer != null}" style="display:inline;">
-                    <button type="button" class="buy">Mua ngay</button>
-                </div>
+                    <div class="amount-wrapper">
+                        <label for="amountInput">Số lượng:</label>
+                        <input type="number" id="amountInput" name="amount" value="1" min="1" />
+                        <span th:if="${param.message}" th:text="${param.message}" style="margin-left:10px;color: red; padding:6px 10px; border-radius:6px; font-weight:bold;"></span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="cart" th:disabled="${selectedVariant == null}">
+                            Thêm vào giỏ
+                        </button>
+                        <button class="buy action-btn"
+                                type="button"
+                                th:onclick="|window.location.href='/product/${product.id}'|"
+                                aria-label="Mua ngay">
+                            Mua ngay
+                        </button>
+                    </div>
+
+                </form>
             </div>
+
+
         </div>
     </div>
 </div>

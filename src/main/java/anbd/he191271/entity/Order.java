@@ -35,17 +35,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
 
-    // Trạng thái thanh toán: VD: "PENDING", "PAID", "FAILED"
-    @Column(name = "status", length = 50)
     private String status;
-
-    // Mã đơn hàng / mã giao dịch (VD: VN123456)
-    @Column(name = "code", length = 100)
     private String code;
-
-    // Tổng số tiền (dùng Long để tránh null lỗi)
-    @Column(name = "total_amount")
-    private Long totalAmount;
+    private long totalAmount;
 
     public String getStatus() {
         return status;

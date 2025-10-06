@@ -35,6 +35,6 @@ public class ManagerLoginController {
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login.html";
+        return "redirect:/home/homepage";
     }
 }
