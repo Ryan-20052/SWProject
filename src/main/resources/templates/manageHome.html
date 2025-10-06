@@ -252,10 +252,10 @@
 
     <!-- Form Thêm sản phẩm -->
     <h3>Thêm sản phẩm</h3>
-    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post">
-        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm">
-        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh">
-        <select th:field="*{categoryId}">
+    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post" required>
+        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
+        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh" required>
+        <select th:field="*{categoryId}" required>
             <option value="">-- Chọn danh mục --</option>
             <option th:each="c : ${categories}"
                     th:value="${c.id}"
@@ -266,11 +266,11 @@
     </form>
 
     <h3>Thêm Variant</h3>
-    <form th:action="@{/manage/addVariant}" th:object="${newVariant}" method="post">
-        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm">
-        <input type="text" th:field="*{duration}" placeholder="Thời hạn">
-        <input type="text" th:field="*{price}" placeholder="Giá">
-        <select th:field="*{productId}">
+    <form th:action="@{/manage/addVariant}" th:object="${newVariant}" method="post" required>
+        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
+        <input type="text" th:field="*{duration}" placeholder="Thời hạn" required>
+        <input type="text" th:field="*{price}" placeholder="Giá" required>
+        <select th:field="*{productId}" required>
             <option value="">-- Chọn sản phẩm --</option>
             <option th:each="p : ${productListAvai}"
                     th:value="${p.id}"
@@ -286,7 +286,7 @@
             <th>STT</th>
             <th>Ảnh</th>
             <th>Tên sản phẩm</th>
-            <th>Variants</th>
+            <th>Gói sản phẩm</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
         </tr>
@@ -301,7 +301,7 @@
                 <table border="1">
                     <thead>
                     <tr>
-                        <th>Tên variant</th>
+                        <th>Tên gói sản phẩm</th>
                         <th>Thời hạn</th>
                         <th>Giá</th>
                         <th>Trạng thái</th>
@@ -315,7 +315,21 @@
                         <td th:text="${v.price}"></td>
                         <td th:text="${v.status}"></td>
                         <td>
-                            <a th:href="@{/manage/deleteVariant/{id}(id=${v.id})}" class="btn btn-del">Xóa</a>
+                            <!-- Nút Ẩn (khi đang available) -->
+                            <a th:if="${v.status == 'available'}"
+                               th:href="@{/manage/statusVariant/{id}(id=${p.id})}"
+                               class="btn btn-del"
+                               style="margin-right: 8px;">
+                                Ẩn
+                            </a>
+
+                            <!-- Nút Hiện lại (khi đang unavailable) -->
+                            <a th:if="${v.status == 'unavailable'}"
+                               th:href="@{/manage/statusVariant/{id}(id=${p.id})}"
+                               class="btn btn-edit"
+                               style="margin-right: 8px; background-color: #28a745">
+                                Hiện
+                            </a>
                             <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}" class="btn btn-edit" th:color="blue">Sửa</a>
                         </td>
                     </tr>
