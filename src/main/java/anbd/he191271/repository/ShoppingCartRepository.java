@@ -20,8 +20,11 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long
 
     List<ShoppingCart> findByCustomerId(Long customerId);
 
-    // thay đổi method tìm theo variant: dùng property path
+    // tìm giỏ hàng theo customer + variant (property path chuẩn)
     Optional<ShoppingCart> findByCustomerIdAndVariant_Id(Long customerId, Long variantId);
 
-    Optional<ShoppingCart> findByCustomerIdAndVariantId(Long customerId, Long variantId);
+
+
+    // ✅ method xoá sản phẩm khỏi giỏ sau khi đã mua
+    void deleteByCustomerIdAndVariant_Id(Long customerId, Long variantId);
 }
