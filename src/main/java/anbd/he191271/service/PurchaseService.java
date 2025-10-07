@@ -138,6 +138,7 @@ public class PurchaseService {
         key.setOrderDetail(detail);
         key.setActivatedAt(activatedAt);
         key.setExpiredAt(expiredAt);
+        key.setStatus("ACTIVATE");
         licenseKeyRepository.save(key);
 
         // ✅ Gửi mail

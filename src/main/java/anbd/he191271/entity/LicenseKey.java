@@ -22,10 +22,22 @@ public class LicenseKey {
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiredAt;
 
+    @Column(name = "status", nullable = false)
+    private String status = "INACTIVE";
+
     // 1-1 với OrderDetail
     @OneToOne
     @JoinColumn(name = "order_detail_id", nullable = false)
     private OrderDetail orderDetail;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 
     public int getId() {
         return id;

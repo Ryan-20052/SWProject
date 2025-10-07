@@ -147,6 +147,24 @@
             margin-left: 20px;
         }
 
+        .btn-log {
+            display: inline-block;
+            background-color: #2563eb;   /* xanh nổi bật */
+            color: white;               /* chữ trắng */
+            padding: 10px 24px;         /* cao + dài */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;         /* bo góc mềm mại */
+            text-decoration: none;      /* bỏ gạch chân */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* nổi bật hơn */
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .btn-log:hover {
+            background-color: #1d4ed8;  /* đậm hơn khi hover */
+            transform: translateY(-2px);
+        }
+
     </style>
 </head>
 <body>
@@ -248,7 +266,10 @@
 
 </script>
 <div class="dashboard">
-    <h2>Danh sách sản phẩm</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2>Danh sách sản phẩm</h2>
+        <a th:href="@{/manage/manageLog}" class="btn-log">Xem Log</a>
+    </div>
 
     <!-- Form Thêm sản phẩm -->
     <h3>Thêm sản phẩm</h3>
@@ -291,13 +312,83 @@
             <th>Hành động</th>
         </tr>
         </thead>
+<!--        <tbody th:each="p, iterStat : ${productList}">-->
+<!--        <tr>-->
+<!--            <td th:text="${iterStat.count}" style="padding:8px; vertical-align:middle;"></td>-->
+<!--            <td><img th:src="${p.img_url}" style="width:60px; padding:4px;"></td>-->
+<!--            <td th:text="${p.name}" style="padding:8px; vertical-align:middle;"></td>-->
+<!--            <td style="padding:8px; vertical-align:top;"> &lt;!&ndash; vertical-align top để bảng con không dính &ndash;&gt;-->
+<!--                &lt;!&ndash; Bảng con hiển thị variants &ndash;&gt;-->
+<!--                <table border="1" style="width:100%; border-collapse:collapse;">-->
+<!--                    <thead>-->
+<!--                    <tr>-->
+<!--                        <th>Tên gói sản phẩm</th>-->
+<!--                        <th>Thời hạn</th>-->
+<!--                        <th>Giá</th>-->
+<!--                        <th>Trạng thái</th>-->
+<!--                        <th>Hành động</th>-->
+<!--                    </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody>-->
+<!--                    <tr th:each="v : ${p.variants}">-->
+<!--                        <td th:text="${v.name}" style="padding:6px; vertical-align:middle;"></td>-->
+<!--                        <td th:text="${v.duration}" style="padding:6px; vertical-align:middle;"></td>-->
+<!--                        <td th:text="${v.price}" style="padding:6px; vertical-align:middle;"></td>-->
+<!--                        <td th:text="${v.status}" style="padding:6px; vertical-align:middle;"></td>-->
+<!--                        <td style="display:flex; gap:6px; padding:6px; vertical-align:middle;">-->
+<!--                            <a th:if="${v.status == 'available'}"-->
+<!--                               th:href="@{/manage/statusVariant/{id}(id=${v.id})}"-->
+<!--                               class="btn btn-del">-->
+<!--                                Ẩn-->
+<!--                            </a>-->
+<!--                            <a th:if="${v.status == 'unavailable'}"-->
+<!--                               th:href="@{/manage/statusVariant/{id}(id=${v.id})}"-->
+<!--                               class="btn btn-edit" style="background-color:#28a745">-->
+<!--                                Hiện-->
+<!--                            </a>-->
+<!--                            <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}" class="btn btn-edit">-->
+<!--                                Sửa-->
+<!--                            </a>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </td>-->
+<!--            <td th:text="${p.status}" style="padding:8px; vertical-align:middle;"></td>-->
+<!--            <td style="display:flex; gap:6px; padding:8px; align-items:center;">-->
+<!--                <a th:if="${p.status == 'available'}"-->
+<!--                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"-->
+<!--                   class="btn btn-del">-->
+<!--                    Ẩn-->
+<!--                </a>-->
+<!--                <a th:if="${p.status == 'unavailable'}"-->
+<!--                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"-->
+<!--                   class="btn btn-edit" style="background-color:#28a745">-->
+<!--                    Hiện-->
+<!--                </a>-->
+<!--                <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}" class="btn btn-edit">-->
+<!--                    Sửa-->
+<!--                </a>-->
+<!--            </td>-->
+<!--        </tr>-->
+<!--        </tbody>-->
+
+
         <tbody th:each="p, iterStat : ${productList}">
         <tr>
+            <!-- STT -->
             <td th:text="${iterStat.count}"></td>
-            <td><img th:src="${p.img_url}" style="width:60px;"></td>
-            <td th:text="${p.name}"></td>
+
+            <!-- Ảnh sản phẩm -->
             <td>
-                <!-- Bảng con hiển thị variants -->
+                <img th:src="${p.img_url}" style="width:60px;">
+            </td>
+
+            <!-- Tên sản phẩm -->
+            <td th:text="${p.name}"></td>
+
+            <!-- Variants -->
+            <td>
                 <table border="1">
                     <thead>
                     <tr>
@@ -314,10 +405,10 @@
                         <td th:text="${v.duration}"></td>
                         <td th:text="${v.price}"></td>
                         <td th:text="${v.status}"></td>
-                        <td>
+                        <td style="display:flex; gap:6px; padding:8px; align-items:center;" >
                             <!-- Nút Ẩn (khi đang available) -->
                             <a th:if="${v.status == 'available'}"
-                               th:href="@{/manage/statusVariant/{id}(id=${p.id})}"
+                               th:href="@{/manage/statusVariant/{id}(id=${v.id})}"
                                class="btn btn-del"
                                style="margin-right: 8px;">
                                 Ẩn
@@ -325,19 +416,28 @@
 
                             <!-- Nút Hiện lại (khi đang unavailable) -->
                             <a th:if="${v.status == 'unavailable'}"
-                               th:href="@{/manage/statusVariant/{id}(id=${p.id})}"
+                               th:href="@{/manage/statusVariant/{id}(id=${v.id})}"
                                class="btn btn-edit"
                                style="margin-right: 8px; background-color: #28a745">
                                 Hiện
                             </a>
-                            <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}" class="btn btn-edit" th:color="blue">Sửa</a>
+
+                            <a th:href="@{/manage/updateVariant/{id}(id=${v.id})}"
+                               class="btn btn-edit"
+                               th:color="blue">
+                                Sửa
+                            </a>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </td>
-            <td th:text="${p.status}" ></td>
-            <td>
+
+            <!-- Trạng thái sản phẩm -->
+            <td th:text="${p.status}"></td>
+
+            <!-- Hành động sản phẩm -->
+            <td style="gap:6px; padding:8px;">
                 <!-- Nút Ẩn (khi đang available) -->
                 <a th:if="${p.status == 'available'}"
                    th:href="@{/manage/statusProduct/{id}(id=${p.id})}"
@@ -350,14 +450,19 @@
                 <a th:if="${p.status == 'unavailable'}"
                    th:href="@{/manage/statusProduct/{id}(id=${p.id})}"
                    class="btn btn-edit"
-                style="margin-right: 8px; background-color: #28a745">
+                   style="margin-right: 8px; background-color: #28a745">
                     Hiện
                 </a>
 
-                <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}" class="btn btn-edit">Sửa</a>
+                <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}"
+                   class="btn btn-edit">
+                    Sửa
+                </a>
             </td>
         </tr>
         </tbody>
+
+
     </table>
 
 </div>

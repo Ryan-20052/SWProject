@@ -5,6 +5,8 @@ import anbd.he191271.repository.ManagerLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ManagerLogService {
     @Autowired
@@ -14,5 +16,8 @@ public class ManagerLogService {
     }
     public void save(ManagerLog managerLog) {
         managerLogRepository.save(managerLog);
+    }
+    public List<ManagerLog> findAll() {
+        return  managerLogRepository.findAll();
     }
 }

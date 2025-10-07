@@ -17,12 +17,13 @@ public class ManagerLog {
     @Column(name = "action")
     private String action;
 
-    @Column(name = "time", updatable = false, insertable = false)
+    @Column(name = "time", updatable = false)
     private LocalDateTime time;
 
     public ManagerLog(String managerName, String action) {
         this.managerName = managerName;
         this.action = action;
+        this.time = LocalDateTime.now();
     }
 
     public ManagerLog() {
