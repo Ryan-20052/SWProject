@@ -348,6 +348,7 @@
     <div class="nav-inner" id="mainNav">
         <!-- Hard-coded links mapped to category IDs you specified:
              1 = Học tập, 2 = Giải trí, 3 = Làm việc, 4 = Windows, 5 = VPN -->
+        <a class="nav-link" th:href="@{/home/homepage}">ALL</a>
         <a class="nav-link" th:href="@{/home/category/2}"
            th:classappend="${currentCategory != null and currentCategory.id == 2} ? ' active' : ''">Giải trí</a>
 
