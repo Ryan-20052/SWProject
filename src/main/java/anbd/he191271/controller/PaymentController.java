@@ -32,6 +32,8 @@ public class PaymentController {
     public PaymentResponseDTO createPayment(@RequestBody PaymentRequestDTO requestDTO,
                                             HttpServletRequest request) throws Exception {
         String clientIp = request.getRemoteAddr();
+
+        // ⚙️ Không cần tự tính totalAmount nữa, vì service đã làm việc đó rồi
         return paymentService.createPayment(requestDTO, clientIp);
     }
 

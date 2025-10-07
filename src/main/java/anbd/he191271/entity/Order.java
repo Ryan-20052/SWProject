@@ -39,6 +39,10 @@ public class Order {
     @Column(name = "status", length = 50)
     private String status;
 
+    public void setTotalAmount(Long totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     // Mã đơn hàng / mã giao dịch (VD: VN123456)
     @Column(name = "code", length = 100)
     private String code;

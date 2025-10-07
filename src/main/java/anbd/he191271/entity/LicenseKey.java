@@ -25,8 +25,7 @@ public class LicenseKey {
     @Column(name = "status", nullable = false)
     private String status = "INACTIVE";
 
-    // 1-1 với OrderDetail
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "order_detail_id", nullable = false)
     private OrderDetail orderDetail;
 

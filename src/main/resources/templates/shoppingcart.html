@@ -229,6 +229,7 @@
     </style>
 </head>
 <body>
+<body th:data-customer-id="${session.customer.id}">
 
 <header id="siteHeader">
     <div class="header-inner">
@@ -274,7 +275,11 @@
                         <input type="number" name="quantities" th:value="${item.quantity}" min="1">
                         <input type="hidden" name="itemIds" th:value="${item.id}">
                     </td>
-                    <td class="subtotal" th:data-subtotal="${item.subtotal}" th:text="${item.subtotal + ' đ'}">100.000 đ</td>
+                    <td class="subtotal"
+                        th:attr="data-subtotal=${item.subtotal}"
+                        th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    </td>
+
                     <td>
                         <button type="submit" formaction="/cart/remove" name="itemId"
                                 th:value="${item.id}" class="btn-remove">X</button>
@@ -289,7 +294,7 @@
 
             <div class="cart-actions">
                 <button type="submit" class="btn-continue" formaction="/cart/update">Cập nhật giỏ hàng</button>
-                <button type="submit" class="btn-checkout" formaction="/checkout">Thanh toán sản phẩm đã chọn</button>
+                <button type="button" id="btnCheckout" class="btn-checkout">Thanh toán sản phẩm đã chọn</button>
             </div>
         </form>
     </div>
@@ -333,6 +338,58 @@
 
         updateTotal();
     });
+    const customerId = document.body.dataset.customerId;
+
+    document.getElementById('btnCheckout').addEventListener('click', async () => {
+        const checkedItems = Array.from(document.querySelectorAll('input[name="selectedItems"]:checked'))
+            .map(cb => cb.value);
+
+        if (checkedItems.length === 0) {
+            alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+            return;
+        }
+
+        // Lấy quantity tương ứng
+        const items = checkedItems.map(id => {
+            const row = document.querySelector(`input[name="selectedItems"][value="${id}"]`).closest('tr');
+            const qty = parseInt(row.querySelector('input[name="quantities"]').value);
+            const variantId = row.querySelector('input[name="selectedItems"]').value;
+            return { variantId: parseInt(variantId), quantity: qty };
+        });
+
+        const payload = {
+            customerId: parseInt(customerId),
+            orderInfo: "Thanh toán giỏ hàng License Shop",
+            locale: "vn",
+            orderType: "cart",
+            items: items
+        };
+
+        try {
+            const response = await fetch('/api/payment/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Không thể tạo đơn thanh toán');
+            }
+
+            const data = await response.json();
+
+            if (data && data.paymentUrl) {
+                // ✅ Chuyển hướng sang VNPAY
+                window.location.href = data.paymentUrl;
+            } else {
+                alert("Không nhận được liên kết thanh toán. Vui lòng thử lại!");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Đã xảy ra lỗi khi tạo thanh toán!");
+        }
+    });
+
 </script>
 
 </body>

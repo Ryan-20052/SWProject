@@ -2,6 +2,9 @@ package anbd.he191271.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "orders_detail")
 public class OrderDetail {
@@ -23,9 +26,9 @@ public class OrderDetail {
     @Column(name = "amount", nullable = false)
     private int amount;
 
-    // 1-1: 1 OrderDetail có 1 LicenseKey
-    @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL)
-    private LicenseKey licenseKey;
+
+    @OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LicenseKey> licenseKeys = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -59,11 +62,11 @@ public class OrderDetail {
         this.amount = amount;
     }
 
-    public LicenseKey getLicenseKey() {
-        return licenseKey;
+    public List<LicenseKey> getLicenseKeys() {
+        return licenseKeys;
     }
 
-    public void setLicenseKey(LicenseKey licenseKey) {
-        this.licenseKey = licenseKey;
+    public void setLicenseKeys(List<LicenseKey> licenseKeys) {
+        this.licenseKeys = licenseKeys;
     }
 }
