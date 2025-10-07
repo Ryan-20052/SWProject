@@ -12,4 +12,9 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByStatus(String status);
+    // nativeQuery — thay 'products' bằng tên bảng thực tế nếu khác
+    @Query(value = "SELECT * FROM products p WHERE p.categories_id = :catId", nativeQuery = true)
+    List<Product> findByCategoryIdNative(@Param("catId") Integer catId);
+
+    List<Product> findByCategoryId(Integer id);
 }
