@@ -30,7 +30,7 @@ public class AdminManagerController {
     @PostMapping
     public ResponseEntity<Manager> addManager(@RequestBody Manager manager) {
         Manager saved = managerService.save(manager);
-        logService.saveLog("add","manager");
+        logService.saveLog("add manager name:"+manager.getName(),"manager");
         return ResponseEntity.ok(saved);
     }
 

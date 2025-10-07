@@ -1,5 +1,6 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.dto.CustomerDTO;
 import anbd.he191271.entity.Customer;
 import anbd.he191271.service.AdminLogService;
 import anbd.he191271.service.CustomerService;
@@ -23,9 +24,12 @@ public class AdminCustomerController {
 
     // Lấy danh sách customer
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return customerService.getAllCustomers();
+    public List<CustomerDTO> getAllCustomers() {
+        return customerService.getAllCustomers().stream()
+                .map(c -> new CustomerDTO(c.getId(), c.getUsername(), c.getEmail()))
+                .toList();
     }
+
 
     // Xóa customer theo id
     @DeleteMapping("/{id}")

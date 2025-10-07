@@ -5,6 +5,7 @@ import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.service.EmailService;
 import anbd.he191271.service.OtpService;
 import jakarta.mail.MessagingException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,11 +18,13 @@ public class ForgotPasswordController {
     private final OtpService otpService;
     private final EmailService emailService;
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public ForgotPasswordController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository) {
+    public ForgotPasswordController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.otpService = otpService;
         this.emailService = emailService;
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Bước 1: Nhập email
@@ -56,7 +59,8 @@ public class ForgotPasswordController {
         Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("❌ Email not found!"));
 
-        customer.setPassword(newPassword); // ⚠️ nhớ hash ở thực tế
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        customer.setPassword(hashedPassword);
         customerRepository.save(customer);
 
         otpService.clearOtp(email);

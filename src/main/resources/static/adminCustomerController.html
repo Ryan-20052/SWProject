@@ -73,15 +73,24 @@
         try {
             const res = await fetch(API_URL);
             const data = await res.json();
+
             const table = document.getElementById("customerTable");
             table.innerHTML = "";
+
             data.forEach(c => {
-                table.innerHTML += `<tr>
-                    <td>${c.id}</td><td>${c.username}</td><td>${c.email}</td>
-                    <td><button onclick="deleteCustomer(${c.id})">Xóa</button></td>
-                </tr>`;
+                const row = `<tr>
+          <td>${c.id}</td>
+          <td>${c.username}</td>
+          <td>${c.email}</td>
+          <td>
+            <button onclick="deleteCustomer(${c.id})">Xóa</button>
+          </td>
+        </tr>`;
+                table.innerHTML += row;
             });
-        } catch (err) { console.error("Lỗi khi load customers:", err); }
+        } catch (err) {
+            console.error("Lỗi khi load customers:", err);
+        }
     }
 
     async function deleteCustomer(id) {

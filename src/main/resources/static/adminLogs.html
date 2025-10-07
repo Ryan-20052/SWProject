@@ -76,9 +76,9 @@
             data.forEach(log => {
                 table.innerHTML += `<tr>
                     <td>${log.id}</td>
-                    <td>${log.action}</td>
-                    <td>${log.user}</td>
-                    <td>${log.timestamp}</td>
+                        <td>${log.action}</td>
+                        <td>${log.table_affected}</td>
+                        <td>${log.time ? log.time.replace("T", " ") : ""}</td>
                 </tr>`;
             });
         } catch (err) { console.error("Lỗi khi load logs:", err); }
