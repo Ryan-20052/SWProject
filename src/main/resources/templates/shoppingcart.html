@@ -264,7 +264,12 @@
                 </thead>
                 <tbody>
                 <tr th:each="item : ${cartItems}">
-                    <td><input type="checkbox" name="selectedItems" th:value="${item.id}"></td>
+                    <td>
+                        <input type="checkbox" name="selectedItems"
+                               th:value="${item.id}"
+                               th:data-variant-id="${item.variant.id}">
+                    </td>
+
                     <td>
                         <div class="thumb" th:style="|background-image: url('${item.product.img_url}')|"></div>
                         <p th:text="${item.product.name}">Tên sản phẩm</p>
@@ -353,9 +358,10 @@
         const items = checkedItems.map(id => {
             const row = document.querySelector(`input[name="selectedItems"][value="${id}"]`).closest('tr');
             const qty = parseInt(row.querySelector('input[name="quantities"]').value);
-            const variantId = row.querySelector('input[name="selectedItems"]').value;
+            const variantId = row.querySelector('input[name="selectedItems"]').dataset.variantId; // ✅ Lấy đúng variant id
             return { variantId: parseInt(variantId), quantity: qty };
         });
+
 
         const payload = {
             customerId: parseInt(customerId),
