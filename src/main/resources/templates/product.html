@@ -3,20 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
+
+    <!-- Gắn CSS ngoài -->
     <link rel="stylesheet" th:href="@{/product.css}">
+
+    <!-- CSRF bảo mật cho POST request (Spring Security) -->
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
 
-    <!-- Luôn khai báo biến sessionCustomerId an toàn để JS có thể dùng -->
+    <!-- Lấy dữ liệu session & sản phẩm từ backend Spring -->
     <script th:inline="javascript">
         /*<![CDATA[*/
+        // Nếu người dùng đăng nhập thì lấy ID của họ, nếu không thì gán 'null'
         const sessionCustomerId = /*[[${session.customer != null ? session.customer.id : 'null'}]]*/ 'null';
+        // Lấy tên sản phẩm hiện tại để ghi chú khi tạo đơn thanh toán
         const productName = /*[[${product.name}]]*/ 'Sản phẩm';
         /*]]>*/
     </script>
 
     <style>
-        /* --- tối giản style cho phần mua hàng --- */
+
+        /* ===== HEADER CĂN GIỮA ĐẸP ===== */
+        /* ===== HEADER ===== */
+        #siteHeader {
+            background: linear-gradient(90deg, #2563eb, #06b6d4);
+            color: white;
+            padding: 0 20px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1150px;
+            margin: 0 auto;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+        .logo:hover { opacity: 0.9; }
+
+        /* Nhóm nút */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== NÚT CĂN ĐỀU ===== */
+        .nav-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+
+            /* 👇 Kích thước chuẩn hóa */
+            height: 36px;
+            min-width: 100px; /* đảm bảo đồng đều */
+            padding: 0 12px;
+            line-height: 1;
+            white-space: nowrap;
+            box-sizing: border-box;
+            margin-top: -20px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Biểu tượng căn giữa */
+        .nav-btn i, .nav-btn svg {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+
+        /* ====== PHẦN MUA HÀNG ====== */
         .alert { margin: 10px 0; padding: 12px; border-radius: 6px; font-weight: bold; }
         .alert-success { background-color: #e6ffed; color: #0f5132; border: 1px solid #badbcc; }
         .alert-warning { background-color: #fff3cd; color: #664d03; border: 1px solid #ffeeba; }
@@ -33,25 +128,39 @@
         .variant-option { display:block; margin:6px 0; }
     </style>
 </head>
+
 <body>
+
+<!-- ====== HEADER ====== -->
 <header id="siteHeader">
     <div class="header-inner">
-        <h1>License Shop</h1>
-        <div class="actions" id="actions">
-            <div th:if="${session.customer == null}">
-                <button onclick="window.location.href='/login.html'">Đăng nhập</button>
-                <button onclick="window.location.href='/register.html'">Đăng ký</button>
+        <!-- Logo -->
+        <h1 class="logo" onclick="window.location.href='/home/homepage'">🏷️ License Shop</h1>
+
+        <div class="actions">
+            <!-- Nút điều hướng luôn hiển thị -->
+            <button class="nav-btn" onclick="window.location.href='/home/homepage'">🏠 Trang chủ</button>
+            <button class="nav-btn" onclick="window.location.href='/cart/view'">🛒 Giỏ hàng</button>
+
+            <!-- Nếu chưa đăng nhập -->
+            <div class="auth-group" th:if="${session.customer == null}">
+                <button class="nav-btn" onclick="window.location.href='/login.html'">Đăng nhập</button>
+                <button class="nav-btn" onclick="window.location.href='/register.html'">Đăng ký</button>
             </div>
-            <div th:if="${session.customer != null}">
-                <button onclick="window.location.href='/cart/view'">Giỏ hàng</button>
+
+            <!-- Nếu đã đăng nhập -->
+            <div class="auth-group" th:if="${session.customer != null}">
+                <button class="nav-btn" onclick="window.location.href='/logout'">🚪 Đăng xuất</button>
             </div>
         </div>
     </div>
 </header>
 
+<!-- ====== NỘI DUNG CHÍNH ====== -->
 <div class="container">
     <div class="product-header">
         <div class="thumb" th:style="|background-image: url('${product.img_url}')|"></div>
+
         <div class="info">
             <h1 th:text="${product.name}">Tên sản phẩm</h1>
 
@@ -72,50 +181,45 @@
                 <p th:text="${product.description}">Mô tả sản phẩm</p>
             </section>
 
-            <!-- LIST VARIANTS -->
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
                 <form id="variantSelectForm" method="get" th:action="@{/product/{id}(id=${product.id})}">
                     <div class="options">
-                        <!-- Duyệt variants, chỉ show các duration mong muốn như trước -->
                         <label class="variant-option" th:each="v : ${variants}">
                             <input type="radio" name="variantId"
                                    th:value="${v.id}"
                                    th:checked="${selectedVariant != null and selectedVariant.id == v.id}" />
-                            <span><span th:text="${v.duration}">Thời hạn</span> - <span th:text="${v.price + ' đ'}">Giá</span></span>
+                            <span>
+                                <span th:text="${v.duration}">Thời hạn</span> -
+                                <span th:text="${v.price + ' đ'}">Giá</span>
+                            </span>
                         </label>
                     </div>
-                    <!-- Nút reload (giữ nguyên behaviour nếu bạn muốn reload khi đổi) -->
-                    <noscript>
-                        <button type="submit">Chọn</button>
-                    </noscript>
+                    <noscript><button type="submit">Chọn</button></noscript>
                 </form>
             </div>
 
-            <!-- PHẦN MUA HÀNG (Hợp nhất) -->
             <div class="purchase-section">
-                <!-- Form chính gửi POST /cart/add -->
                 <form th:action="@{/cart/add}" method="post" id="cartForm">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                    <!-- Hidden variantId: giá trị được cập nhật bằng Thymeleaf (selectedVariant) hoặc JS từ radio -->
                     <input type="hidden" id="variantIdInput" name="variantId"
-                           th:value="${selectedVariant != null ? selectedVariant.id : (variants != null and #lists.isEmpty(variants) == false ? variants[0].id : '')}" />
+                           th:value="${selectedVariant != null ? selectedVariant.id :
+                           (variants != null and #lists.isEmpty(variants) == false ? variants[0].id : '')}" />
 
                     <div class="amount-wrapper">
                         <label for="amountInput">Số lượng:</label>
                         <input type="number" id="amountInput" name="amount" value="1" min="1" />
-                        <span th:if="${param.message}" th:text="${param.message}" style="margin-left:10px;color:red;font-weight:bold;"></span>
+                        <span th:if="${param.message}" th:text="${param.message}"
+                              style="margin-left:10px;color:red;font-weight:bold;"></span>
                     </div>
 
                     <div class="action-buttons">
-                        <!-- Thêm vào giỏ (form submit truyền variantId, amount, CSRF) -->
                         <button type="submit" class="cart" id="addToCartBtn"
                                 th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
                             🛒 Thêm vào giỏ
                         </button>
 
-                        <!-- Mua ngay: gọi API thanh toán (JS fetch) -->
                         <button type="button" class="buy-now" id="buyNowBtn"
                                 th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
                             ⚡ Mua ngay
@@ -123,64 +227,45 @@
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
 </div>
 
-<!-- SCRIPT: đồng bộ variant selection, xử lý buy-now với CSRF -->
+<!-- ====== SCRIPT CHÍNH ====== -->
 <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', function () {
-        // biến sessionCustomerId và productName đã được in ở head
         const buyNowBtn = document.getElementById('buyNowBtn');
         const variantRadios = document.querySelectorAll("input[name='variantId']");
         const variantIdInput = document.getElementById('variantIdInput');
         const addToCartBtn = document.getElementById('addToCartBtn');
 
-        // Helper: cập nhật hidden input variantId từ radio được chọn (nếu có)
         function syncVariantFromRadio() {
             const checked = Array.from(variantRadios).find(r => r.checked);
             if (checked) {
                 variantIdInput.value = checked.value;
-                // enable buttons nếu có variant
                 buyNowBtn.disabled = false;
                 addToCartBtn.disabled = false;
-            } else {
-                // nếu không có radio checked, giữ value ban đầu (do Thymeleaf set)
-                // disable nếu không có variantId
-                if (!variantIdInput.value) {
-                    buyNowBtn.disabled = true;
-                    addToCartBtn.disabled = true;
-                }
+            } else if (!variantIdInput.value) {
+                buyNowBtn.disabled = true;
+                addToCartBtn.disabled = true;
             }
         }
 
-        // Khi user click radio: cập nhật ngay hidden input
-        variantRadios.forEach(radio => {
-            radio.addEventListener('change', function () {
-                syncVariantFromRadio();
-                // nếu bạn muốn reload page khi đổi variant theo phiên bản trước, bỏ comment dòng dưới:
-                // this.form?.submit();
-            });
-        });
-
-        // Khởi tạo trạng thái nút
+        variantRadios.forEach(radio => radio.addEventListener('change', syncVariantFromRadio));
         syncVariantFromRadio();
 
-        // Xử lý mua ngay
         buyNowBtn?.addEventListener('click', async function () {
-            // Kiểm tra đăng nhập
             if (!sessionCustomerId || sessionCustomerId === 'null') {
                 alert('Vui lòng đăng nhập để mua sản phẩm!');
                 window.location.href = '/login.html';
                 return;
             }
 
-            // Lấy variant & amount
             const variantId = variantIdInput.value;
             const amountEl = document.getElementById('amountInput');
-            const quantity = amountEl && parseInt(amountEl.value || '1', 10) > 0 ? parseInt(amountEl.value || '1', 10) : 1;
+            const quantity = amountEl && parseInt(amountEl.value || '1', 10) > 0
+                ? parseInt(amountEl.value || '1', 10) : 1;
 
             if (!variantId) {
                 alert('Vui lòng chọn gói sản phẩm trước khi mua!');
@@ -193,10 +278,8 @@
                 orderInfo: "Thanh toán " + productName
             };
 
-            // Lấy CSRF meta nếu có
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
             const headers = { 'Content-Type': 'application/json' };
             if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
 
@@ -208,7 +291,6 @@
                 });
 
                 if (!res.ok) {
-                    // thử lấy thông báo lỗi ngắn
                     let text;
                     try { text = await res.text(); } catch (e) { text = ''; }
                     console.error('Payment create failed', res.status, text);
@@ -218,7 +300,6 @@
 
                 const data = await res.json();
                 if (data && data.paymentUrl) {
-                    // chuyển sang URL thanh toán (VNPAY...)
                     window.location.href = data.paymentUrl;
                 } else {
                     console.error('Payment create response lacks paymentUrl:', data);
@@ -229,9 +310,6 @@
                 alert('Có lỗi xảy ra khi tạo thanh toán!');
             }
         });
-
-        // Gợi ý: nếu bạn muốn bắt sự kiện submit form cart để gửi ajax thay vì reload,
-        // có thể thêm preventDefault và fetch tới /cart/add (nhưng hiện để form hoạt động bình thường).
     });
     /*]]>*/
 </script>

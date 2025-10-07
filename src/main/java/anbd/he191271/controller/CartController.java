@@ -128,4 +128,29 @@ public class CartController {
         model.addAttribute("cartItems", items);
         return "shoppingCart"; // → file cart.html
     }
+    @PostMapping("/checkout")
+    public String checkout(@RequestParam(value = "selectedItems", required = false) List<Long> selectedItems,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer == null) {
+            return "redirect:/login.html";
+        }
+
+        if (selectedItems == null || selectedItems.isEmpty()) {
+            redirectAttributes.addFlashAttribute("message", "Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+            return "redirect:/cart/view";
+        }
+
+        // Lấy danh sách sản phẩm theo ID được chọn
+        List<ShoppingCart> items = shoppingCartRepository.findAllById(selectedItems);
+
+        // 👉 TODO: Xử lý thanh toán / tạo đơn hàng ở đây (sẽ thêm ở bước sau)
+        // Sau khi thanh toán thành công:
+        shoppingCartRepository.deleteAll(items);
+
+        redirectAttributes.addFlashAttribute("message", "Thanh toán thành công! Các sản phẩm đã được xoá khỏi giỏ hàng.");
+        return "redirect:/cart/view";
+    }
+
 }
