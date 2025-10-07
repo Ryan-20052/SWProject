@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Logs</title>
+    <style>
+        /* Reset và font */
+        body { font-family: Arial, sans-serif; margin:0; background:#f8f9fa; color:#111; }
+
+        /* Header */
+        header { background:#2563eb; color:white; padding:15px 20px; display:flex; justify-content:center; align-items:center; }
+        .header-inner { width:1200px; display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; }
+
+        /* Dashboard container */
+        .dashboard { max-width:1200px; margin:20px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+
+        /* Nút quay lại */
+        .btn-back {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-back:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* Table wrapper để hỗ trợ scroll */
+        .table-wrapper {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Cố định chiều rộng cột để align chính xác */
+            min-width: 600px; /* Tránh co lại quá nhỏ trên mobile */
+        }
+
+        thead tr {
+            position: relative; /* Để sticky th hoạt động */
+        }
+
+        th {
+            background: #f3f4f6;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border:1px solid #ddd;
+            padding:12px 10px;
+            text-align:left;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+
+        td {
+            border:1px solid #ddd;
+            padding:12px 10px;
+            text-align:left;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+
+        tbody tr:hover { background:#e0f2fe; }
+
+        /* Scrollbar đẹp cho wrapper */
+        .table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 4px; }
+        .table-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+
+        /* Width cố định từng cột - Áp dụng cho cả th và td */
+        th:nth-child(1), td:nth-child(1) { width: 10%; }
+        th:nth-child(2), td:nth-child(2) { width: 30%; }
+        th:nth-child(3), td:nth-child(3) { width: 40%; }
+        th:nth-child(4), td:nth-child(4) { width: 20%; }
+
+        /* Thông báo khi không có dữ liệu */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media(max-width:768px){
+            .dashboard { padding:10px; margin:10px; }
+            .btn-back { width: 100%; text-align:center; margin-bottom:10px; }
+            .header-inner { flex-direction: column; text-align:center; gap:10px; }
+            th, td { font-size: 14px; padding:8px 6px; }
+            .table-wrapper { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>Manager Logs</h1>
+        <div>
+            <span th:text="|Xin chào, ${manager.username}|"></span>
+        </div>
+    </div>
+</header>
+
+<div class="dashboard">
+    <button class="btn-back" onclick="window.location.href='/manage/manageHome'">← Quay lại Dashboard</button>
+
+    <h2>Danh sách log</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Manager Name</th>
+                <th>Action</th>
+                <th>Time</th>
+            </tr>
+            </thead>
+            <tbody th:if="${manageLogList != null and !manageLogList.isEmpty()}">
+            <tr th:each="log,iterStat : ${manageLogList}">
+                <td th:text="${iterStat.count}"></td>
+                <td th:text="${log.managerName}"></td>
+                <td th:text="${log.action}"></td>
+                <td th:text="${#temporals.format(log.time, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            </tr>
+            </tbody>
+            <tbody th:if="${manageLogList == null or manageLogList.isEmpty()}">
+            <tr>
+                <td colspan="4" class="no-data">Không có dữ liệu log nào.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

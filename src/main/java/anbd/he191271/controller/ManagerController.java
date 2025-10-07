@@ -2,11 +2,9 @@ package anbd.he191271.controller;
 
 import anbd.he191271.dto.ProductDTO;
 import anbd.he191271.dto.VariantDTO;
-import anbd.he191271.entity.Categories;
-import anbd.he191271.entity.Manager;
-import anbd.he191271.entity.Product;
-import anbd.he191271.entity.Variant;
+import anbd.he191271.entity.*;
 import anbd.he191271.service.CategoryService;
+import anbd.he191271.service.ManagerLogService;
 import anbd.he191271.service.ProductService;
 import anbd.he191271.service.VariantService;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 
 @Controller
@@ -27,6 +27,9 @@ public class ManagerController {
     private ProductService productService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private ManagerLogService managerLogService;
+
     @GetMapping("/manageHome")
     public String manageHome(Model model, HttpSession session) {
         Manager manager=(Manager)session.getAttribute("manager");
@@ -48,6 +51,8 @@ public class ManagerController {
         if (manager == null) {
             return "redirect:/login.html";
         }
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "add product "+ request.getName());
+        managerLogService.save(log);
         Categories category = categoryService.getCategoryById(request.getCategoryId());
         Product product=new Product(request.getName(), manager.getId(), request.getImgUrl(),category);
         productService.saveProduct(product);
@@ -63,6 +68,8 @@ public class ManagerController {
         product.setImg_url(request.getImgUrl());
         product.setCategory(categoryService.getCategoryById(request.getCategoryId()));
         productService.saveProduct(product);
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "update product "+ request.getName());
+        managerLogService.save(log);
         redirectAttributes.addFlashAttribute("msg", "Đã cập nhật sản phẩm");
         return "redirect:/manage/manageHome";
     }
@@ -90,6 +97,8 @@ public class ManagerController {
         Product product = productService.findProductById(request.getProductId());
         Variant variant = new Variant(request.getName(),request.getDuration(),request.getPrice(), product);
         variantService.saveVariant(variant);
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "add variant "+ request.getName());
+        managerLogService.save(log);
         return "redirect:/manage/manageHome";
     }
 
@@ -109,20 +118,23 @@ public class ManagerController {
     @PostMapping("updateVariant")
     public String updateVariant(@ModelAttribute("request") VariantDTO request, HttpSession session, RedirectAttributes redirectAttributes) {
         Variant variant =  variantService.getVariantById(request.getId());
+        Manager manager=(Manager)session.getAttribute("manager");
         variant.setName(request.getName());
         variant.setDuration(request.getDuration());
         variant.setPrice(request.getPrice());
         variant.setProduct(productService.findProductById(request.getProductId()));
         variantService.saveVariant(variant);
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "update variant "+ request.getName());
+        managerLogService.save(log);
         return "redirect:/manage/manageHome";
     }
 
-    @GetMapping("/deleteVariant/{id}")
-    public String deleteVariant(@PathVariable int id, RedirectAttributes redirectAttributes) {
-        variantService.deleteVariant(id);
-        redirectAttributes.addFlashAttribute("msg", "Đã xóa thành công");
-        return "redirect:/manage/manageHome";
-    }
+//    @GetMapping("/deleteVariant/{id}")
+//    public String deleteVariant(@PathVariable int id, RedirectAttributes redirectAttributes) {
+//        variantService.deleteVariant(id);
+//        redirectAttributes.addFlashAttribute("msg", "Đã xóa thành công");
+//        return "redirect:/manage/manageHome";
+//    }
 
     @GetMapping("/statusProduct/{id}")
     public String updateStatusProduct(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {
@@ -138,6 +150,8 @@ public class ManagerController {
             product.setStatus("available");
             redirectAttributes.addFlashAttribute("msg", "Đã bỏ ẩn sản phẩm");
         }
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "change status of product "+ product.getName());
+        managerLogService.save(log);
         productService.saveProduct(product);
         return "redirect:/manage/manageHome";
     }
@@ -156,8 +170,22 @@ public class ManagerController {
             variant.setStatus("available");
             redirectAttributes.addFlashAttribute("msg", "Đã bỏ ẩn sản phẩm");
         }
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "change status of variant "+ variant.getName());
+        managerLogService.save(log);
         variantService.saveVariant(variant);
         return "redirect:/manage/manageHome";
+    }
+
+    @GetMapping("/manageLog")
+    public String manageLog(Model model, HttpSession session) {
+        List<ManagerLog> manageLogList = managerLogService.findAll();
+        Manager manager=(Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        model.addAttribute("manager", manager);
+        model.addAttribute("manageLogList", manageLogList);
+        return "manageLogPage";
     }
 
 }
