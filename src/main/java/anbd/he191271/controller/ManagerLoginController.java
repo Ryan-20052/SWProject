@@ -33,8 +33,11 @@ public class ManagerLoginController {
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
     @PostMapping("/logout")
-    public String logout(HttpSession session) {
+    public ResponseEntity<Void> logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login.html";
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .header("Location", "/login.html")
+                .build();
     }
 }

@@ -20,6 +20,6 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
     public Categories  getCategoryById(int id) {
-        return categoryRepository.findById(id).get();
+        return categoryRepository.findById( id).get();
     }
 }

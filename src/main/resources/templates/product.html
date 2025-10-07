@@ -3,92 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
+
+    <!-- Gắn CSS ngoài -->
     <link rel="stylesheet" th:href="@{/product.css}">
+
+    <!-- CSRF bảo mật cho POST request (Spring Security) -->
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <!-- Lấy dữ liệu session & sản phẩm từ backend Spring -->
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const sessionCustomerId = /*[[${session.customer != null ? session.customer.id : 'null'}]]*/ null;
+        // Nếu người dùng đăng nhập thì lấy ID của họ, nếu không thì gán 'null'
+        const sessionCustomerId = /*[[${session.customer != null ? session.customer.id : 'null'}]]*/ 'null';
+        // Lấy tên sản phẩm hiện tại để ghi chú khi tạo đơn thanh toán
+        const productName = /*[[${product.name}]]*/ 'Sản phẩm';
         /*]]>*/
     </script>
-    <script src="/product.js"></script>
+
     <style>
-        /* CSS cho thông báo */
-        .alert {
-            margin: 10px 0;
-            padding: 12px;
+
+        /* ===== HEADER CĂN GIỮA ĐẸP ===== */
+        /* ===== HEADER ===== */
+        #siteHeader {
+            background: linear-gradient(90deg, #2563eb, #06b6d4);
+            color: white;
+            padding: 0 20px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1150px;
+            margin: 0 auto;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+        .logo:hover { opacity: 0.9; }
+
+        /* Nhóm nút */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== NÚT CĂN ĐỀU ===== */
+        .nav-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
             border-radius: 6px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+
+            /* 👇 Kích thước chuẩn hóa */
+            height: 36px;
+            min-width: 100px; /* đảm bảo đồng đều */
+            padding: 0 12px;
+            line-height: 1;
+            white-space: nowrap;
+            box-sizing: border-box;
+            margin-top: -20px;
         }
-        .alert p { margin: 0; }
-        .alert-success {
-            background-color: #e6ffed;
-            color: #0f5132;
-            border: 1px solid #badbcc;
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
         }
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #664d03;
-            border: 1px solid #ffeeba;
+
+        /* Biểu tượng căn giữa */
+        .nav-btn i, .nav-btn svg {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
         }
-        .alert-error {
-            background-color: #f8d7da;
-            color: #842029;
-            border: 1px solid #f5c2c7;
-        }
+
+
+        /* ====== PHẦN MUA HÀNG ====== */
+        .alert { margin: 10px 0; padding: 12px; border-radius: 6px; font-weight: bold; }
+        .alert-success { background-color: #e6ffed; color: #0f5132; border: 1px solid #badbcc; }
+        .alert-warning { background-color: #fff3cd; color: #664d03; border: 1px solid #ffeeba; }
+        .alert-error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+        .purchase-section { margin: 20px 0; padding: 15px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
+        .amount-wrapper { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .amount-wrapper input { width:80px; padding:6px; font-size:16px; text-align:center; border:1px solid #ccc; border-radius:6px; }
+        .action-buttons { display:flex; gap:12px; }
+        button.cart, button.buy-now { flex:1; padding:10px 14px; font-size:15px; border:none; border-radius:6px; cursor:pointer; color:white; }
+        button.cart { background:#007bff; } button.cart:hover{background:#0069d9;}
+        button.buy-now{ background:#28a745; } button.buy-now:hover{background:#218838;}
+        button:disabled { opacity:0.6; cursor:not-allowed; }
+        .variant-option { display:block; margin:6px 0; }
     </style>
 </head>
+
 <body>
+
+<!-- ====== HEADER ====== -->
 <header id="siteHeader">
     <div class="header-inner">
-        <h1>License Shop</h1>
+        <!-- Logo -->
+        <h1 class="logo" onclick="window.location.href='/home/homepage'">🏷️ License Shop</h1>
 
-        <!-- Actions (Login / Register / Cart) -->
-        <div class="actions" id="actions">
+        <div class="actions">
+            <!-- Nút điều hướng luôn hiển thị -->
+            <button class="nav-btn" onclick="window.location.href='/home/homepage'">🏠 Trang chủ</button>
+            <button class="nav-btn" onclick="window.location.href='/cart/view'">🛒 Giỏ hàng</button>
 
             <!-- Nếu chưa đăng nhập -->
-            <div th:if="${session.customer == null}">
-                <button class="auth-login" onclick="window.location.href='/login.html'" aria-label="Đăng nhập">
-                    Đăng nhập
-                </button>
-                <button class="auth-register" onclick="window.location.href='/register.html'" aria-label="Đăng ký">
-                    Đăng ký
-                </button>
+            <div class="auth-group" th:if="${session.customer == null}">
+                <button class="nav-btn" onclick="window.location.href='/login.html'">Đăng nhập</button>
+                <button class="nav-btn" onclick="window.location.href='/register.html'">Đăng ký</button>
             </div>
 
             <!-- Nếu đã đăng nhập -->
-            <div th:if="${session.customer != null}">
-                <button id="cartBtn" aria-live="polite">Giỏ hàng (0)</button>
+            <div class="auth-group" th:if="${session.customer != null}">
+                <button class="nav-btn" onclick="window.location.href='/logout'">🚪 Đăng xuất</button>
             </div>
-
         </div>
     </div>
 </header>
 
+<!-- ====== NỘI DUNG CHÍNH ====== -->
 <div class="container">
     <div class="product-header">
         <div class="thumb" th:style="|background-image: url('${product.img_url}')|"></div>
+
         <div class="info">
             <h1 th:text="${product.name}">Tên sản phẩm</h1>
 
             <div th:if="${message != null}">
-                <!-- Thành công -->
-                <div th:if="${#strings.contains(message, 'thành công')}"
-                     class="alert alert-success"
-                     th:text="${message}"></div>
-
-                <!-- Cảnh báo đăng nhập -->
-                <div th:if="${#strings.contains(message, 'Vui lòng đăng nhập')}"
-                     class="alert alert-warning"
-                     th:text="${message}"></div>
-
-                <!-- Lỗi khác -->
-                <div th:if="${!(#strings.contains(message, 'thành công') or #strings.contains(message, 'Vui lòng đăng nhập'))}"
-                     class="alert alert-error"
-                     th:text="${message}"></div>
+                <div th:if="${#strings.contains(message, 'thành công')}" class="alert alert-success" th:text="${message}"></div>
+                <div th:if="${#strings.contains(message, 'Vui lòng đăng nhập')}" class="alert alert-warning" th:text="${message}"></div>
+                <div th:if="${!(#strings.contains(message, 'thành công') or #strings.contains(message, 'Vui lòng đăng nhập'))}" class="alert alert-error" th:text="${message}"></div>
             </div>
 
-            <!-- Hiển thị giá -->
             <div class="price"
                  th:text="${selectedVariant != null ? selectedVariant.price + ' đ' :
                           (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
@@ -97,109 +178,141 @@
 
             <section class="product-description">
                 <h2>Mô tả sản phẩm</h2>
-
+                <p th:text="${product.description}">Mô tả sản phẩm</p>
             </section>
 
             <div class="variants">
                 <h3>Chọn gói/phiên bản:</h3>
-
-                <!-- Form GET chọn variant -->
-                <form method="get" th:action="@{/product/{id}(id=${product.id})}">
+                <form id="variantSelectForm" method="get" th:action="@{/product/{id}(id=${product.id})}">
                     <div class="options">
-                        <label class="variant-option"
-                               th:each="v : ${variants}"
-                               th:if="${v.duration == '1 tháng' or v.duration == '3 tháng' or v.duration == '6 tháng' or v.duration == '1 năm'}">
-                            <input type="radio"
-                                   name="variantId"
+                        <label class="variant-option" th:each="v : ${variants}">
+                            <input type="radio" name="variantId"
                                    th:value="${v.id}"
-                                   th:checked="${selectedVariant != null and selectedVariant.id == v.id}"
-                                   onchange="this.form.submit()">
+                                   th:checked="${selectedVariant != null and selectedVariant.id == v.id}" />
                             <span>
                                 <span th:text="${v.duration}">Thời hạn</span> -
                                 <span th:text="${v.price + ' đ'}">Giá</span>
                             </span>
                         </label>
                     </div>
+                    <noscript><button type="submit">Chọn</button></noscript>
                 </form>
             </div>
 
-            <div class="actions">
-                <button class="cart">Thêm vào giỏ</button>
+            <div class="purchase-section">
+                <form th:action="@{/cart/add}" method="post" id="cartForm">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <!-- Nếu chưa login -->
-                <div th:if="${session.customer == null}" style="display:inline;">
-                    <button type="button" class="buy"
-                            onclick="alert('Vui lòng đăng nhập để mua sản phẩm!'); window.location.href='/login.html';">
-                        Mua ngay
-                    </button>
-                </div>
+                    <input type="hidden" id="variantIdInput" name="variantId"
+                           th:value="${selectedVariant != null ? selectedVariant.id :
+                           (variants != null and #lists.isEmpty(variants) == false ? variants[0].id : '')}" />
 
-                <!-- Nếu đã login -->
-                <div th:if="${session.customer != null}" style="display:inline;">
-                    <button type="button" class="buy">Mua ngay</button>
-                </div>
+                    <div class="amount-wrapper">
+                        <label for="amountInput">Số lượng:</label>
+                        <input type="number" id="amountInput" name="amount" value="1" min="1" />
+                        <span th:if="${param.message}" th:text="${param.message}"
+                              style="margin-left:10px;color:red;font-weight:bold;"></span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="cart" id="addToCartBtn"
+                                th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
+                            🛒 Thêm vào giỏ
+                        </button>
+
+                        <button type="button" class="buy-now" id="buyNowBtn"
+                                th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
+                            ⚡ Mua ngay
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ====== SCRIPT CHÍNH ====== -->
 <script th:inline="javascript">
-    document.addEventListener("DOMContentLoaded", function() {
-        const buyBtn = document.querySelector(".buy");
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function () {
+        const buyNowBtn = document.getElementById('buyNowBtn');
+        const variantRadios = document.querySelectorAll("input[name='variantId']");
+        const variantIdInput = document.getElementById('variantIdInput');
+        const addToCartBtn = document.getElementById('addToCartBtn');
 
-        if (buyBtn) {
-            buyBtn.addEventListener("click", async function() {
-                if (typeof sessionCustomerId === "undefined" || !sessionCustomerId || sessionCustomerId === 'null') {
-                    alert("Vui lòng đăng nhập để mua sản phẩm!");
-                    window.location.href = "/login.html";
-                    return;
-                }
-
-                const selectedVariant = document.querySelector("input[name='variantId']:checked");
-                if (!selectedVariant) {
-                    alert("Vui lòng chọn gói sản phẩm trước khi mua!");
-                    return;
-                }
-
-                // ✅ Gửi JSON đúng theo PaymentRequestDTO
-                const body = {
-                    customerId: parseInt(sessionCustomerId),
-                    items: [
-                        {
-                            variantId: parseInt(selectedVariant.value),
-                            quantity: 1
-                        }
-                    ],
-                    orderInfo: "Thanh toán [[${product.name}]]"
-                };
-
-                try {
-                    const res = await fetch("/api/payment/create", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(body)
-                    });
-
-                    if (!res.ok) {
-                        alert("Không thể tạo thanh toán. Vui lòng thử lại.");
-                        return;
-                    }
-
-                    const data = await res.json();
-                    if (data && data.paymentUrl) {
-                        window.location.href = data.paymentUrl; // ✅ Chuyển qua VNPAY
-                    } else {
-                        alert("Không thể tạo thanh toán: Không có URL trả về.");
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    alert("Có lỗi xảy ra khi tạo thanh toán!");
-                }
-            });
+        function syncVariantFromRadio() {
+            const checked = Array.from(variantRadios).find(r => r.checked);
+            if (checked) {
+                variantIdInput.value = checked.value;
+                buyNowBtn.disabled = false;
+                addToCartBtn.disabled = false;
+            } else if (!variantIdInput.value) {
+                buyNowBtn.disabled = true;
+                addToCartBtn.disabled = true;
+            }
         }
-    });
-</script>
 
+        variantRadios.forEach(radio => radio.addEventListener('change', syncVariantFromRadio));
+        syncVariantFromRadio();
+
+        buyNowBtn?.addEventListener('click', async function () {
+            if (!sessionCustomerId || sessionCustomerId === 'null') {
+                alert('Vui lòng đăng nhập để mua sản phẩm!');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const variantId = variantIdInput.value;
+            const amountEl = document.getElementById('amountInput');
+            const quantity = amountEl && parseInt(amountEl.value || '1', 10) > 0
+                ? parseInt(amountEl.value || '1', 10) : 1;
+
+            if (!variantId) {
+                alert('Vui lòng chọn gói sản phẩm trước khi mua!');
+                return;
+            }
+
+            const body = {
+                customerId: parseInt(sessionCustomerId),
+                items: [{ variantId: parseInt(variantId), quantity: quantity }],
+                orderInfo: "Thanh toán " + productName
+            };
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+            try {
+                const res = await fetch('/api/payment/create', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    let text;
+                    try { text = await res.text(); } catch (e) { text = ''; }
+                    console.error('Payment create failed', res.status, text);
+                    alert('Không thể tạo thanh toán. Vui lòng thử lại.');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data && data.paymentUrl) {
+                    window.location.href = data.paymentUrl;
+                } else {
+                    console.error('Payment create response lacks paymentUrl:', data);
+                    alert('Không có URL thanh toán trả về.');
+                }
+            } catch (err) {
+                console.error('Error creating payment', err);
+                alert('Có lỗi xảy ra khi tạo thanh toán!');
+            }
+        });
+    });
+    /*]]>*/
+</script>
 
 </body>
 </html>

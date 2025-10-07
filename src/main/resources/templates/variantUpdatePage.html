@@ -96,13 +96,14 @@
     <h2>Cập nhật sản phẩm</h2>
     <form th:action="@{/manage/updateVariant}" th:object="${request}" method="post">
         <!-- Hidden để gửi id -->
-        <input type="hidden" th:field="*{name}">
+        <input type="hidden" th:field="*{id}">
+
 
         <label for="name">Tên sản phẩm</label>
         <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên sản phẩm" required>
 
         <label for="imgUrl">Thời hạn</label>
-        <input type="text" id="imgUrl" th:field="*{duration}" placeholder="Nhập link ảnh">
+        <input type="text" id="imgUrl" th:field="*{duration}" placeholder="Nhập link ảnh" required>
 
         <label for="category">Danh mục</label>
         <select id="category" th:field="*{productId}" required>
@@ -111,6 +112,9 @@
                     th:selected="${p.id} == ${request.productId}">
             </option>
         </select>
+
+        <label for="price">Giá tiền</label>
+        <input type="number" id="price" th:field="*{price}" placeholder="Nhập giá tiền" required>
 
         <button type="submit">Cập nhật</button>
     </form>

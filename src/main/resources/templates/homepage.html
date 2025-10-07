@@ -153,12 +153,42 @@
            Navigation
            -------------------- */
         nav { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.06); margin-top: 0; }
+
         .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 24px; padding: 10px 20px; font-weight: 600; }
+
+        /* style cho link categories */
+        .nav-inner .nav-link {
+            color: #111;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background .18s, color .18s, transform .12s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-inner .nav-link:hover {
+            background: rgba(37,99,235,0.06);
+            color: var(--blue);
+            transform: translateY(-2px);
+        }
+        .nav-inner .nav-link.active {
+            color: var(--blue);
+            background: rgba(37,99,235,0.12);
+            box-shadow: inset 0 -3px 0 rgba(37,99,235,0.08);
+        }
 
         /* --------------------
            Banner & layout
            -------------------- */
-        .banner { margin: 20px auto; padding: 34px; border-radius: 12px; background: linear-gradient(90deg,#4ade80,#3b82f6); color: white; text-align: center; max-width: 1200px }
+        .banner {
+            border-radius: 12px;
+            text-align: center;
+            max-width: 1000px;
+            height: 350px;
+            background-size: cover;         /* ảnh phủ kín vùng */
+            background-position: center;    /* căn giữa ảnh */
+            background-repeat: no-repeat;   /* 🚫 không lặp ảnh */
+        }
 
         .products { padding: 20px; text-align: center; max-width: 1200px; margin: 0 auto }
         .section-inner { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
@@ -231,7 +261,7 @@
 </head>
 <script>
     function updateCartCountUI() {
-        const cart = loadCart();
+        const cart = typeof loadCart === 'function' ? loadCart() : [];
         const total = cart.reduce((s, it) => s + (it.qty||1), 0);
         document.querySelectorAll('#cartBtn').forEach(btn => {
             btn.innerText = `Giỏ hàng (${total})`;
@@ -260,34 +290,6 @@
         updateCartCountUI();
     });
 </script>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const params = new URLSearchParams(window.location.search);
-        const status = params.get("status");
-        if (!status) return;
-
-        const alertBox = document.createElement("div");
-        alertBox.innerText = status === "success"
-            ? "🎉 Thanh toán thành công! Cảm ơn bạn đã mua hàng."
-            : "❌ Thanh toán thất bại hoặc bị hủy.";
-        alertBox.style.position = "fixed";
-        alertBox.style.top = "20px";
-        alertBox.style.left = "50%";
-        alertBox.style.transform = "translateX(-50%)";
-        alertBox.style.backgroundColor = status === "success" ? "#28a745" : "#dc3545";
-        alertBox.style.color = "white";
-        alertBox.style.padding = "12px 24px";
-        alertBox.style.borderRadius = "8px";
-        alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-        alertBox.style.zIndex = "9999";
-        alertBox.style.fontWeight = "600";
-        alertBox.style.fontSize = "15px";
-        document.body.appendChild(alertBox);
-
-        setTimeout(() => alertBox.remove(), 2000);
-    });
-</script>
-
 <body>
 <header id="siteHeader">
     <div class="header-inner">
@@ -334,7 +336,8 @@
                     </form>
                 </div>
 
-                <button id="cartBtnL" class="cart-btn">Giỏ hàng (0)</button>
+                <button id="cartBtnL" class="cart-btn"
+                        th:onclick="|window.location.href='/cart/view'|">Giỏ hàng</button>
             </div>
 
         </div>
@@ -343,11 +346,23 @@
 
 <nav style="margin-top:0;">
     <div class="nav-inner" id="mainNav">
-        <span>Giải trí</span>
-        <span>Làm việc</span>
-        <span>Học tập</span>
-        <span>windows</span>
-        <span>VPN</span>
+        <!-- Hard-coded links mapped to category IDs you specified:
+             1 = Học tập, 2 = Giải trí, 3 = Làm việc, 4 = Windows, 5 = VPN -->
+        <a class="nav-link" th:href="@{/home/homepage}">ALL</a>
+        <a class="nav-link" th:href="@{/home/category/2}"
+           th:classappend="${currentCategory != null and currentCategory.id == 2} ? ' active' : ''">Giải trí</a>
+
+        <a class="nav-link" th:href="@{/home/category/3}"
+           th:classappend="${currentCategory != null and currentCategory.id == 3} ? ' active' : ''">Làm việc</a>
+
+        <a class="nav-link" th:href="@{/home/category/1}"
+           th:classappend="${currentCategory != null and currentCategory.id == 1} ? ' active' : ''">Học tập</a>
+
+        <a class="nav-link" th:href="@{/home/category/4}"
+           th:classappend="${currentCategory != null and currentCategory.id == 4} ? ' active' : ''">Windows</a>
+
+        <a class="nav-link" th:href="@{/home/category/5}"
+           th:classappend="${currentCategory != null and currentCategory.id == 5} ? ' active' : ''">VPN</a>
     </div>
 </nav>
 
@@ -355,9 +370,7 @@
 <main id="pageContent" style="margin-top:0;">
     <div style="height: 8px;"></div>
 
-    <div class="banner">
-        <h2>Khuyến mãi siêu hot!</h2>
-        <p>Giảm giá lên tới 80% cho các phần mềm bản quyền</p>
+    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418352_770267042671107_6961607438473419344_n.png?stp=dst-png_s720x720&_nc_cat=105&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeHyEG88V0DdnLVBMkWAgYkvokjCGs1qhreiSMIazWqGt9gSNYfky-rFMwsRQ9xtFUnBikEQnwSPNDujEYFs-Zzz&_nc_ohc=imsD9FHbcRkQ7kNvwGKjasb&_nc_oc=AdkJmZJingJ-oIouY3Tr1huLHpiI3L8kQ6tyNoFyga7bCbG7JQqE3Rr8fCdci8I8U4A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&oh=03_Q7cD3gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
     </div>
 
     <section class="products">
@@ -388,10 +401,9 @@
                             <button
                                     class="add-to-cart action-btn"
                                     type="button"
-                                    th:attr="data-product-id=${product.id},
-                                         data-variant-id=${#lists.isEmpty(product.variants) ? 0 : product.variants[0].id},
-                                         data-price=${#lists.isEmpty(product.variants) ? 0 : product.variants[0].price}"
-                                    aria-label="Thêm vào giỏ hàng">
+                                    th:attr="data-product-id=${product.id}"
+                                    aria-label="Thêm vào giỏ hàng"
+                                    th:onclick="|window.location.href='/product/${product.id}?from=addcart'|">
                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42c-.14 0-.25-.11-.25-.25l.03-.12L15.1 9H20V7h-5.21l-.94-2H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
                                 </svg>
