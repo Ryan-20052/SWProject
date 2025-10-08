@@ -131,6 +131,10 @@
                 registerForm.reset();
                 verifyForm.reset();
                 otpSection.style.display = 'none'; // ẩn form OTP sau khi thành công
+                // ✅ Thêm dòng này để chuyển hướng sau khi xác minh thành công
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500); // đợi 1.5s để hiển thị thông báo trước khi chuyển trang
             } else {
                 msg.className = 'error';
                 msg.textContent = text || 'Verification failed';
