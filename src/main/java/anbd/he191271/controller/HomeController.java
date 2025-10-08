@@ -2,6 +2,7 @@ package anbd.he191271.controller;
 
 import anbd.he191271.entity.Categories;
 import anbd.he191271.entity.Customer;
+import anbd.he191271.entity.Product;
 import anbd.he191271.repository.CategoryRepository;
 import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.repository.ProductRepository;
@@ -33,48 +34,56 @@ public class HomeController {
         this.productRepository = productRepository;
     }
 
-    /**
-     * Đảm bảo danh sách categories luôn có sẵn cho mọi view do controller này trả về.
-     * (Giúp template ${categories} không bị "Cannot resolve symbol 'categories'")
-     */
+    // luôn cung cấp categories cho mọi view do controller này trả về
     @ModelAttribute("categories")
     public List<Categories> populateCategories() {
         return categoryRepository.findAll();
     }
 
-    @GetMapping("/homepage")
-    public String homepage(Model model, HttpSession session) {
-        model.addAttribute("products", productService.findAllProducts());
-
-        Customer customer = (Customer) session.getAttribute("customer");
-        if (customer != null) model.addAttribute("customer", customer);
-        return "homepage";
+    // luôn cung cấp danh sách best sellers cho mọi view (nếu bạn chỉ muốn cho homepage remove nếu cần)
+    @ModelAttribute("bestSellers")
+    public List<Product> populateBestSellers() {
+        // đảm bảo ProductService có method getBestSellingProducts(int)
+        return productService.getBestSellingProducts(4);
     }
 
-    /**
-     * Lấy sản phẩm theo category ID và trả view homepage (giữ nguyên layout).
-     * URL ví dụ: /home/category/1
-     */
+    @GetMapping("/homepage")
+    public String homepage(Model model, HttpSession session) {
+        // products chính (tất cả)
+        model.addAttribute("products", productService.findAllProducts()); // hoặc getAllProducts() nếu bạn dùng tên đó
+
+        // customer (nếu có đăng nhập)
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer != null) model.addAttribute("customer", customer);
+
+        return "homepage"; // file templates/homepage.html
+    }
+
     @GetMapping("/category/{id}")
     public String productsByCategory(@PathVariable("id") Integer id, Model model, HttpSession session) {
-
-        // Lấy products theo category id — chọn method phù hợp trong ProductRepository:
-        // 1) nếu dùng JPQL method findByCategoryId:
+        // Lấy products theo category id
         try {
             model.addAttribute("products", productRepository.findByCategoryId(id));
         } catch (Exception ex) {
-            // Nếu JPQL không có (không mapped), thử native method tên findByCategoryIdNative
             model.addAttribute("products", productRepository.findByCategoryIdNative(id));
         }
 
-        // Đặt currentCategory để thymeleaf có thể highlight mục active
         Optional<Categories> current = categoryRepository.findById(id);
         current.ifPresent(c -> model.addAttribute("currentCategory", c));
 
-        // Giữ thông tin customer nếu login để header hiển thị
         Customer customer = (Customer) session.getAttribute("customer");
         if (customer != null) model.addAttribute("customer", customer);
 
+        return "homepage";
+    }
+
+    // (tùy chọn) page riêng cho bestsellers nếu cần
+    @GetMapping("/bestseller")
+    public String bestSellerPage(Model model, HttpSession session) {
+        model.addAttribute("products", productService.findAllProducts());
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer != null) model.addAttribute("customer", customer);
+        // bestSellers đã được tự động thêm bởi @ModelAttribute("bestSellers")
         return "homepage";
     }
 }
