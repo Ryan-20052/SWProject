@@ -3,6 +3,7 @@ package anbd.he191271.controller;
 import anbd.he191271.dto.RegisterRequest;
 import anbd.he191271.entity.Customer;
 import anbd.he191271.repository.CustomerRepository;
+import anbd.he191271.repository.ManagerRepository;
 import anbd.he191271.service.EmailService;
 import anbd.he191271.service.OtpService;
 import jakarta.mail.MessagingException;
@@ -16,12 +17,15 @@ public class RegisterController {
     private final OtpService otpService;
     private final EmailService emailService; // Service gửi mail
     private final CustomerRepository customerRepository;
+    private final ManagerRepository managerRepository; // thêm dòng này
+
     private final PasswordEncoder passwordEncoder;
 
-    public RegisterController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
+    public RegisterController(OtpService otpService, EmailService emailService, CustomerRepository customerRepository, ManagerRepository managerRepository, PasswordEncoder passwordEncoder) {
         this.otpService = otpService;
         this.emailService = emailService;
         this.customerRepository = customerRepository;
+        this.managerRepository = managerRepository;
         this.passwordEncoder = passwordEncoder;
     }
     private RegisterRequest pendingUser;
@@ -29,10 +33,10 @@ public class RegisterController {
     @PostMapping("/register")
     public String register(@RequestBody RegisterRequest request) throws MessagingException {
         // Kiểm tra trùng email / username
-        if (customerRepository.existsByEmail(request.getEmail())) {
+        if (customerRepository.existsByEmail(request.getEmail())|| managerRepository.existsByEmail(request.getEmail())) {
             return "❌ Email already exists!";
         }
-        if (customerRepository.existsByUsername(request.getUsername())) {
+        if (customerRepository.existsByUsername(request.getUsername())|| managerRepository.existsByUsername(request.getUsername())|| request.getUsername().equals("admin")) {
             return "❌ Username already exists!";
         }
 

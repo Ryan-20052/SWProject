@@ -9,5 +9,6 @@ public interface ManagerRepository  extends JpaRepository<Manager, Integer> {
     Optional<Manager> findByUsername(String username);
     Optional<Manager> findByEmail(String email);
     boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 
 }
