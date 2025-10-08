@@ -129,12 +129,6 @@ public class ManagerController {
         return "redirect:/manage/manageHome";
     }
 
-//    @GetMapping("/deleteVariant/{id}")
-//    public String deleteVariant(@PathVariable int id, RedirectAttributes redirectAttributes) {
-//        variantService.deleteVariant(id);
-//        redirectAttributes.addFlashAttribute("msg", "Đã xóa thành công");
-//        return "redirect:/manage/manageHome";
-//    }
 
     @GetMapping("/statusProduct/{id}")
     public String updateStatusProduct(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {
@@ -184,7 +178,7 @@ public class ManagerController {
             return "redirect:/login.html";
         }
         model.addAttribute("manager", manager);
-        model.addAttribute("manageLogList", manageLogList);
+        model.addAttribute("manageLogList", manageLogList.reversed());
         return "manageLogPage";
     }
 
