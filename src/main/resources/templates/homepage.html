@@ -395,7 +395,7 @@
                                     type="button"
                                     th:attr="data-product-id=${product.id}"
                                     aria-label="Thêm vào giỏ hàng"
-                                    th:onclick="|window.location.href='@{/cart/add(productId=${product.id},qty=1,from='/home/homepage')}'|">
+                                    th:onclick="|window.location.href='/product/${product.id}?from=addcart'|">
                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42c-.14 0-.25-.11-.25-.25l.03-.12L15.1 9H20V7h-5.21l-.94-2H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
                                 </svg>
