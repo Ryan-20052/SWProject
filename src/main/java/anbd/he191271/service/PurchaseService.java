@@ -144,7 +144,7 @@ public class PurchaseService {
                 ));
             }
 
-            // ✅ Xóa item khỏi giỏ hàng
+            // ✅ Xóa item khỏi giỏ hàngg
             cartRepo.deleteByCustomerIdAndVariant_Id(
                     Long.valueOf(order.getCustomer().getId()),
                     Long.valueOf(variant.getId())

@@ -27,7 +27,7 @@ public class PurchasedLicenseController {
             return "redirect:/login.html"; // file login.html
         }
 
-        // Lấy danh sách license theo customer
+        // Lấy danh sách license theo customerr
         List<LicenseKey> purchasedLicenses = licenseKeyRepository.findAllByCustomerId(customer.getId());
         purchasedLicenses.sort((a, b) -> b.getActivatedAt().compareTo(a.getActivatedAt()));
         model.addAttribute("purchasedLicenses", purchasedLicenses);
