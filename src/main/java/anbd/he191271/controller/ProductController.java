@@ -13,6 +13,7 @@ import anbd.he191271.repository.ReviewRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Controller
 public class ProductController {
@@ -37,7 +38,11 @@ public class ProductController {
             return "product";
         }
 
-        List<Variant> variants = product.getVariants();
+        List<Variant> variants = product.getVariants()
+                .stream()
+                .filter(v -> "available".equalsIgnoreCase(v.getStatus()))
+                .collect(Collectors.toList());
+
 
         Variant selectedVariant = null;
         if (variantId != null && variants != null) {

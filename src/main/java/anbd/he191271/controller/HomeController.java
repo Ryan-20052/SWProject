@@ -50,7 +50,7 @@ public class HomeController {
     @GetMapping("/homepage")
     public String homepage(Model model, HttpSession session) {
         // products chính (tất cả)
-        model.addAttribute("products", productService.findAllProducts()); // hoặc getAllProducts() nếu bạn dùng tên đó
+        model.addAttribute("products", productService.getAllProductByStatus("available"));
 
         // customer (nếu có đăng nhập)
         Customer customer = (Customer) session.getAttribute("customer");
@@ -77,13 +77,6 @@ public class HomeController {
         return "homepage";
     }
 
-    // (tùy chọn) page riêng cho bestsellers nếu cần
-    @GetMapping("/bestseller")
-    public String bestSellerPage(Model model, HttpSession session) {
-        model.addAttribute("products", productService.findAllProducts());
-        Customer customer = (Customer) session.getAttribute("customer");
-        if (customer != null) model.addAttribute("customer", customer);
-        // bestSellers đã được tự động thêm bởi @ModelAttribute("bestSellers")
-        return "homepage";
-    }
+
+
 }

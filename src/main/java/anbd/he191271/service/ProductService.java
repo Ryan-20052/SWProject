@@ -53,14 +53,21 @@ public class ProductService {
     public List<Product> getBestSellingProducts(int limit) {
         List<Object[]> rows = orderDetailRepository.findTopProductIds(PageRequest.of(0, limit));
         List<Product> best = new ArrayList<>();
+
         for (Object[] r : rows) {
-            // r[0] => productId, r[1] => totalSold (Long)
             Integer productId = (Integer) r[0];
             Optional<Product> p = productRepository.findById(productId);
-            p.ifPresent(best::add);
+
+            p.ifPresent(product -> {
+                if ("available".equalsIgnoreCase(product.getStatus())) {
+                    best.add(product);
+                }
+            });
         }
+
         return best;
     }
+
 
 
 }
