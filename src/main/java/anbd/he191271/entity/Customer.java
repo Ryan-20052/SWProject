@@ -17,6 +17,17 @@ public class Customer {
     private String username;
     private String password;
 
+    @Column(name = "status")
+    private String status = "ACTIVE";
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     private LocalDate dob; // ngày sinh
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders;

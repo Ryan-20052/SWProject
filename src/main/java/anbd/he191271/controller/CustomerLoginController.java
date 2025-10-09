@@ -10,7 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import anbd.he191271.service.CustomerService;
 
-@Controller
+import java.util.Map;
+import java.util.Optional;
+@RestController
 @RequestMapping("/auth/customer")
 public class CustomerLoginController {
 
@@ -21,23 +23,38 @@ public class CustomerLoginController {
     }
 
     @PostMapping("/login")
-    @ResponseBody
-    public ResponseEntity<CustomerDTO> login(@RequestBody LoginRequest request, HttpSession session) {
-        return customerService.login(request.getUsername(), request.getPassword())
-                .map(customer -> {
-                    session.setAttribute("customer", customer); // lưu nguyên bản vào session
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+        // 1️⃣ Tìm theo username
+        Optional<Customer> opt = customerService.findByUsername(request.getUsername());
 
-                    // chỉ trả JSON gọn gàng ra FE
-                    CustomerDTO dto = new CustomerDTO(
-                            customer.getId(),
-                            customer.getUsername(),
-                            customer.getEmail()
-                    );
-                    return ResponseEntity.ok(dto);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Sai tên đăng nhập hoặc mật khẩu!"));
+        }
+
+        Customer customer = opt.get();
+
+        // 2️⃣ Kiểm tra trạng thái tài khoản
+        if ("BANNED".equalsIgnoreCase(customer.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", "BANNED", "message", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ!"));
+        }
+
+        if ("DELETED".equalsIgnoreCase(customer.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", "DELETED", "message", "Tài khoản này đã bị xóa."));
+        }
+
+        // 3️⃣ Kiểm tra mật khẩu (đã mã hóa)
+        if (!customerService.checkPassword(request.getPassword(), customer.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Sai tên đăng nhập hoặc mật khẩu!"));
+        }
+
+        // ✅ Thành công → Lưu session
+        session.setAttribute("customer", customer);
+        return ResponseEntity.ok(customer);
     }
-
 
     @PostMapping("/logout")
     public String logout(HttpSession session) {

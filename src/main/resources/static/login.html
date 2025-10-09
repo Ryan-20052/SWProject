@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>Login Page</title>
     <link rel="stylesheet" href="style.css" />
+
 </head>
 <body>
 <div class="login-container">
@@ -23,12 +23,10 @@
 
     <p id="message"></p>
 
-    <!-- 🔗 Link đến Register -->
     <p class="register-link">
         Don’t have an account?
         <a href="register.html">Register here</a>
     </p>
-    <!-- 🔗 Link đến Foget Password -->
     <p class="register-link">
         <a href="forgetPassword.html">Forget Password</a>
     </p>
@@ -36,65 +34,87 @@
 
 <script>
     const form = document.getElementById("loginForm");
+    const msg = document.getElementById("message");
+
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        const msg = document.getElementById("message");
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-        // Hàm gọi API login
+        // ✅ Hàm gọi API login và luôn trả về {status, data}
         async function tryLogin(url) {
-            return fetch(url, {
+            const res = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
             });
+            let data = {};
+            try {
+                data = await res.json();
+            } catch {
+                data = {};
+            }
+            return { status: res.status, data };
         }
 
         try {
-            // 🟢 Thử login Customer trước
-            let response = await tryLogin("http://localhost:8080/auth/customer/login");
+            // 1️⃣ Customer login
+            const customerResp = await tryLogin("http://localhost:8080/auth/customer/login");
 
-            if (response.ok) {
-                const customer = await response.json();
+            if (customerResp.status === 200) {
+                const customer = customerResp.data;
+                msg.className = "success";
+                msg.innerText = "✅ Welcome " + (customer.username || "Customer");
                 sessionStorage.setItem("username", customer.username);
-                msg.className = "success";
-                msg.innerText = "✅ Welcome " + customer.username + " (Customer)";
-                setTimeout(() => window.location.href = "/home/homepage", 1000);
+                setTimeout(() => (window.location.href = "/home/homepage"), 1000);
+                return;
+            }
+            if (customerResp.status === 403) {
+                msg.className = "error";
+                msg.innerText =
+                    customerResp.data.message || "🚫 Tài khoản của bạn đã bị khóa!";
                 return;
             }
 
-            // 🔄 Nếu Customer thất bại → thử Manager
-            response = await tryLogin("http://localhost:8080/auth/manager/login");
+            // 2️⃣ Manager login
+            const managerResp = await tryLogin("http://localhost:8080/auth/manager/login");
 
-            if (response.ok) {
-                const manager = await response.json();
+            if (managerResp.status === 200) {
+                const manager = managerResp.data;
+                msg.className = "success";
+                msg.innerText = "✅ Welcome " + (manager.username || "Manager");
                 sessionStorage.setItem("username", manager.username);
-                msg.className = "success";
-                msg.innerText = "✅ Welcome " + manager.username + " (Manager)";
-                setTimeout(() => window.location.href = "manage/manageHome", 1000);
+                setTimeout(() => (window.location.href = "manage/manageHome"), 1000);
+                return;
+            }
+            if (managerResp.status === 403) {
+                msg.className = "error";
+                msg.innerText =
+                    managerResp.data.message || "🚫 Tài khoản quản lý đã bị khóa!";
                 return;
             }
 
-            // 🔄 Nếu Manager thất bại → thử Admin
-            response = await tryLogin("http://localhost:8080/auth/admin/login");
-            if (response.ok) {
-                const admin = await response.json();
+            // 3️⃣ Admin login
+            const adminResp = await tryLogin("http://localhost:8080/auth/admin/login");
+
+            if (adminResp.status === 200) {
+                const admin = adminResp.data;
+                msg.className = "success";
+                msg.innerText = "✅ Welcome " + (admin.username || "Admin");
                 sessionStorage.setItem("username", admin.username);
-                msg.className = "success";
-                msg.innerText = "✅ Welcome " + admin.username + " (Admin)";
-                setTimeout(() => window.location.href = "adminDashboard.html", 1000);
+                setTimeout(() => (window.location.href = "adminDashboard.html"), 1000);
                 return;
             }
 
-            // ❌ Nếu cả 3 đều fail
+            // ❌ Nếu tất cả đều thất bại
             msg.className = "error";
-            msg.innerText = "❌ Login failed! Invalid username or password.";
+            msg.innerText = "❌ Sai tên đăng nhập hoặc mật khẩu!";
 
-        } catch (error) {
+        } catch (err) {
+            console.error(err);
             msg.className = "warning";
-            msg.innerText = "⚠️ Error connecting to server: " + error;
+            msg.innerText = "⚠️ Lỗi kết nối tới server: " + err.message;
         }
     });
 </script>

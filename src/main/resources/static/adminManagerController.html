@@ -17,8 +17,10 @@
         }
         .navbar a:hover, .logout-btn:hover { background: #1259a6; }
         .navbar-menu { display: flex; gap: 10px; }
+
         .container { padding: 30px; }
         h2 { color: #333; margin-bottom: 20px; }
+
         form { margin-bottom: 20px; }
         input {
             padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;
@@ -26,10 +28,16 @@
         button {
             padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer;
         }
+
         .add-btn { background: #43a047; color: white; }
         .add-btn:hover { background: #2e7d32; }
-        .delete-btn { background: #e53935; color: white; }
-        .delete-btn:hover { background: #c62828; }
+
+        .ban-btn { background: #e53935; color: white; }
+        .ban-btn:hover { background: #c62828; }
+
+        .unban-btn { background: #0288d1; color: white; }
+        .unban-btn:hover { background: #01579b; }
+
         table {
             width: 100%; border-collapse: collapse; background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -37,6 +45,15 @@
         th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
         th { background: #1976d2; color: white; }
         tr:nth-child(even) { background: #f9f9f9; }
+
+        .status {
+            font-weight: bold;
+            border-radius: 6px;
+            padding: 4px 8px;
+            display: inline-block;
+        }
+        .status.active { background: #c8e6c9; color: #2e7d32; }
+        .status.banned { background: #ffcdd2; color: #c62828; }
     </style>
 </head>
 <body>
@@ -53,16 +70,23 @@
 
 <div class="container">
     <h2>Quản lý tài khoản Manager</h2>
+
     <form onsubmit="addManager(event)">
         <input type="text" id="username" placeholder="Tên đăng nhập" required>
         <input type="email" id="email" placeholder="Email" required>
         <input type="password" id="password" placeholder="Mật khẩu" required>
-        <button class="add-btn" type="submit">Thêm Manager</button>
+        <button class="add-btn" type="submit">➕ Thêm Manager</button>
     </form>
 
     <table>
         <thead>
-        <tr><th>ID</th><th>Username</th><th>Email</th><th>Hành động</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Tên đăng nhập</th>
+            <th>Email</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
         </thead>
         <tbody id="managerTable"></tbody>
     </table>
@@ -91,36 +115,65 @@
             const data = await res.json();
             const table = document.getElementById("managerTable");
             table.innerHTML = "";
+
             data.forEach(m => {
-                table.innerHTML += `<tr>
-                    <td>${m.id}</td><td>${m.username}</td><td>${m.email}</td>
-                    <td><button class="delete-btn" onclick="deleteManager(${m.id})">Xóa</button></td>
+                const statusClass = m.status === "BANNED" ? "banned" : "active";
+                const actionBtn = m.status === "BANNED"
+                    ? `<button class="unban-btn" onclick="unbanManager(${m.id})">Mở khóa</button>`
+                    : `<button class="ban-btn" onclick="banManager(${m.id})">Khóa</button>`;
+
+                table.innerHTML += `
+                <tr>
+                    <td>${m.id}</td>
+                    <td>${m.username}</td>
+                    <td>${m.email}</td>
+                    <td><span class="status ${statusClass}">${m.status || "ACTIVE"}</span></td>
+                    <td>${actionBtn}</td>
                 </tr>`;
             });
-        } catch (err) { console.error("Lỗi khi load managers:", err); }
+        } catch (err) {
+            console.error("❌ Lỗi khi tải danh sách managers:", err);
+        }
     }
 
     async function addManager(event) {
         event.preventDefault();
-        const username = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-        await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password })
-        });
+        try {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password })
+            });
 
-        document.getElementById("username").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("password").value = "";
-        loadManagers();
+            if (!res.ok) {
+                alert("❌ Không thể thêm Manager!");
+                return;
+            }
+
+            alert("✅ Thêm Manager thành công!");
+            document.getElementById("username").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("password").value = "";
+            loadManagers();
+        } catch (err) {
+            alert("⚠️ Lỗi khi thêm Manager: " + err.message);
+        }
     }
 
-    async function deleteManager(id) {
-        if (confirm("Bạn có chắc muốn xóa manager này không?")) {
-            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    async function banManager(id) {
+        if (confirm("Bạn có chắc muốn KHÓA tài khoản này không?")) {
+            await fetch(`${API_URL}/${id}/ban`, { method: "PUT" });
+            loadManagers();
+        }
+    }
+
+    async function unbanManager(id) {
+        if (confirm("Bạn có chắc muốn MỞ KHÓA tài khoản này không?")) {
+            await fetch(`${API_URL}/${id}/unban`, { method: "PUT" });
             loadManagers();
         }
     }

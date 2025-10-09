@@ -18,9 +18,12 @@ public class CustomerService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<Customer> login(String username, String rawPassword) {
-        return customerRepository.findByUsername(username)
-                .filter(customer -> passwordEncoder.matches(rawPassword, customer.getPassword()));
+    public Optional<Customer> findByUsername(String username) {
+        return customerRepository.findByUsername(username);
+    }
+
+    public boolean checkPassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     public Optional<Customer> getById(int id) {
@@ -52,11 +55,18 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public void deleteCustomer(int id) {
-        if (customerRepository.existsById(id)) {
-            customerRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Customer not found with id " + id);
-        }
+    public void banCustomer(int id) {
+        Customer c = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        c.setStatus("BANNED");
+        customerRepository.save(c);
     }
+
+    public void unbanCustomer(int id) {
+        Customer c = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        c.setStatus("ACTIVE");
+        customerRepository.save(c);
+    }
+
 }

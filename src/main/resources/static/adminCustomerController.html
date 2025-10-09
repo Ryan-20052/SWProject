@@ -19,6 +19,7 @@
         .navbar-menu { display: flex; gap: 10px; }
         .container { padding: 30px; }
         h2 { color: #333; margin-bottom: 20px; }
+
         table {
             width: 100%; border-collapse: collapse; background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -26,8 +27,34 @@
         th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
         th { background: #1976d2; color: white; }
         tr:nth-child(even) { background: #f9f9f9; }
-        button { background: #e53935; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #c62828; }
+
+        button {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-ban { background: #e53935; }
+        .btn-ban:hover { background: #c62828; }
+        .btn-unban { background: #43a047; }
+        .btn-unban:hover { background: #2e7d32; }
+
+        .status {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .status-active {
+            color: #2e7d32;
+            background: #c8e6c9;
+        }
+        .status-banned {
+            color: #c62828;
+            background: #ffcdd2;
+        }
     </style>
 </head>
 <body>
@@ -46,7 +73,7 @@
     <h2>Quản lý tài khoản Customer</h2>
     <table>
         <thead>
-        <tr><th>ID</th><th>Username</th><th>Email</th><th>Hành động</th></tr>
+        <tr><th>ID</th><th>Username</th><th>Email</th><th>Trạng thái</th><th>Hành động</th></tr>
         </thead>
         <tbody id="customerTable"></tbody>
     </table>
@@ -78,14 +105,26 @@
             table.innerHTML = "";
 
             data.forEach(c => {
-                const row = `<tr>
-          <td>${c.id}</td>
-          <td>${c.username}</td>
-          <td>${c.email}</td>
-          <td>
-            <button onclick="deleteCustomer(${c.id})">Xóa</button>
-          </td>
-        </tr>`;
+                const isBanned = c.status === "BANNED";
+
+                const row = `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.username}</td>
+                    <td>${c.email}</td>
+                    <td>
+                        <span class="status ${isBanned ? 'status-banned' : 'status-active'}">
+                            ${isBanned ? 'Bị khóa' : 'Hoạt động'}
+                        </span>
+                    </td>
+                    <td>
+                        ${
+                    isBanned
+                        ? `<button class="btn-unban" onclick="unbanCustomer(${c.id})">Mở khóa</button>`
+                        : `<button class="btn-ban" onclick="banCustomer(${c.id})">Khóa</button>`
+                }
+                    </td>
+                </tr>`;
                 table.innerHTML += row;
             });
         } catch (err) {
@@ -93,9 +132,16 @@
         }
     }
 
-    async function deleteCustomer(id) {
-        if (confirm("Bạn có chắc muốn xóa customer này không?")) {
-            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    async function banCustomer(id) {
+        if (confirm("Bạn có chắc muốn khóa tài khoản này không?")) {
+            await fetch(`${API_URL}/${id}/ban`, { method: "PUT" });
+            loadCustomers();
+        }
+    }
+
+    async function unbanCustomer(id) {
+        if (confirm("Bạn có chắc muốn mở khóa tài khoản này không?")) {
+            await fetch(`${API_URL}/${id}/unban`, { method: "PUT" });
             loadCustomers();
         }
     }

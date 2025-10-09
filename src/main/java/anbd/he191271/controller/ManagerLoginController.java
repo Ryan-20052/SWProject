@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
 @RequestMapping("/auth/manager")
 public class ManagerLoginController {
 
@@ -25,13 +28,37 @@ public class ManagerLoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Manager> login(@RequestBody LoginRequest request, HttpSession session) {
-        return managerService.login(request.getUsername(), request.getPassword())
-                .map(manager -> {
-                    session.setAttribute("manager", manager);
-                    return ResponseEntity.ok(manager);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+        // 1️⃣ Tìm theo username
+        Optional<Manager> opt = managerService.findByUsername(request.getUsername());
+
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Sai tên đăng nhập hoặc mật khẩu!"));
+        }
+
+        Manager manager = opt.get();
+
+        // 2️⃣ Kiểm tra trạng thái
+        if ("BANNED".equalsIgnoreCase(manager.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", "BANNED", "message", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin."));
+        }
+
+        if ("DELETED".equalsIgnoreCase(manager.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", "DELETED", "message", "Tài khoản này đã bị xóa."));
+        }
+
+        // 3️⃣ Kiểm tra mật khẩu (đã mã hóa)
+        if (!managerService.checkPassword(request.getPassword(), manager.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Sai tên đăng nhập hoặc mật khẩu!"));
+        }
+
+        // ✅ Thành công
+        session.setAttribute("manager", manager);
+        return ResponseEntity.ok(manager);
     }
     @PostMapping("/logout")
     public String logout(HttpSession session) {
