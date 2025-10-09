@@ -1,6 +1,7 @@
 package anbd.he191271.controller;
 
 import anbd.he191271.entity.Product;
+import anbd.he191271.entity.Review;
 import anbd.he191271.entity.Variant;
 import anbd.he191271.repository.CategoryRepository;
 import anbd.he191271.service.ProductService;
@@ -8,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import anbd.he191271.repository.ReviewRepository;
 
 import java.util.List;
 import java.util.Objects;
 
 @Controller
 public class ProductController {
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private ProductService productService;
@@ -50,9 +54,25 @@ public class ProductController {
             selectedVariant = variants.get(0);
         }
 
+        // 👉 Lấy danh sách review theo product
+        List<Review> reviews = reviewRepository.findByProduct_Id(id);
+
+        double averageRating = 0;
+        if (!reviews.isEmpty()) {
+            averageRating = reviews.stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+        }
+
         model.addAttribute("product", product);
         model.addAttribute("variants", variants);
         model.addAttribute("selectedVariant", selectedVariant);
+
+        // 👉 Gửi thêm dữ liệu review xuống view
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("averageRating", String.format("%.1f", averageRating));
+        model.addAttribute("totalReviews", reviews.size());
 
         return "product";
     }

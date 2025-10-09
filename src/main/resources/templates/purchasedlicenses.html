@@ -28,8 +28,14 @@
 <header id="siteHeader">
     <div class="header-inner">
         <h1>License Shop</h1>
+        <button type="button"
+                onclick="window.location.href='/home/homepage'"
+                style="background:#6c757d;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">
+            ⬅ Back to Homepage
+        </button>
 
     </div>
+
 </header>
 
 <div class="container">
@@ -45,6 +51,7 @@
             <th>Gói/Dung lượng</th>
             <th>Ngày mua</th>
             <th>Ngày hết hạn</th>
+            <th>Đánh giá</th>
         </tr>
         </thead>
         <tbody>
@@ -53,15 +60,17 @@
             <td th:text="${license.orderDetail.variant.name}">Gói</td>
             <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}">01/10/2025</td>
             <td th:text="${#dates.format(license.expiredAt, 'dd/MM/yyyy')}">01/11/2025</td>
+            <td>
+                <a th:href="@{/review/{productId}(productId=${license.orderDetail.variant.product.id})}">
+                    <button style="background:#f39c12;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;">
+                        ⭐ Đánh giá
+                    </button>
+                </a>
+            </td>
         </tr>
-        <div style="margin-bottom:15px; text-align:left;">
-            <button onclick="window.location.href='/home/homepage'"
-                    style="background:#2d89ef;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
-                ⬅ Về trang chủ
-            </button>
-        </div>
         </tbody>
     </table>
+
 
     <div th:if="${#lists.isEmpty(purchasedLicenses)}">
         <p>Bạn chưa mua license nào.</p>
