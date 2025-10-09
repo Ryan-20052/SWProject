@@ -5,21 +5,32 @@ public class ProductDTO {
     private String name;
     private Integer categoryId;
     private String imgUrl;
+    private String description;
 
     public ProductDTO() {
     }
 
-    public ProductDTO(String name, Integer categoryId, String imgUrl) {
+    public ProductDTO(String name, Integer categoryId, String imgUrl, String description) {
         this.name = name;
         this.categoryId = categoryId;
         this.imgUrl = imgUrl;
+        this.description = description;
     }
 
-    public ProductDTO(Integer productId, String name, Integer categoryId, String imgUrl) {
+    public ProductDTO(Integer productId, String name, Integer categoryId, String imgUrl , String description) {
         this.productId = productId;
         this.name = name;
         this.categoryId = categoryId;
         this.imgUrl = imgUrl;
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Integer getProductId() {

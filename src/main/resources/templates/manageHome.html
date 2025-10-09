@@ -274,6 +274,7 @@
     <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post" required>
         <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
         <input type="text" th:field="*{imgUrl}" placeholder="link ảnh" required>
+        <input type="text" th:field="*{description}" placeholder="Mô tả" required>
         <select th:field="*{categoryId}" required>
             <option value="">-- Chọn danh mục --</option>
             <option th:each="c : ${categories}"
@@ -368,6 +369,7 @@
                     </tbody>
                 </table>
             </td>
+
 
             <!-- Trạng thái sản phẩm -->
             <td th:text="${p.status}"></td>
