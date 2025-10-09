@@ -29,6 +29,7 @@ public class PurchasedLicenseController {
 
         // Lấy danh sách license theo customer
         List<LicenseKey> purchasedLicenses = licenseKeyRepository.findAllByCustomerId(customer.getId());
+        purchasedLicenses.sort((a, b) -> b.getActivatedAt().compareTo(a.getActivatedAt()));
         model.addAttribute("purchasedLicenses", purchasedLicenses);
 
         return "purchasedlicenses"; // file Thymeleaf purchasedlicenses.html
