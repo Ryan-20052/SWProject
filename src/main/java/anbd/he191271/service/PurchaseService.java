@@ -11,10 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PurchaseService {
@@ -104,70 +101,95 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception("Không tìm thấy đơn hàng với mã: " + orderCode));
 
         if (order.getCustomer() == null) {
-            order = orderRepository.findByCodeWithCustomer(orderCode)
-                    .orElseThrow(() -> new Exception("Không tìm thấy đơn hàng hoặc khách hàng"));
+            throw new Exception("Không tìm thấy khách hàng cho đơn hàng: " + orderCode);
         }
 
         order.setStatus("PAID");
         orderRepository.save(order);
+
+        // 📩 Gom nội dung email
+        StringBuilder licenseList = new StringBuilder();
+        List<LicenseKey> allKeys = new ArrayList<>();
 
         for (OrderDetail detail : order.getOrderDetails()) {
             Variant variant = detail.getVariant();
             Date activatedAt = new Date();
 
             for (int i = 0; i < detail.getAmount(); i++) {
-                String licenseKey = generateKey(16);
+                String rawKey = generateKey(16);
                 Date expiredAt = calculateExpiredDate(variant.getDuration(), activatedAt);
 
+                // Lưu key (hash vào DB)
                 LicenseKey key = new LicenseKey();
-                key.setKey(licenseKey);
+                key.setKey(hashSHA256(rawKey));
                 key.setOrderDetail(detail);
                 key.setActivatedAt(activatedAt);
                 key.setExpiredAt(expiredAt);
                 key.setStatus("ACTIVATE");
-                licenseKeyRepository.save(key);
+                allKeys.add(key);
 
-                String emailContent = """
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                    <h2 style="color: #2E86DE;">Thanh toán thành công!</h2>
-                    <p><b>Khách hàng:</b> %s</p>
-                    <p><b>Sản phẩm:</b> %s</p>
-                    <p><b>Mã đơn hàng:</b> %s</p>
-                    <hr>
-                    <p><b>License key của bạn:</b> 
-                        <span style="font-size:16px; color:#e74c3c; font-weight:bold;">%s</span>
-                    </p>
-                    <p><b>Thời hạn:</b> %s → %s</p>
-                    <br>
-                    <p>Cảm ơn bạn đã mua sản phẩm tại <b>License Shop</b> ❤️</p>
-                </div>
-                """.formatted(
-                        order.getCustomer().getName(),
-                        variant.getProduct().getName(),
-                        order.getCode(),
-                        licenseKey,
-                        activatedAt,
-                        expiredAt
-                );
-
-                mailService.sendEmail(
-                        order.getCustomer().getEmail(),
-                        "License Key của bạn - License Shop",
-                        emailContent
-                );
-
-                String hashedKey = hashSHA256(licenseKey);
-                key.setKey(hashedKey);
-                licenseKeyRepository.save(key);
+                // ✅ Thêm vào bảng email: Product + Duration
+                licenseList.append("""
+                <tr>
+                    <td style="padding:6px; border:1px solid #ccc;">%s - %s</td>
+                    <td style="padding:6px; border:1px solid #ccc; color:#e74c3c; font-weight:bold;">%s</td>
+                    <td style="padding:6px; border:1px solid #ccc;">%s → %s</td>
+                </tr>
+            """.formatted(
+                        variant.getProduct().getName(),   // Tên sản phẩm
+                        variant.getDuration(),            // Thời hạn gói
+                        rawKey,                           // License key thật
+                        activatedAt,                      // Ngày bắt đầu
+                        expiredAt                         // Ngày hết hạn
+                ));
             }
 
-            // ✅ gọi qua bean instance, không gọi static
+            // ✅ Xóa item khỏi giỏ hàng
             cartRepo.deleteByCustomerIdAndVariant_Id(
                     Long.valueOf(order.getCustomer().getId()),
-                    Long.valueOf(detail.getVariant().getId())
+                    Long.valueOf(variant.getId())
             );
         }
+
+        // ✅ Batch save tất cả key
+        licenseKeyRepository.saveAll(allKeys);
+
+        // 📧 Gửi email 1 lần duy nhất
+        String emailContent = """
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #2E86DE;">Thanh toán thành công!</h2>
+            <p><b>Khách hàng:</b> %s</p>
+            <p><b>Mã đơn hàng:</b> %s</p>
+            <hr>
+            <table style="border-collapse: collapse; width:100%%; margin-top:10px;">
+                <thead>
+                    <tr style="background:#2563eb; color:white; text-align:left;">
+                        <th style="padding:8px; border:1px solid #ccc;">Gói/Variant</th>
+                        <th style="padding:8px; border:1px solid #ccc;">License Key</th>
+                        <th style="padding:8px; border:1px solid #ccc;">Thời hạn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    %s
+                </tbody>
+            </table>
+            <br>
+            <p>Cảm ơn bạn đã mua sản phẩm tại <b>License Shop</b> ❤️</p>
+        </div>
+    """.formatted(
+                order.getCustomer().getName(),
+                order.getCode(),
+                licenseList.toString()
+        );
+
+        mailService.sendEmail(
+                order.getCustomer().getEmail(),
+                "License Key của bạn - License Shop",
+                emailContent
+        );
     }
+
+
 
     private String hashSHA256(String input) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
