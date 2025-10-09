@@ -11,4 +11,5 @@ public class CustomerDTO {
     private Integer id;
     private String username;
     private String email;
+    private String status;
 }

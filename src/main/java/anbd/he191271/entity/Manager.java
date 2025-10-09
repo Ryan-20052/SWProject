@@ -19,6 +19,17 @@ public class Manager {
 
     private String email;
 
+    @Column(name = "status")
+    private String status = "ACTIVE";
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Lob   // dùng để lưu dữ liệu lớn (Large OBject)
     @Column(name = "img", columnDefinition = "LONGBLOB")
     private byte[] avatar;   // đổi từ String -> byte[]
