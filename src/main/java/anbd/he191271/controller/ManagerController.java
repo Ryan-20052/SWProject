@@ -54,7 +54,7 @@ public class ManagerController {
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add product "+ request.getName());
         managerLogService.save(log);
         Categories category = categoryService.getCategoryById(request.getCategoryId());
-        Product product=new Product(request.getName(), manager.getId(), request.getImgUrl(),category);
+        Product product=new Product(request.getName(), manager.getId(), request.getImgUrl(),category, request.getDescription());
         productService.saveProduct(product);
         return "redirect:/manage/manageHome";
     }
@@ -66,6 +66,7 @@ public class ManagerController {
         product.setName(request.getName());
         product.setManager_id(manager.getId());
         product.setImg_url(request.getImgUrl());
+        product.setDescription(request.getDescription());
         product.setCategory(categoryService.getCategoryById(request.getCategoryId()));
         productService.saveProduct(product);
         ManagerLog log =  new ManagerLog(manager.getUsername(), "update product "+ request.getName());
@@ -77,7 +78,7 @@ public class ManagerController {
     @GetMapping("/updateProduct/{id}")
     public String deleteProduct(@PathVariable("id") int id,   Model model, HttpSession session) {
         Product product = productService.findProductById(id);
-        ProductDTO request=new ProductDTO(product.getId(), product.getName(), product.getCategory().getId(), product.getImg_url());
+        ProductDTO request=new ProductDTO(product.getId(), product.getName(), product.getCategory().getId(), product.getImg_url(), product.getDescription());
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
