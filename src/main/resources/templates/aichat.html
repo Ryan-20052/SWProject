@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý ảo ShineShop</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .back-btn {
+            background: white;
+            color: #2563eb;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,0.8);
+            transform: translateY(-1px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            max-width: 900px;
+            width: 100%;
+            margin: 24px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f3f4f6;
+            scroll-behavior: smooth;
+        }
+
+        .msg {
+            max-width: 75%;
+            padding: 10px 14px;
+            margin: 8px 0;
+            border-radius: 8px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user {
+            background: #2563eb;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg.ai {
+            background: #e5e7eb;
+            color: #111;
+            border-bottom-left-radius: 2px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 14px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        .input-area input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .input-area button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-left: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .input-area button:hover {
+            background: #1d4ed8;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #555;
+            margin: 0 2px;
+            animation: blink 1s infinite alternate;
+        }
+
+        .loading:nth-child(2) { animation-delay: .2s; }
+        .loading:nth-child(3) { animation-delay: .4s; }
+
+        @keyframes blink {
+            from { opacity: 0.2; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 700px) {
+            .chat-container { margin: 0; border-radius: 0; height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <span>🤖 Trợ lý ảo</span>
+    <button class="back-btn" onclick="window.location.href='/home/homepage'">⬅ Trang chủ</button>
+</header>
+
+<div class="chat-container">
+    <div class="messages" id="messages">
+        <div class="msg ai">Xin chào 👋! Tôi có thể giúp bạn tìm sản phẩm, xem sản phẩm bán chạy hoặc gợi ý phù hợp với nhu cầu của bạn.</div>
+    </div>
+
+    <div class="input-area">
+        <input id="userInput" type="text" placeholder="Nhập tin nhắn..." autocomplete="off" />
+        <button id="sendBtn">Gửi</button>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const messages = document.getElementById("messages");
+
+    function addMessage(role, text) {
+        const msg = document.createElement("div");
+        msg.className = "msg " + role;
+        msg.textContent = text;
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addLoading() {
+        const wrap = document.createElement("div");
+        wrap.className = "msg ai";
+        wrap.id = "loadingMsg";
+        wrap.innerHTML = '<span class="loading"></span><span class="loading"></span><span class="loading"></span>';
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeLoading() {
+        const loading = document.getElementById("loadingMsg");
+        if (loading) loading.remove();
+    }
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage("user", text);
+        input.value = "";
+        addLoading();
+
+        try {
+            const res = await fetch("/chat/api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await res.json();
+            removeLoading();
+            addMessage("ai", data.reply || "Xin lỗi, tôi chưa có câu trả lời phù hợp.");
+        } catch (err) {
+            removeLoading();
+            addMessage("ai", "Lỗi khi gửi tin nhắn: " + err.message);
+        }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+    });
+</script>
+
+</body>
+</html>
