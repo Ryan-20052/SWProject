@@ -17,4 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByCategoryIdNative(@Param("catId") Integer catId);
 
     List<Product> findByCategoryId(Integer id);
+    @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE %:keyword% OR LOWER(p.description) LIKE %:keyword%")
+    List<Product> searchByKeyword(@Param("keyword") String keyword);
 }

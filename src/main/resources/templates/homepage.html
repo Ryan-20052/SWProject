@@ -126,7 +126,29 @@
             padding: 8px 14px;
         }
         .auth-login:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
+        /* Nút Trợ lý ảo */
+        .assistant-btn {
+            background: white;
+            color: #2563eb;
+            border: 1.5px solid #2563eb;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .assistant-btn:hover {
+            background: #2563eb;
+            color: white;
+            transform: translateY(-2px);
+        }
 
+        /* actions */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         /* Nút Đăng ký: filled để nổi bật */
         .auth-register {
             background: white;
@@ -290,6 +312,8 @@
         updateCartCountUI();
     });
 </script>
+
+
 <body>
 <header id="siteHeader">
     <div class="header-inner">
@@ -301,6 +325,9 @@
                 <button id="clearSearch" class="search-clear hidden" aria-label="Xóa tìm kiếm">X</button>
             </div>
         </div>
+        <button class="assistant-btn" onclick="window.location.href='/chat'">
+            💬 Trợ lý ảo
+        </button>
 
         <!-- Actions (Login / Register / Cart) -->
         <div class="actions">

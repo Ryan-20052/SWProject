@@ -15,4 +15,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             "GROUP BY od.variant.product.id " +
             "ORDER BY SUM(od.amount) DESC")
     List<Object[]> findTopProductIds(Pageable pageable);
+    @Query("""
+        SELECT od.variant.product.name, SUM(od.amount) AS totalSold
+        FROM OrderDetail od
+        GROUP BY od.variant.product.name
+        ORDER BY totalSold DESC
+    """)
+    List<Object[]> findTopSellingProducts();
 }
