@@ -54,7 +54,12 @@ public class AIChatService {
 
     public String chat(String message) {
         String lower = normalize(message);
-
+        if (containsAny(lower,
+                "bán gì", "bán cái gì", "shop bán gì", "shop mình bán gì",
+                "mình bán gì", "cửa hàng bán gì", "bán những gì", "bán những")
+        ) {
+            return "Shop mình bán license bạn nhé, tất tần tật mọi thể loại từ học tập, giải trí,...";
+        }
         // =============================
         // 1️⃣ Xử lý sản phẩm trong DB
         // =============================
@@ -71,6 +76,7 @@ public class AIChatService {
                     || lower.matches(".*\\b" + productName.split(" ")[0] + "\\b.*")) {
                 boolean askPrice = containsAny(lower, "giá", "bao nhiêu", "mắc", "rẻ", "price", "cost");
                 boolean askDesc  = containsAny(lower, "là gì", "mô tả", "giới thiệu", "dùng làm gì");
+
 
                 List<Variant> variants = p.getVariants() == null ? List.of() : p.getVariants();
                 StringBuilder reply = new StringBuilder("📦 **" + p.getName() + "**\n");
@@ -89,6 +95,7 @@ public class AIChatService {
                     }
                     return reply.toString();
                 }
+
 
                 if (askDesc) {
                     reply.append("📜 Mô tả: ")
