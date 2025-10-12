@@ -14,8 +14,11 @@ public class Categories {
 
     private String description;
 
+    private String status;
+
     public Categories() {
     }
+
 
     public Categories(Integer id, String name, String description) {
         this.id = id;
@@ -26,6 +29,15 @@ public class Categories {
     public Categories(String name, String description) {
         this.name = name;
         this.description = description;
+        this.status = "unavailable";
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Integer getId() { return id; }

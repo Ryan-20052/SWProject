@@ -24,6 +24,10 @@ public class CategoryService {
         categoryRepository.save(categories);
     }
 
+    public List<Categories> getAllCategoriesByStatus(String status) {
+        return categoryRepository.findByStatus(status);
+    }
+
     public Categories  getCategoryById(int id) {
         return categoryRepository.findById( id).get();
     }

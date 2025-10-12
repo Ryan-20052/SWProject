@@ -276,6 +276,14 @@
         <input type="text" name="name" placeholder="Tìm theo tên sản phẩm"
                th:value="${categoryName}"
                style="width: 200px; padding: 4px;">
+
+        <select name="status"
+                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:150px;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="available" th:selected="${status == 'available'}">available</option>
+            <option value="unavailable" th:selected="${status == 'unavailable'}">unavailable</option>
+        </select>
+
         <button type="submit"
                 style="padding:8px 16px; background:var(--blue); color:white; border:none;
                    border-radius:6px; cursor:pointer; font-weight:500;">
@@ -301,6 +309,7 @@
             <th>STT</th>
             <th>Tên Danh Mục</th>
             <th>Mô Tả</th>
+            <th>Trạng thái</th>
             <th>Hành động</th>
         </tr>
         </thead>
@@ -313,11 +322,30 @@
 
             <td th:text="${c.description}"></td>
 
+            <td th:text="${c.status}"></td>
+
             <td style="gap:6px; padding:8px;">
+                <!-- Nút Ẩn (khi đang available) -->
+                <a th:if="${c.status == 'available'}"
+                   th:href="@{/manage/statusCategory/{id}(id=${c.id})}"
+                   class="btn btn-del"
+                   style="margin-right: 8px;">
+                    Ẩn
+                </a>
+
+                <!-- Nút Hiện lại (khi đang unavailable) -->
+                <a th:if="${c.status == 'unavailable'}"
+                   th:href="@{/manage/statusCategory/{id}(id=${c.id})}"
+                   class="btn btn-edit"
+                   style="margin-right: 8px; background-color: #28a745">
+                    Hiện
+                </a>
+
                 <a th:href="@{/manage/updateCategory/{id}(id=${c.id})}"
                    class="btn btn-edit">
                     Sửa
                 </a>
+
             </td>
         </tr>
         </tbody>

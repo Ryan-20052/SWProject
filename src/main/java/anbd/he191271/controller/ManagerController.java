@@ -60,7 +60,7 @@ public class ManagerController {
         model.addAttribute("productList", stream.toList());
         model.addAttribute("newProduct", new ProductDTO());
         model.addAttribute("newVariant", new VariantDTO());
-        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("categories", categoryService.getAllCategoriesByStatus("available"));
         model.addAttribute("manager", manager);
         return "manageHome";
     }
@@ -204,7 +204,9 @@ public class ManagerController {
     }
 
     @GetMapping("/category")
-    public String category(@RequestParam(required = false, name = "name") String categoryName, Model model, HttpSession session)
+    public String category(@RequestParam(required = false, name = "name") String categoryName,
+                           @RequestParam(required = false) String status,
+                           Model model, HttpSession session)
     {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
@@ -213,9 +215,13 @@ public class ManagerController {
         Stream<Categories> stream = categoryService.getAllCategories().stream();
         if(categoryName != null &&  !categoryName.isEmpty()){
             stream = stream.filter( c -> c.getName().toLowerCase().contains(categoryName.toLowerCase()));
+            model.addAttribute("categoryName", categoryName);
+        }
+        if(status!=null&&!status.isEmpty()){
+            stream=stream.filter(c -> c.getStatus().equals(status));
+            model.addAttribute("status",status);
         }
         model.addAttribute("categoryList", stream.toList());
-        model.addAttribute("categoryName", categoryName);
         model.addAttribute("manager", manager);
         model.addAttribute("newCategory", new CategoryDTO());
         return "manageCategory";
@@ -232,6 +238,51 @@ public class ManagerController {
         managerLogService.save(log);
         Categories category = new Categories(request.getName(), request.getDescription());
         categoryService.save(category);
+        return "redirect:/manage/category";
+    }
+
+    @GetMapping("/statusCategory/{id}")
+    public String updateStatusCategory(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {
+        Categories category = categoryService.getCategoryById(id);
+        Manager manager=(Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        if(category.getStatus().equals("available")) {
+            category.setStatus("unavailable");
+            redirectAttributes.addFlashAttribute("msg", "Đã tắt khả năng thêm sản phẩm cho danh mục này");
+        }else{
+            category.setStatus("available");
+            redirectAttributes.addFlashAttribute("msg", "Đã bật khả năng thêm sản phẩm cho danh mục này");
+        }
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "change status of category "+ category.getName());
+        managerLogService.save(log);
+        categoryService.save(category);
+        return "redirect:/manage/category";
+    }
+
+    @GetMapping("/updateCategory/{id}")
+    public String updateCategory(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session, Model model) {
+        Manager manager=(Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        Categories category = categoryService.getCategoryById(id);
+        model.addAttribute("category", category);
+        model.addAttribute("manager", manager);
+        model.addAttribute("request", new CategoryDTO(category.getId(), category.getName(), category.getDescription()));
+        return "categoryUpdatePage";
+    }
+
+    @PostMapping("updateCategory")
+    public String updateVariant(@ModelAttribute("request") CategoryDTO request, HttpSession session, RedirectAttributes redirectAttributes) {
+        Categories category =  categoryService.getCategoryById(request.getCategory_id());
+        Manager manager=(Manager)session.getAttribute("manager");
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        categoryService.save(category);
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "update category "+ request.getName());
+        managerLogService.save(log);
         return "redirect:/manage/category";
     }
 
