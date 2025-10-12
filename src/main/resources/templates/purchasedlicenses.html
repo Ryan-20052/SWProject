@@ -6,43 +6,55 @@
     <style>
         body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
         header { background: #2d89ef; color: white; padding: 15px 30px; }
-        header h1 { margin: 0; font-size: 22px; }
         .header-inner { display: flex; justify-content: space-between; align-items: center; }
-        .actions button { background: white; color: #2d89ef; border: none; padding: 8px 15px; margin-left: 10px;
-            border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .actions button:hover { background: #e0e0e0; }
-        .container { padding: 30px; max-width: 900px; margin: auto; background: white; margin-top: 20px;
+        .container { padding: 30px; max-width: 950px; margin: auto; background: white; margin-top: 20px;
             border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #2d89ef; text-align: center; }
+        input, select, button { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+        button { background: #2d89ef; color: white; cursor: pointer; }
+        button:hover { background: #1b63b8; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table thead { background: #2d89ef; color: white; }
-        table th, table td { padding: 12px 15px; text-align: center; border: 1px solid #ddd; }
-        table tr:nth-child(even) { background: #f4f4f4; }
-        p { text-align: center; font-size: 16px; margin-top: 20px; }
-        .alert { text-align:center; padding:10px; margin:10px auto; max-width:600px; border-radius:6px; }
-        .alert-warning { background:#fff3cd; color:#856404; border:1px solid #ffeeba; }
-        .alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+        thead { background: #2d89ef; color: white; }
+        th, td { padding: 12px 15px; text-align: center; border: 1px solid #ddd; }
+        tr:nth-child(even) { background: #f4f4f4; }
+        a.page-link { margin: 0 4px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px; text-decoration: none; color: #333; }
+        a.active-page { background: #2d89ef; color: white; font-weight: bold; }
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-<header id="siteHeader">
+
+<header>
     <div class="header-inner">
         <h1>License Shop</h1>
-        <button type="button"
-                onclick="window.location.href='/home/homepage'"
-                style="background:#6c757d;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;">
-            ⬅ Back to Homepage
-        </button>
-
+        <button onclick="window.location.href='/home/homepage'">⬅ Về trang chủ</button>
     </div>
-
 </header>
 
 <div class="container">
-    <h2>Danh sách license đã mua</h2>
+    <h2>License đã mua</h2>
 
-    <!-- Hiển thị thông báo -->
-    <div th:if="${message != null}" class="alert alert-warning" th:text="${message}"></div>
+    <!-- Bộ lọc tổng hợp -->
+    <form id="filterForm" method="get" action="/purchasedlicenses" class="filters">
+        <input type="text" name="search" th:value="${search}" placeholder="🔍 Tìm theo tên sản phẩm">
+
+        <select name="category" onchange="submitFilterForm()">
+            <option value="">-- Tất cả danh mục --</option>
+            <option th:each="c : ${@categoryRepository.findAll()}"
+                    th:value="${c.name}"
+                    th:text="${c.name}"
+                    th:selected="${c.name == category}"></option>
+        </select>
+
+        <div>
+            Từ: <input type="date" name="from" th:value="${from}">
+        </div>
+        <div>
+            Đến: <input type="date" name="to" th:value="${to}">
+        </div>
+
+        <button type="submit">Áp dụng</button>
+    </form>
 
     <table th:if="${!#lists.isEmpty(purchasedLicenses)}">
         <thead>
@@ -50,33 +62,57 @@
             <th>Tên sản phẩm</th>
             <th>Gói/Dung lượng</th>
             <th>Ngày mua</th>
-            <th>Ngày hết hạn</th>
             <th>Đánh giá</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="license : ${purchasedLicenses}">
-            <td th:text="${license.orderDetail.variant.product.name}">Tên sản phẩm</td>
-            <td th:text="${license.orderDetail.variant.name}">Gói</td>
-            <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}">01/10/2025</td>
-            <td th:text="${#dates.format(license.expiredAt, 'dd/MM/yyyy')}">01/11/2025</td>
             <td>
-                <a th:href="@{/review/{productId}(productId=${license.orderDetail.variant.product.id})}">
-                    <button style="background:#f39c12;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;">
-                        ⭐ Đánh giá
-                    </button>
-                </a>
+                <a th:href="@{/product/{id}(id=${license.orderDetail.variant.product.id})}"
+                   style="color:#2d89ef; text-decoration:none; font-weight:bold;"
+                   th:text="${license.orderDetail.variant.product.name}"></a>
+            </td>
+            <td th:text="${license.orderDetail.variant.name}"></td>
+            <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}"></td>
+            <td>
+                <button style="background:#ffc107;border:none;color:#333;padding:6px 10px;border-radius:5px;cursor:pointer;"
+                        th:onclick="'window.location.href=\'/review/' + ${license.orderDetail.variant.product.id} + '\''">
+                    ★ Đánh giá
+                </button>
             </td>
         </tr>
         </tbody>
     </table>
 
+    <p th:if="${#lists.isEmpty(purchasedLicenses)}">Bạn chưa mua license nào.</p>
 
-    <div th:if="${#lists.isEmpty(purchasedLicenses)}">
-        <p>Bạn chưa mua license nào.</p>
+    <!-- Phân trang kiểu << < 1 2 3 ... > >> -->
+    <div style="text-align:center; margin-top:20px;" th:if="${totalPages > 1}">
+        <a class="page-link" th:if="${currentPage > 1}"
+           th:href="@{/purchasedlicenses(page=1, search=${search}, category=${category}, from=${from}, to=${to})}">&laquo;&laquo;</a>
+        <a class="page-link" th:if="${currentPage > 1}"
+           th:href="@{/purchasedlicenses(page=${currentPage - 1}, search=${search}, category=${category}, from=${from}, to=${to})}">&lt;</a>
+
+        <a class="page-link"
+           th:each="p : ${#numbers.sequence(1, totalPages)}"
+           th:if="${p >= currentPage - 2 and p <= currentPage + 2}"
+           th:text="${p}"
+           th:classappend="${p == currentPage ? 'active-page' : ''}"
+           th:href="@{/purchasedlicenses(page=${p}, search=${search}, category=${category}, from=${from}, to=${to})}"></a>
+
+        <a class="page-link" th:if="${currentPage < totalPages}"
+           th:href="@{/purchasedlicenses(page=${currentPage + 1}, search=${search}, category=${category}, from=${from}, to=${to})}">&gt;</a>
+        <a class="page-link" th:if="${currentPage < totalPages}"
+           th:href="@{/purchasedlicenses(page=${totalPages}, search=${search}, category=${category}, from=${from}, to=${to})}">&raquo;&raquo;</a>
     </div>
-
-
 </div>
+
+<script>
+    // Khi đổi category hoặc ngày => submit toàn bộ form
+    function submitFilterForm() {
+        document.getElementById("filterForm").submit();
+    }
+</script>
+
 </body>
 </html>
