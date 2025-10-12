@@ -1,5 +1,6 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.dto.CategoryDTO;
 import anbd.he191271.dto.ProductDTO;
 import anbd.he191271.dto.VariantDTO;
 import anbd.he191271.entity.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Controller
@@ -31,13 +33,31 @@ public class ManagerController {
     private ManagerLogService managerLogService;
 
     @GetMapping("/manageHome")
-    public String manageHome(Model model, HttpSession session) {
+    public String manageHome(
+            @RequestParam(name = "name",required = false) String productName,
+            @RequestParam(name ="categoryId", required = false) String categoryId,
+            @RequestParam(required = false) String status,
+            Model model, HttpSession session)
+    {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
         }
+        Stream<Product> stream=productService.getAllProduct().stream();
+        if(productName!=null&&!productName.isEmpty()){
+            stream=stream.filter(p -> p.getName().toLowerCase().contains(productName.toLowerCase()));
+            model.addAttribute("productName",productName);
+        }
+        if(categoryId!=null&&!categoryId.isEmpty()){
+            stream=stream.filter(p -> p.getCategory().getId()==Integer.parseInt(categoryId));
+            model.addAttribute("categoryId",Integer.parseInt(categoryId));
+        }
+        if(status!=null&&!status.isEmpty()){
+            stream=stream.filter(p -> p.getStatus().equals(status));
+            model.addAttribute("status",status);
+        }
         model.addAttribute("productListAvai", productService.getAllProductByStatus("available"));
-        model.addAttribute("productList", productService.getAllProduct());
+        model.addAttribute("productList", stream.toList());
         model.addAttribute("newProduct", new ProductDTO());
         model.addAttribute("newVariant", new VariantDTO());
         model.addAttribute("categories", categoryService.getAllCategories());
@@ -181,6 +201,38 @@ public class ManagerController {
         model.addAttribute("manager", manager);
         model.addAttribute("manageLogList", manageLogList.reversed());
         return "manageLogPage";
+    }
+
+    @GetMapping("/category")
+    public String category(@RequestParam(required = false, name = "name") String categoryName, Model model, HttpSession session)
+    {
+        Manager manager=(Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        Stream<Categories> stream = categoryService.getAllCategories().stream();
+        if(categoryName != null &&  !categoryName.isEmpty()){
+            stream = stream.filter( c -> c.getName().toLowerCase().contains(categoryName.toLowerCase()));
+        }
+        model.addAttribute("categoryList", stream.toList());
+        model.addAttribute("categoryName", categoryName);
+        model.addAttribute("manager", manager);
+        model.addAttribute("newCategory", new CategoryDTO());
+        return "manageCategory";
+    }
+
+    @PostMapping("/addCategory")
+    public String addCategory(@ModelAttribute("newCategory") CategoryDTO request, RedirectAttributes redirectAttributes, HttpSession session)
+    {
+        Manager manager=(Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "add category "+ request.getName());
+        managerLogService.save(log);
+        Categories category = new Categories(request.getName(), request.getDescription());
+        categoryService.save(category);
+        return "redirect:/manage/category";
     }
 
 }

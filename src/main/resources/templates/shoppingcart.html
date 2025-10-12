@@ -238,7 +238,11 @@
         </div>
         <div class="actions">
             <button class="nav-btn" onclick="window.location.href='/home/homepage'">🏠 Trang chủ</button>
-            <button class="nav-btn" onclick="window.location.href='/logout'">🚪 Đăng xuất</button>
+            <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
+                <button type="submit" class="nav-btn">
+                    Đăng xuất
+                </button>
+            </form>
         </div>
     </div>
 </header>

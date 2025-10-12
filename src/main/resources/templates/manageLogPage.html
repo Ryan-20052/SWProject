@@ -135,7 +135,7 @@
                 <td th:text="${iterStat.count}"></td>
                 <td th:text="${log.managerName}"></td>
                 <td th:text="${log.action}"></td>
-                <td th:text="${#temporals.format(log.time, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${#temporals.format(log.time, 'dd-MM-yyyy HH:mm:ss')}"></td>
             </tr>
             </tbody>
             <tbody th:if="${manageLogList == null or manageLogList.isEmpty()}">

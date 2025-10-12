@@ -6,6 +6,7 @@ import anbd.he191271.entity.Manager;
 import anbd.he191271.service.CustomerService;
 import anbd.he191271.service.ManagerService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -61,8 +62,11 @@ public class ManagerLoginController {
         return ResponseEntity.ok(manager);
     }
     @PostMapping("/logout")
-    public String logout(HttpSession session) {
+    public ResponseEntity<Void> logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/home/homepage";
+        return ResponseEntity
+                .status(HttpStatus.FOUND) // 302
+                .header(HttpHeaders.LOCATION, "/home/homepage")
+                .build();
     }
 }

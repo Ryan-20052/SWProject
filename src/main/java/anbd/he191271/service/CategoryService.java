@@ -19,6 +19,11 @@ public class CategoryService {
     public List<Categories> getAllCategories() {
         return categoryRepository.findAll();
     }
+
+    public void  save(Categories categories) {
+        categoryRepository.save(categories);
+    }
+
     public Categories  getCategoryById(int id) {
         return categoryRepository.findById( id).get();
     }
