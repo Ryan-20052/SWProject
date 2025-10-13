@@ -13,6 +13,7 @@
         :root {
             --blue: #2563eb;
             --blue-dark: #1d4ed8;
+            --blue-light: rgba(37,99,235,0.15); /* Light blue for button backgrounds */
             --accent: #f43f5e; /* màu đỏ/đậm cho nút thêm giỏ */
             --white-90: rgba(255,255,255,0.9);
         }
@@ -100,76 +101,100 @@
         }
         .search-clear.hidden { display: none; opacity: 0; }
 
-        /* Actions (Login/Register/Cart) */
+        /* Actions (Login/Register/Cart/Support/Assistant) */
         .actions { display: flex; gap: 8px; align-items: center; }
 
-        /* Reset chung cho nút trong header */
-        .actions button {
-            padding: 8px 12px;
-            border: none;
+        /* Reset chung cho các nút trong header (trừ user-avatar) */
+        .actions button, .actions a:not(.user-avatar) {
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.5;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             box-sizing: border-box;
-            transition: transform 140ms ease, box-shadow 140ms ease, opacity 160ms ease;
+            transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, color 140ms ease;
             white-space: nowrap;
+            text-decoration: none;
+            color: white;
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
         }
 
-        /* Nút Đăng nhập: outline trắng (trong suốt) */
-        .auth-login {
-            background: transparent;
-            color: var(--white-90);
-            border: 1.5px solid rgba(255,255,255,0.18);
-            padding: 8px 14px;
-        }
-        .auth-login:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
         /* Nút Trợ lý ảo */
         .assistant-btn {
-            background: white;
-            color: #2563eb;
-            border: 1.5px solid #2563eb;
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 8px 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
+            color: var(--white-90);
         }
         .assistant-btn:hover {
-            background: #2563eb;
-            color: white;
+            background: #2d89ef;
+            border-color: #2d89ef;
             transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
         }
 
-        /* actions */
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* Nút Đăng nhập */
+        .auth-login {
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
+            color: var(--white-90);
         }
-        /* Nút Đăng ký: filled để nổi bật */
+        .auth-login:hover {
+            background: #2d89ef;
+            border-color: #2d89ef;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
+        }
+
+        /* Nút Đăng ký */
         .auth-register {
-            background: white;
-            color: var(--blue);
-            border: 1.5px solid rgba(0,0,0,0.06);
-            padding: 9px 14px;
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
+            color: var(--white-90);
+            font-weight: 600;
         }
-        .auth-register:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.08); }
-
-        /* Nút Giỏ hàng: tông nhấn nhẹ */
-        #cartBtn {
-            background: rgba(255,255,255,0.12);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 8px 12px;
-            border-radius: 8px;
+        .auth-register:hover {
+            background: #2d89ef;
+            border-color: #2d89ef;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
         }
-        #cartBtn:hover { background: rgba(255,255,255,0.16); transform: translateY(-2px); }
 
-        /* Khi header compact, giảm kích thước các nút 1 chút */
-        header.compact .actions button { padding: 6px 10px; font-size: 13px; }
+        /* Nút Giỏ hàng */
+        .cart-btn {
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
+            color: var(--white-90);
+        }
+        .cart-btn:hover {
+            background: #2d89ef;
+            border-color:#2d89ef;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
+        }
+
+        /* Nút Hỗ trợ */
+        .support-btn {
+            background: var(--blue-light);
+            border: 1.5px solid var(--white-90);
+            color: var(--white-90);
+        }
+        .support-btn:hover {
+            background: #2d89ef;
+            border-color: #2d89ef;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
+        }
+
+        /* Khi header compact, giảm kích thước các nút */
+        header.compact .actions button, header.compact .actions a:not(.user-avatar) {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
 
         /* --------------------
            Navigation
@@ -190,11 +215,11 @@
         }
         .nav-inner .nav-link:hover {
             background: rgba(37,99,235,0.06);
-            color: var(--blue);
+            color: #2d89ef;
             transform: translateY(-2px);
         }
         .nav-inner .nav-link.active {
-            color: var(--blue);
+            color: #2d89ef;
             background: rgba(37,99,235,0.12);
             box-shadow: inset 0 -3px 0 rgba(37,99,235,0.08);
         }
@@ -272,47 +297,75 @@
         .toast-cart { position: fixed; right: 20px; bottom: 20px; background: #111; color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(10px); opacity: 0; transition: all 240ms ease; z-index: 9999; }
         .toast-cart.show { opacity: 1; transform: translateY(0); }
 
+        /* --------------------
+           Pagination styles
+           -------------------- */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .page-btn, .page-num {
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .page-btn {
+            background: white;
+            color: #111;
+        }
+        .page-num {
+            background: white;
+            color: #111;
+        }
+        .page-num.active {
+            background: var(--blue);
+            color: white;
+            border-color: rgba(0,0,0,0.06);
+        }
+        .page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+
         /* Responsive: rút gọn layout header cho mobile */
         @media (max-width: 880px) {
             .header-inner { padding: 0 12px; gap: 10px; }
-            .search-box { display: none; } /* ẩn search trên mobile header để gọn (tùy bạn) */
+            .search-box { display: none; } /* ẩn search trên mobile header để gọn */
             .nav-inner { padding: 8px 12px; gap: 12px; overflow-x:auto; }
             .grid-featured, .grid-all { grid-template-columns: repeat(2, 1fr); }
+            .page-num { padding: 6px 8px; font-size: 14px; }
         }
+
+        /* Simple dropdown */
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); color: white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+        .avatar-img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+        .dropdown { position: absolute; right: 20px; top: 68px; background: white; color: #111; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12); min-width:180px; display:none; z-index:1300; }
+        .dropdown.show { display:block; }
+        .dropdown .item { padding:10px 12px; display:block; text-decoration:none; color:inherit; border-bottom:1px solid rgba(0,0,0,0.04); }
+        .dropdown .item:last-child { border-bottom:none; }
+        .dropdown .item:hover { background: rgba(0,0,0,0.02); }
+
     </style>
 </head>
 <script>
-    function updateCartCountUI() {
-        const cart = typeof loadCart === 'function' ? loadCart() : [];
-        const total = cart.reduce((s, it) => s + (it.qty||1), 0);
-        document.querySelectorAll('#cartBtn').forEach(btn => {
-            btn.innerText = `Giỏ hàng (${total})`;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const avatar = document.getElementById('userAvatar');
-        const dropdown = document.getElementById('userDropdown');
-
-        if (avatar && dropdown) {
-            avatar.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdown.classList.toggle('show');
-                dropdown.setAttribute('aria-hidden', dropdown.classList.contains('show') ? 'false' : 'true');
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target) && !avatar.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                    dropdown.setAttribute('aria-hidden', 'true');
-                }
-            });
+    // Nếu bạn đã có homepage.js, hàm này có thể nằm ở đó. Đây là fallback/tiện lợi.
+    function loadCart() {
+        try {
+            const raw = localStorage.getItem('cart');
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed;
+            return [];
+        } catch (e) {
+            return [];
         }
-
-        updateCartCountUI();
-    });
+    }
 </script>
-
 
 <body>
 <header id="siteHeader">
@@ -325,46 +378,77 @@
                 <button id="clearSearch" class="search-clear hidden" aria-label="Xóa tìm kiếm">X</button>
             </div>
         </div>
-        <button class="assistant-btn" onclick="window.location.href='/chat'">
-            💬 Trợ lý ảo
-        </button>
 
-        <!-- Actions (Login / Register / Cart) -->
-        <div class="actions">
-            <!-- Nếu chưa đăng nhập -->
-            <div th:if="${customer == null}">
+        <!-- Actions (theo thứ tự: Trợ lý ảo, Giỏ hàng, Hỗ trợ, Profile/Đăng nhập) -->
+        <div class="actions" role="group" aria-label="Hành động người dùng">
+
+            <!-- Trợ lý ảo (luôn hiển thị) -->
+            <a th:href="@{/chat}" class="assistant-btn" role="button" aria-label="Trợ lý ảo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/>
+                </svg>
+                Trợ lý ảo
+            </a>
+
+            <!-- Giỏ hàng + Support + Auth (khi chưa đăng nhập) -->
+            <div th:if="${customer == null}" style="display:inline-flex; gap:8px; align-items:center;">
+                <!-- Giỏ hàng (guest) - dùng class chung .cart-btn để JS cập nhật -->
+                <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
+                    </svg>
+                    <span class="cart-text">Giỏ hàng (0)</span>
+                </a>
+
+                <!-- Hỗ trợ khách hàng -->
+                <a th:href="@{/support/view}" class="support-btn" role="button" aria-label="Hỗ trợ khách hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92A2.5 2.5 0 0012.5 12H11v-1h1.5c.28 0 .5-.22.5-.5 0-.13-.05-.26-.15-.35L11.9 7.9A1 1 0 0113 7c.55 0 1 .45 1 1 0 .28-.11.53-.28.75z"/>
+                    </svg>
+                    <span>Hỗ trợ</span>
+                </a>
+
+                <!-- Đăng nhập / Đăng ký -->
                 <a th:href="@{/login.html}" class="auth-login" role="button">Đăng nhập</a>
                 <a th:href="@{/register.html}" class="auth-register" role="button">Đăng ký</a>
-                <button id="cartBtn" class="cart-btn">Giỏ hàng (0)</button>
             </div>
 
-            <!-- Nếu đã đăng nhập -->
-            <div class="user-menu" th:if="${customer != null}">
-                <div id="userAvatar" class="user-avatar" title="Tài khoản">
-                    <!-- Nếu có ảnh avatar thì hiển thị từ endpoint -->
+            <!-- User menu khi đã đăng nhập -->
+            <div class="user-menu" th:if="${customer != null}" style="display:inline-flex; gap:8px; align-items:center;">
+                <!-- Giỏ hàng (user) -->
+                <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
+                    </svg>
+                    <span class="cart-text">Giỏ hàng (0)</span>
+                </a>
+
+                <!-- Hỗ trợ khách hàng (user) -->
+                <a th:href="@{/support/view}" class="support-btn" role="button" aria-label="Hỗ trợ khách hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92A2.5 2.5 0 0012.5 12H11v-1h1.5c.28 0 .5-.22.5-.5 0-.13-.05-.26-.15-.35L11.9 7.9A1 1 0 0113 7c.55 0 1 .45 1 1 0 .28-.11.53-.28.75z"/>
+                    </svg>
+                    <span>Hỗ trợ</span>
+                </a>
+
+                <!-- Avatar / profile (giữ nguyên dropdown của bạn) -->
+                <div id="userAvatar" class="user-avatar" title="Tài khoản" style="cursor:pointer;">
                     <img th:if="${customer.avatar != null}"
                          th:src="@{'/customer/avatar/' + ${customer.id}}" alt="avatar" class="avatar-img"/>
-
-                    <!-- Nếu không có ảnh thì lấy chữ cái đầu -->
                     <span th:if="${customer.avatar == null}"
                           th:text="${#strings.substring(customer.name,0,1).toUpperCase()}">U</span>
                 </div>
 
-                <div id="userDropdown" class="dropdown">
+                <div id="userDropdown" class="dropdown" aria-hidden="true">
                     <div class="item item-name" th:text="${customer.name}">Tên user</div>
                     <a th:href="@{/customer/profile}" class="item">Profile</a>
                     <a th:href="@{/purchasedlicenses}" class="item">Purchased License</a>
-
-                    <!-- Sử dụng form POST tới /auth/customer/logout -->
                     <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
                         <button type="submit" class="item" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;">
                             Log out
                         </button>
                     </form>
                 </div>
-
-                <button id="cartBtnL" class="cart-btn"
-                        th:onclick="|window.location.href='/cart/view'|">Giỏ hàng</button>
             </div>
 
         </div>
@@ -413,10 +497,8 @@
                         <div class="meta">
                         <span class="price"
                               th:text="${#lists.isEmpty(product.variants) ? 'Liên hệ' : product.variants[0].price + ' đ'}">Giá</span>
-                            <!-- Nếu muốn hiện số đã bán, bạn có thể mở rộng service để trả về DTO chứa totalSold -->
                         </div>
                         <div class="actions-row">
-                            <!-- Nút Thêm vào giỏ hàng (button giống phần "Tất cả sản phẩm") -->
                             <button
                                     class="add-to-cart action-btn"
                                     type="button"
@@ -429,7 +511,6 @@
                                 Thêm Vào Giỏ Hàng
                             </button>
 
-                            <!-- Nút Mua ngay (button giống phần "Tất cả sản phẩm") -->
                             <button
                                     class="buy action-btn"
                                     type="button"
@@ -448,8 +529,18 @@
     <section class="products">
         <div class="section-inner">
             <div class="content-inner">
+                <form th:action="@{/home/homepage}" method="get" style="margin-bottom: 20px;">
+                    <label for="sort">Sắp xếp theo giá: </label>
+                    <select id="sort" name="sort" onchange="this.form.submit()">
+                        <option th:value="default" th:selected="${currentSort == 'default'}">Mặc định</option>
+                        <option th:value="priceAsc" th:selected="${currentSort == 'priceAsc'}">Giá tăng dần</option>
+                        <option th:value="priceDesc" th:selected="${currentSort == 'priceDesc'}">Giá giảm dần</option>
+                    </select>
+                </form>
+
                 <h2>Tất cả sản phẩm</h2>
                 <div class="sub">Danh sách đầy đủ sản phẩm</div>
+
                 <div class="grid-all" id="allGrid">
                     <!-- Thymeleaf render .card ở đây -->
                     <div th:each="product : ${products}" class="card">
@@ -483,6 +574,28 @@
                 </div>
 
                 <div id="noResults" class="no-results" style="display:none;">Không tìm thấy sản phẩm nào khớp.</div>
+
+                <!-- ======== Pagination ======== -->
+                <div th:if="${totalPages != null and totalPages > 1}" class="pagination" role="navigation" aria-label="Phân trang sản phẩm">
+                    <!-- Prev -->
+                    <a th:if="${hasPrev}"
+                       th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${currentPage - 1})} : @{/home/homepage(page=${currentPage - 1})}"
+                       class="page-btn">← Trước</a>
+
+                    <!-- Pages (hiển thị 1-based cho người dùng, model dùng 0-based) -->
+                    <span th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a th:classappend="${p == currentPage} ? ' page-num active' : ' page-num'"
+                           th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${p})} : @{/home/homepage(page=${p})}"
+                           th:text="${p + 1}">1</a>
+                    </span>
+
+                    <!-- Next -->
+                    <a th:if="${hasNext}"
+                       th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${currentPage + 1})} : @{/home/homepage(page=${currentPage + 1})}"
+                       class="page-btn">Tiếp →</a>
+                </div>
+                <!-- ======== end pagination ======== -->
+
             </div>
         </div>
     </section>
@@ -491,9 +604,64 @@
 <!-- Toast element (tạo động nếu chưa có) và script xử lý cart + tìm kiếm + header compact -->
 <script>
     /* =========================
-       Local Storage Cart Utils
+       Local Storage Cart Utils (cập nhật UI cho mọi .cart-btn)
        ========================= */
 
+    function updateCartCountUI() {
+        const cart = typeof loadCart === 'function' ? loadCart() : [];
+        const total = cart.reduce((s, it) => s + (it.qty||1), 0);
+
+        // Cập nhật tất cả phần tử có class .cart-btn
+        document.querySelectorAll('.cart-btn').forEach(btn => {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/></svg>`;
+            const text = ` <span class="cart-text">Giỏ hàng (${total})</span>`;
+            btn.innerHTML = svg + text;
+        });
+    }
+
+    // Search input clear button behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatar = document.getElementById('userAvatar');
+        const dropdown = document.getElementById('userDropdown');
+
+        if (avatar && dropdown) {
+            avatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+                dropdown.setAttribute('aria-hidden', dropdown.classList.contains('show') ? 'false' : 'true');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && !avatar.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                    dropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+
+        // search clear button
+        const input = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearch');
+        if (input && clearBtn) {
+            input.addEventListener('input', function() {
+                if (input.value && input.value.trim().length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            });
+            clearBtn.addEventListener('click', function() {
+                input.value = '';
+                clearBtn.classList.add('hidden');
+                // nếu có chức năng lọc, submit form hoặc call search lại tại đây
+            });
+        }
+
+        updateCartCountUI();
+    });
+
+    // Nếu bạn có logic thêm vào cart (thêm sp), hãy gọi updateCartCountUI() sau khi cập nhật localStorage.
 </script>
 
 </body>

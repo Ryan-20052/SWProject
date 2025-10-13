@@ -8,6 +8,8 @@ import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.repository.ProductRepository;
 import anbd.he191271.service.ProductService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +24,12 @@ public class HomeController {
     private final ProductService productService;
     private final CustomerRepository customerRepository;
     private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository;
+    private final ProductRepository<P, Number> productRepository;
 
     public HomeController(ProductService productService,
                           CustomerRepository customerRepository,
                           CategoryRepository categoryRepository,
-                          ProductRepository productRepository) {
+                          ProductRepository<P, Number> productRepository) {
         this.productService = productService;
         this.customerRepository = customerRepository;
         this.categoryRepository = categoryRepository;
@@ -47,10 +49,27 @@ public class HomeController {
         return productService.getBestSellingProducts(4);
     }
 
+    /**
+     * Homepage với phân trang.
+     * Parameter:
+     *     page (0-based), size
+     */
     @GetMapping("/homepage")
-    public String homepage(Model model, HttpSession session) {
-        // products chính (tất cả)
-        model.addAttribute("products", productService.getAllProductByStatus("available"));
+    public String homepage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            Model model,
+            HttpSession session) {
+
+        Page<Product> productPage = productService.getAllProductByStatusPage("available", page, size);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalItems", productPage.getTotalElements());
+        model.addAttribute("hasNext", productPage.hasNext());
+        model.addAttribute("hasPrev", productPage.hasPrevious());
 
         // customer (nếu có đăng nhập)
         Customer customer = (Customer) session.getAttribute("customer");
@@ -59,13 +78,36 @@ public class HomeController {
         return "homepage"; // file templates/homepage.html
     }
 
+    /**
+     * Lọc theo category có phân trang
+     */
     @GetMapping("/category/{id}")
-    public String productsByCategory(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        // Lấy products theo category id
+    public String productsByCategory(
+            @PathVariable("id") Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            Model model,
+            HttpSession session) {
+
+        Page<Product> productPage;
         try {
-            model.addAttribute("products", productRepository.findByCategoryId(id));
+            productPage = productService.getProductsByCategoryPage(id, page, size);
+            model.addAttribute("products", productPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", productPage.getTotalPages());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalItems", productPage.getTotalElements());
+            model.addAttribute("hasNext", productPage.hasNext());
+            model.addAttribute("hasPrev", productPage.hasPrevious());
         } catch (Exception ex) {
-            model.addAttribute("products", productRepository.findByCategoryIdNative(id));
+            // Fallback: nếu repository chưa hỗ trợ Page (sử dụng method cũ)
+            model.addAttribute("products", productRepository.findByCategoryId(id));
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("pageSize", Integer.MAX_VALUE);
+            model.addAttribute("totalItems", ((List) model.getAttribute("products")).size());
+            model.addAttribute("hasNext", false);
+            model.addAttribute("hasPrev", false);
         }
 
         Optional<Categories> current = categoryRepository.findById(id);
@@ -76,7 +118,4 @@ public class HomeController {
 
         return "homepage";
     }
-
-
-
 }
