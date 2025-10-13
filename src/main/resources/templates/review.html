@@ -15,13 +15,17 @@
     .buttons button { margin: 0 10px; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; }
     .save { background: #28a745; color: white; }
     .cancel { background: #dc3545; color: white; }
+    .image-section { margin-top: 15px; }
+    .image-section label { font-weight: bold; }
+    #previewImg { max-width: 100%; display: none; border-radius: 6px; margin-top: 10px; }
   </style>
 </head>
 <body>
 <div class="container">
   <h2 th:text="'Đánh giá sản phẩm: ' + ${product.name}"></h2>
 
-  <form th:action="@{/review/save}" th:object="${review}" method="post">
+  <!-- Thêm enctype để gửi file -->
+  <form th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
     <!-- Gắn productId -->
     <input type="hidden" name="productId" th:value="${product.id}" />
 
@@ -38,12 +42,26 @@
     <!-- Comment -->
     <textarea th:field="*{comment}" placeholder="Nhập đánh giá chi tiết..."></textarea>
 
+    <!-- Upload ảnh -->
+    <div class="image-section">
+      <label for="imageFile">Ảnh minh họa (tùy chọn):</label>
+      <input type="file" name="imageFile" id="imageFile" accept="image/*" onchange="previewImage(event)">
+    </div>
+
+    <!-- Hiển thị ảnh đã upload -->
+    <div style="margin-top: 15px; text-align: center;">
+      <img th:if="${review.reviewImage != null}"
+           th:src="@{'/review/image/' + ${review.id}}"
+           id="previewImg"
+           alt="Ảnh đánh giá"
+           style="max-width: 100%; border-radius: 6px; display: block; margin: auto;">
+    </div>
+
     <div class="buttons">
       <button type="submit" class="save">Lưu đánh giá</button>
       <button type="button" class="cancel" onclick="window.location.href='/purchasedlicenses'">Hủy</button>
     </div>
   </form>
-
 </div>
 
 <script>
@@ -73,6 +91,22 @@
       highlightStars(currentRating);
     }
   });
+
+  // Xem trước ảnh upload
+  function previewImage(event) {
+    const previewImg = document.getElementById("previewImg");
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewImg.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewImg.style.display = "none";
+    }
+  }
 </script>
 </body>
 </html>

@@ -60,23 +60,23 @@ public class AIChatService {
         ) {
             return "Shop mình bán license bạn nhé, tất tần tật mọi thể loại từ học tập, giải trí,...";
         }
-        // =============================
-        // 1️⃣ Xử lý sản phẩm trong DB
-        // =============================
+
+        // ==============================
+        // 1️⃣ Tìm sản phẩm trong DB
+        // ==============================
         List<Product> allProducts = productRepo.findAll();
 
         for (Product p : allProducts) {
             String productName = normalize(p.getName());
 
-            // kiểm tra chứa từ khóa linh hoạt
             if (lower.contains(productName)
                     || productName.contains(lower)
                     || lower.contains(p.getName().toLowerCase())
                     || p.getName().toLowerCase().contains(lower)
                     || lower.matches(".*\\b" + productName.split(" ")[0] + "\\b.*")) {
+
                 boolean askPrice = containsAny(lower, "giá", "bao nhiêu", "mắc", "rẻ", "price", "cost");
                 boolean askDesc  = containsAny(lower, "là gì", "mô tả", "giới thiệu", "dùng làm gì");
-
 
                 List<Variant> variants = p.getVariants() == null ? List.of() : p.getVariants();
                 StringBuilder reply = new StringBuilder("📦 **" + p.getName() + "**\n");
@@ -96,7 +96,6 @@ public class AIChatService {
                     return reply.toString();
                 }
 
-
                 if (askDesc) {
                     reply.append("📜 Mô tả: ")
                             .append(p.getDescription() != null ? p.getDescription() : "Hiện chưa có mô tả.\n");
@@ -106,7 +105,6 @@ public class AIChatService {
                     return reply.toString();
                 }
 
-                // nếu chỉ nhắc tên sản phẩm
                 if (!variants.isEmpty()) {
                     reply.append("💰 Giá từ ").append(fmtVnd(minPrice(variants))).append(".\n");
                 } else {
@@ -119,46 +117,55 @@ public class AIChatService {
             }
         }
 
-        // =============================
-        // 2️⃣ Bán chạy & đánh giá cao
-        // =============================
+        // ==============================
+        // 2️⃣ Sản phẩm bán chạy / đánh giá cao
+        // ==============================
         if (containsAny(lower, "bán chạy", "mua nhiều", "best seller")) {
-            var top = orderRepo.findTopSellingProducts();
+            List<Object[]> top = orderRepo.findTopSellingProducts();
             if (top == null || top.isEmpty()) return "Hiện chưa có dữ liệu sản phẩm bán chạy.";
             StringBuilder sb = new StringBuilder("🔥 **Top sản phẩm bán chạy:**\n");
-            top.stream().limit(5).forEach(o ->
-                    sb.append("- ").append(o[0]).append(" (").append(o[1]).append(" lượt mua)\n"));
+            for (Object[] o : top) {
+                String name = String.valueOf(o[0]);
+                String count = String.valueOf(o[1]);
+                sb.append("- ").append(name).append(" (").append(count).append(" lượt mua)\n");
+            }
             return sb.toString();
         }
 
         if (containsAny(lower, "đánh giá cao", "tốt nhất", "rating cao")) {
-            var rated = reviewRepo.findTopRatedProducts();
+            List<Object[]> rated = reviewRepo.findTopRatedProducts();
             if (rated == null || rated.isEmpty()) return "Hiện chưa có đánh giá nào.";
             StringBuilder sb = new StringBuilder("⭐ **Sản phẩm được đánh giá cao:**\n");
-            rated.stream().limit(5).forEach(o ->
-                    sb.append("- ").append(o[0])
-                            .append(": ⭐ ").append(String.format(Locale.ROOT, "%.2f", o[1])).append("\n"));
+            for (Object[] o : rated) {
+                String name = String.valueOf(o[0]);
+                Double rating = (o[1] instanceof Number) ? ((Number) o[1]).doubleValue() : 0.0;
+                sb.append("- ").append(name)
+                        .append(": ⭐ ")
+                        .append(String.format(Locale.ROOT, "%.2f", rating))
+                        .append("\n");
+            }
             return sb.toString();
         }
 
-        // =============================
-        // 3️⃣ Tìm sản phẩm theo từ khóa
-        // =============================
-        var found = productRepo.searchByKeyword(lower);
+        // ==============================
+        // 3️⃣ Tìm theo keyword
+        // ==============================
+        List<Product> found = productRepo.searchByKeyword(lower);
         if (found != null && !found.isEmpty()) {
             StringBuilder sb = new StringBuilder("🔎 **Một số sản phẩm liên quan:**\n");
-            found.stream().limit(5).forEach(p ->
-                    sb.append("- ").append(p.getName())
-                            .append(" — ")
-                            .append(p.getVariants().isEmpty() ? "Liên hệ"
-                                    : fmtVnd(p.getVariants().get(0).getPrice()))
-                            .append("\n"));
+            for (Product p : found) {
+                List<Variant> vs = p.getVariants() == null ? List.of() : p.getVariants();
+                sb.append("- ").append(p.getName())
+                        .append(" — ")
+                        .append(vs.isEmpty() ? "Liên hệ" : fmtVnd(vs.get(0).getPrice()))
+                        .append("\n");
+            }
             return sb.toString();
         }
 
-        // =============================
-        // 4️⃣ Không khớp → gọi OpenAI
-        // =============================
+        // ==============================
+        // 4️⃣ Không khớp → Gọi OpenAI
+        // ==============================
         Map<String, Object> payload = Map.of(
                 "model", "gpt-4o-mini",
                 "messages", List.of(

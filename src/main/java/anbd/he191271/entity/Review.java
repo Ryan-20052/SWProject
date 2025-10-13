@@ -41,6 +41,18 @@ public class Review {
     @Column(name = "created_at")
     private Date createdAt;
 
+    @Lob
+    @Column(name = "review_image", columnDefinition = "LONGBLOB")
+    private byte[] reviewImage;
+
+    public byte[] getReviewImage() {
+        return reviewImage;
+    }
+
+    public void setReviewImage(byte[] reviewImage) {
+        this.reviewImage = reviewImage;
+    }
+
     // ===== Getters & Setters =====
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
