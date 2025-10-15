@@ -2,77 +2,424 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đánh giá sản phẩm</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    h2 { color: #2d89ef; text-align: center; }
-    .stars span { font-size: 30px; cursor: pointer; color: #ccc; }
-    .stars span.selected { color: gold; }
-    textarea { width: 100%; height: 100px; margin-top: 10px; padding: 10px; }
-    .buttons { margin-top: 15px; text-align: center; }
-    .buttons button { margin: 0 10px; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; }
-    .save { background: #28a745; color: white; }
-    .cancel { background: #dc3545; color: white; }
-    .image-section { margin-top: 15px; }
-    .image-section label { font-weight: bold; }
-    #previewImg { max-width: 100%; display: none; border-radius: 6px; margin-top: 10px; }
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+      --shadow: rgba(0, 0, 0, 0.05);
+      --shadow-hover: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px var(--shadow);
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px var(--shadow-hover);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--warning), var(--success));
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      gap: 8px;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 16px;
+    }
+
+    .form-content {
+      padding: 30px;
+    }
+
+    .rating-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .rating-label {
+      display: block;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .stars {
+      display: inline-flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stars span {
+      font-size: 40px;
+      cursor: pointer;
+      color: #e2e8f0;
+      transition: all 0.3s ease;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .stars span:hover {
+      transform: scale(1.2);
+      color: var(--warning);
+    }
+
+    .stars span.selected {
+      color: var(--warning);
+      transform: scale(1.1);
+    }
+
+    .rating-text {
+      font-size: 14px;
+      color: var(--secondary);
+      margin-top: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      resize: vertical;
+      transition: all 0.3s;
+      background: var(--light);
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+    }
+
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px;
+      background: var(--light);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      color: var(--secondary);
+    }
+
+    .file-upload-label:hover {
+      background: #f1f5f9;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .preview-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .preview-section img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 0.3s;
+    }
+
+    .preview-section img:hover {
+      transform: scale(1.02);
+    }
+
+    .existing-image {
+      margin-top: 15px;
+    }
+
+    .existing-image p {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-save {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: #0da271;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-cancel {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-cancel:hover {
+      background: #475569;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(100, 116, 139, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        border-radius: 16px;
+      }
+
+      .header {
+        padding: 25px 20px;
+      }
+
+      .form-content {
+        padding: 25px 20px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      .back-btn {
+        position: relative;
+        left: 0;
+        top: 0;
+        margin-bottom: 15px;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h2 th:text="'Đánh giá sản phẩm: ' + ${product.name}"></h2>
+  <div class="header">
 
-  <!-- Thêm enctype để gửi file -->
-  <form th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
-    <!-- Gắn productId -->
-    <input type="hidden" name="productId" th:value="${product.id}" />
+    <h2>Đánh giá sản phẩm</h2>
+    <p th:text="${product.name}">Tên sản phẩm</p>
+  </div>
 
-    <!-- Rating sao -->
-    <div class="stars" id="starContainer">
-      <span data-value="1">★</span>
-      <span data-value="2">★</span>
-      <span data-value="3">★</span>
-      <span data-value="4">★</span>
-      <span data-value="5">★</span>
-    </div>
-    <input type="hidden" th:field="*{rating}" id="rating" />
+  <div class="form-content">
+    <form th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="productId" th:value="${product.id}" />
 
-    <!-- Comment -->
-    <textarea th:field="*{comment}" placeholder="Nhập đánh giá chi tiết..."></textarea>
+      <!-- Rating Section -->
+      <div class="rating-section">
+        <span class="rating-label">Chọn số sao đánh giá</span>
+        <div class="stars" id="starContainer">
+          <span data-value="1">★</span>
+          <span data-value="2">★</span>
+          <span data-value="3">★</span>
+          <span data-value="4">★</span>
+          <span data-value="5">★</span>
+        </div>
+        <div class="rating-text" id="ratingText">Vui lòng chọn số sao</div>
+        <input type="hidden" th:field="*{rating}" id="rating" />
+      </div>
 
-    <!-- Upload ảnh -->
-    <div class="image-section">
-      <label for="imageFile">Ảnh minh họa (tùy chọn):</label>
-      <input type="file" name="imageFile" id="imageFile" accept="image/*" onchange="previewImage(event)">
-    </div>
+      <!-- Comment Section -->
+      <div class="form-group">
+        <label for="comment">
+          <i class="fas fa-comment"></i> Đánh giá chi tiết
+        </label>
+        <textarea th:field="*{comment}" id="comment" placeholder="Hãy chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
+      </div>
 
-    <!-- Hiển thị ảnh đã upload -->
-    <div style="margin-top: 15px; text-align: center;">
-      <img th:if="${review.reviewImage != null}"
-           th:src="@{'/review/image/' + ${review.id}}"
-           id="previewImg"
-           alt="Ảnh đánh giá"
-           style="max-width: 100%; border-radius: 6px; display: block; margin: auto;">
-    </div>
+      <!-- Image Upload Section -->
+      <div class="form-group">
+        <label>
+          <i class="fas fa-image"></i> Ảnh minh họa (tùy chọn)
+        </label>
+        <div class="file-upload">
+          <label class="file-upload-label" for="imageFile">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span id="fileLabelText">Chọn ảnh từ máy tính</span>
+          </label>
+          <input type="file" name="imageFile" id="imageFile" accept="image/*" onchange="previewImage(event)">
+        </div>
+      </div>
 
-    <div class="buttons">
-      <button type="submit" class="save">Lưu đánh giá</button>
-      <button type="button" class="cancel" onclick="window.location.href='/purchasedlicenses'">Hủy</button>
-    </div>
-  </form>
+      <!-- Preview Section -->
+      <div class="preview-section">
+        <!-- Ảnh mới được chọn -->
+        <img id="previewImg"
+             alt="Ảnh xem trước"
+             style="display: none;">
+
+        <!-- Ảnh hiện tại nếu có -->
+        <div th:if="${review.hasImage}" class="existing-image">
+          <p><strong>Ảnh hiện tại:</strong></p>
+          <img th:src="@{'/review/image/' + ${review.id}}"
+               alt="Ảnh đánh giá hiện tại"
+               id="existingImg">
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="buttons">
+        <button type="submit" class="btn btn-save">
+          <i class="fas fa-save"></i> Lưu đánh giá
+        </button>
+        <a href="http://localhost:8080/purchasedlicenses" class="btn btn-cancel">
+          <i class="fas fa-times"></i> Hủy bỏ
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
   const stars = document.querySelectorAll("#starContainer span");
   const ratingInput = document.getElementById("rating");
+  const ratingText = document.getElementById("ratingText");
+  const fileLabelText = document.getElementById("fileLabelText");
+  const previewImg = document.getElementById("previewImg");
+  const existingImg = document.getElementById("existingImg");
+
+  const ratingMessages = {
+    1: "Rất không hài lòng",
+    2: "Không hài lòng",
+    3: "Bình thường",
+    4: "Hài lòng",
+    5: "Rất hài lòng"
+  };
 
   function highlightStars(value) {
     stars.forEach(s => s.classList.remove("selected"));
     for (let i = 0; i < value; i++) {
       stars[i].classList.add("selected");
     }
+    ratingText.textContent = ratingMessages[value] || "Vui lòng chọn số sao";
   }
 
   // Khi click chọn sao
@@ -80,6 +427,12 @@
     star.addEventListener("click", () => {
       let value = parseInt(star.getAttribute("data-value"));
       ratingInput.value = value;
+      highlightStars(value);
+    });
+
+    // Hiệu ứng hover
+    star.addEventListener("mouseenter", () => {
+      let value = parseInt(star.getAttribute("data-value"));
       highlightStars(value);
     });
   });
@@ -90,23 +443,57 @@
     if (currentRating && currentRating > 0) {
       highlightStars(currentRating);
     }
+
+    // Hiệu ứng xuất hiện
+    const container = document.querySelector('.container');
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(20px)';
+
+    setTimeout(() => {
+      container.style.transition = 'opacity 0.5s, transform 0.5s';
+      container.style.opacity = '1';
+      container.style.transform = 'translateY(0)';
+    }, 100);
   });
 
   // Xem trước ảnh upload
   function previewImage(event) {
-    const previewImg = document.getElementById("previewImg");
     const file = event.target.files[0];
+
     if (file) {
       const reader = new FileReader();
       reader.onload = e => {
         previewImg.src = e.target.result;
         previewImg.style.display = "block";
+        fileLabelText.textContent = "Đã chọn: " + file.name;
+
+        // Ẩn ảnh hiện tại nếu có
+        if (existingImg) {
+          existingImg.style.display = "none";
+        }
       };
       reader.readAsDataURL(file);
     } else {
       previewImg.style.display = "none";
+      fileLabelText.textContent = "Chọn ảnh từ máy tính";
+
+      // Hiện lại ảnh hiện tại nếu có
+      if (existingImg) {
+        existingImg.style.display = "block";
+      }
     }
   }
+
+  // Reset hover effect khi rời khỏi container sao
+  document.getElementById('starContainer').addEventListener('mouseleave', () => {
+    let currentRating = parseInt(ratingInput.value);
+    if (currentRating && currentRating > 0) {
+      highlightStars(currentRating);
+    } else {
+      stars.forEach(s => s.classList.remove("selected"));
+      ratingText.textContent = "Vui lòng chọn số sao";
+    }
+  });
 </script>
 </body>
 </html>

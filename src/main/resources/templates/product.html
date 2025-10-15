@@ -233,51 +233,13 @@
             </div>
         </div>
     </div>
-    <!-- ====== PHẦN REVIEW ====== -->
-    <div class="reviews-section" style="margin-top:30px;">
-        <h2>Review</h2>
-
-        <!-- ⭐ Trung bình số sao -->
-        <div style="font-size:18px; margin-bottom:10px;">
-            ⭐ <span th:text="${averageRating}">0</span>/5
-            (<span th:text="${totalReviews}">0</span> đánh giá)
-        </div>
-
-        <!-- Dropdown lọc -->
-        <div style="margin-bottom:15px;">
-            <label for="filterSelect">Lọc theo:</label>
-            <select id="filterSelect" onchange="filterReviews(this.value)">
-                <option value="all">Tổng quát</option>
-                <option value="5">5 sao</option>
-                <option value="4">4 sao</option>
-                <option value="3">3 sao</option>
-                <option value="2">2 sao</option>
-                <option value="1">1 sao</option>
-            </select>
-        </div>
-
-        <!-- Danh sách review -->
-        <div id="reviewList">
-            <div th:each="r, stat : ${reviews}" th:if="${stat.index < 5}"
-                 class="review-item" style="border-bottom:1px solid #eee; padding:10px 0;">
-                <div>
-                <span th:each="i : ${#numbers.sequence(1,5)}"
-                      th:text="${i <= r.rating ? '★' : '☆'}"
-                      style="color:gold; font-size:18px;"></span>
-                </div>
-                <p th:text="${r.comment}">Nội dung đánh giá...</p>
-                <small th:text="${#dates.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày</small>
-            </div>
-        </div>
-
-        <!-- Nút xem thêm -->
-        <div style="text-align:center; margin-top:15px;">
-            <button id="loadMoreBtn" onclick="loadMoreReviews()"
-                    th:if="${reviews.size() > 5}"
-                    style="background:#6c757d;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
-                Xem thêm
+    <!-- ====== PHẦN REVIEW (đã rút gọn) ====== -->
+    <div class="reviews-short" style="margin-top:30px; text-align:center;">
+        <a th:href="@{/review/list(productId=${product.id})}">
+            <button style="background:#ffc107; color:#000; border:none; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;">
+                ⭐ <span th:text="${averageRating}">0</span>/5 - Xem đánh giá
             </button>
-        </div>
+        </a>
     </div>
 
 </div>
@@ -363,45 +325,6 @@
         });
     });
     /*]]>*/
-    /* ==== Review load more & filter ==== */
-    let visibleReviews = 5;
-    const allReviews = /*[[${reviews}]]*/ [];
-
-    function renderReview(r) {
-        let stars = "";
-        for (let j = 1; j <= 5; j++) stars += j <= r.rating ? "★" : "☆";
-        return `
-        <div class="review-item" style="border-bottom:1px solid #eee; padding:10px 0;">
-            <div style="color:gold; font-size:18px;">${stars}</div>
-            <p>${r.comment}</p>
-            <small>${new Date(r.createdAt).toLocaleDateString("vi-VN")}</small>
-        </div>
-    `;
-    }
-
-    function loadMoreReviews() {
-        const list = document.getElementById("reviewList");
-        const total = allReviews.length;
-        for (let i = visibleReviews; i < visibleReviews + 5 && i < total; i++) {
-            list.insertAdjacentHTML("beforeend", renderReview(allReviews[i]));
-        }
-        visibleReviews += 5;
-        if (visibleReviews >= total) {
-            document.getElementById("loadMoreBtn").style.display = "none";
-        }
-    }
-
-    function filterReviews(star) {
-        const list = document.getElementById("reviewList");
-        list.innerHTML = "";
-        visibleReviews = 0;
-
-        const filtered = star === "all" ? allReviews : allReviews.filter(r => r.rating == star);
-        filtered.slice(0, 5).forEach(r => list.insertAdjacentHTML("beforeend", renderReview(r)));
-
-        visibleReviews = 5;
-        document.getElementById("loadMoreBtn").style.display = filtered.length > 5 ? "block" : "none";
-    }
 
 </script>
 

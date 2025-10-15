@@ -11,22 +11,18 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Khách hàng
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // Nếu muốn giữ lại order để biết review phát sinh từ order nào → cho phép NULL
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = true)
     private Order order;
 
-    // Product là bắt buộc
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    // Variant thì không cần nữa, cho phép NULL
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = true)
     private Variant variant;
@@ -45,15 +41,11 @@ public class Review {
     @Column(name = "review_image", columnDefinition = "LONGBLOB")
     private byte[] reviewImage;
 
-    public byte[] getReviewImage() {
-        return reviewImage;
-    }
+    @Column(name = "has_image")
+    private boolean hasImage;
 
-    public void setReviewImage(byte[] reviewImage) {
-        this.reviewImage = reviewImage;
-    }
+    // ===== Getter & Setter =====
 
-    // ===== Getters & Setters =====
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -77,4 +69,14 @@ public class Review {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public byte[] getReviewImage() { return reviewImage; }
+
+    public void setReviewImage(byte[] reviewImage) {
+        this.reviewImage = reviewImage;
+        this.hasImage = (reviewImage != null && reviewImage.length > 0);
+    }
+
+    public boolean isHasImage() { return hasImage; }
+    public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
 }

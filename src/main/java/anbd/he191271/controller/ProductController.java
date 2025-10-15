@@ -59,26 +59,42 @@ public class ProductController {
             selectedVariant = variants.get(0);
         }
 
-        // 👉 Lấy danh sách review theo product
+        // 👉 Chỉ lấy số sao trung bình, không gửi danh sách review xuống
         List<Review> reviews = reviewRepository.findByProduct_Id(id);
-
-        double averageRating = 0;
-        if (!reviews.isEmpty()) {
-            averageRating = reviews.stream()
-                    .mapToInt(Review::getRating)
-                    .average()
-                    .orElse(0.0);
-        }
+        double averageRating = reviews.isEmpty()
+                ? 0
+                : reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
 
         model.addAttribute("product", product);
         model.addAttribute("variants", variants);
         model.addAttribute("selectedVariant", selectedVariant);
 
-        // 👉 Gửi thêm dữ liệu review xuống view
-        model.addAttribute("reviews", reviews);
+        // Chỉ gửi số sao trung bình & tổng số review
         model.addAttribute("averageRating", String.format("%.1f", averageRating));
         model.addAttribute("totalReviews", reviews.size());
 
         return "product";
+    }
+
+    // ===================== TRANG XEM TẤT CẢ ĐÁNH GIÁ =====================
+    @GetMapping("/review/view")
+    public String viewReviewPage(@RequestParam("productId") int productId, Model model) {
+        Product product = productService.findProductById(productId);
+        if (product == null) {
+            return "error/404";
+        }
+
+        List<Review> reviews = reviewRepository.findByProduct_Id(productId);
+
+        double averageRating = reviews.isEmpty()
+                ? 0
+                : reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
+
+        model.addAttribute("product", product);
+        model.addAttribute("reviews", reviews);
+        model.addAttribute("averageRating", String.format("%.1f", averageRating));
+        model.addAttribute("totalReviews", reviews.size());
+
+        return "viewReview"; // trỏ tới viewReview.html
     }
 }
