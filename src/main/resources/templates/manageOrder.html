@@ -1,345 +1,369 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="vi" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Manager Dashboard</title>-->
-<!--    <style>-->
-<!--        :root {-->
-<!--            &#45;&#45;blue: #2563eb;-->
-<!--            &#45;&#45;blue-dark: #1d4ed8;-->
-<!--            &#45;&#45;red: #dc2626;-->
-<!--            &#45;&#45;green: #059669-->
-<!--        }-->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669
+        }
 
-<!--        body {-->
-<!--            font-family: Arial, sans-serif;-->
-<!--            margin: 0;-->
-<!--            background: #f8f9fa;-->
-<!--            color: #111-->
-<!--        }-->
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #111
+        }
 
-<!--        header {-->
-<!--            background: #2563eb;-->
-<!--            color: #28a745;-->
-<!--            padding: 15px 20px;-->
-<!--            display: flex;-->
-<!--            justify-content: center;-->
-<!--            align-items: center;-->
-<!--        }-->
+        header {
+            background: #2563eb;
+            color: #28a745;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-<!--        .header-inner {-->
-<!--            width: 1200px;-->
-<!--            display: flex;-->
-<!--            justify-content: space-between;-->
-<!--            align-items: center;-->
-<!--        }-->
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-<!--        header h1 {-->
-<!--            font-size: 20px;-->
-<!--            margin: 0;-->
-<!--        }-->
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
 
-<!--        nav {-->
-<!--            background: #1e3a8a; /* xanh đậm hơn header cho nổi */-->
-<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);-->
-<!--        }-->
+        nav {
+            background: #1e3a8a; /* xanh đậm hơn header cho nổi */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-<!--        .nav-inner {-->
-<!--            width: 1200px;-->
-<!--            margin: 0 auto;-->
-<!--            display: flex;-->
-<!--            gap: 24px;-->
-<!--            padding: 12px 20px;-->
-<!--        }-->
+        .nav-inner {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+        }
 
-<!--        .nav-inner a {-->
-<!--            color: white;-->
-<!--            text-decoration: none;-->
-<!--            font-weight: 500;-->
-<!--            padding: 8px 16px;-->
-<!--            border-radius: 6px;-->
-<!--            transition: background 0.3s, transform 0.2s;-->
-<!--        }-->
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
 
-<!--        .nav-inner a:hover {-->
-<!--            background: #2563eb;-->
-<!--            transform: translateY(-1px);-->
-<!--        }-->
+        .nav-inner a:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
 
-<!--        .dashboard {-->
-<!--            max-width: 1200px;-->
-<!--            margin: 20px auto;-->
-<!--            background: white;-->
-<!--            padding: 20px;-->
-<!--            border-radius: 12px;-->
-<!--            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08)-->
-<!--        }-->
+        .dashboard {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08)
+        }
 
-<!--        .dashboard h2 {-->
-<!--            margin-bottom: 16px-->
-<!--        }-->
+        .dashboard h2 {
+            margin-bottom: 16px
+        }
 
-<!--        .actions {-->
-<!--            margin-bottom: 14px-->
-<!--        }-->
+        .actions {
+            margin-bottom: 14px
+        }
 
-<!--        .actions button {-->
-<!--            padding: 8px 14px;-->
-<!--            border: none;-->
-<!--            border-radius: 6px;-->
-<!--            cursor: pointer;-->
-<!--            background: var(&#45;&#45;green);-->
-<!--            color: white;-->
-<!--        }-->
+        .actions button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: var(--green);
+            color: white;
+        }
 
-<!--        .actions button:hover {-->
-<!--            background: #047857-->
-<!--        }-->
+        .actions button:hover {
+            background: #047857
+        }
 
-<!--        table {-->
-<!--            width: 100%;-->
-<!--            border-collapse: collapse;-->
-<!--            margin-top: 10px-->
-<!--        }-->
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px
+        }
 
-<!--        th, td {-->
-<!--            border: 1px solid #ddd;-->
-<!--            padding: 10px;-->
-<!--            text-align: left-->
-<!--        }-->
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left
+        }
 
-<!--        th {-->
-<!--            background: #f3f4f6-->
-<!--        }-->
+        th {
+            background: #f3f4f6
+        }
 
-<!--        tr:hover {-->
-<!--            background: #f9fafb-->
-<!--        }-->
+        tr:hover {
+            background: #f9fafb
+        }
 
-<!--        .btn {-->
-<!--            padding: 6px 10px;-->
-<!--            border: none;-->
-<!--            border-radius: 4px;-->
-<!--            cursor: pointer;-->
-<!--            font-size: 13px-->
-<!--        }-->
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px
+        }
 
-<!--        .btn-edit {-->
-<!--            background: var(&#45;&#45;blue);-->
-<!--            color: white-->
-<!--        }-->
+        .btn-edit {
+            background: var(--blue);
+            color: white
+        }
 
-<!--        .btn-edit:hover {-->
-<!--            background: var(&#45;&#45;blue-dark)-->
-<!--        }-->
+        .btn-edit:hover {
+            background: var(--blue-dark)
+        }
 
-<!--        .btn-del {-->
-<!--            background: var(&#45;&#45;red);-->
-<!--            color: white-->
-<!--        }-->
+        .btn-del {
+            background: var(--red);
+            color: white
+        }
 
-<!--        .btn-del:hover {-->
-<!--            background: #b91c1c-->
-<!--        }-->
+        .btn-del:hover {
+            background: #b91c1c
+        }
 
-<!--        .header-inner div {-->
-<!--            margin-left: 20px;-->
-<!--        }-->
+        .header-inner div {
+            margin-left: 20px;
+        }
 
-<!--        .btn-log {-->
-<!--            display: inline-block;-->
-<!--            background-color: #2563eb;   /* xanh nổi bật */-->
-<!--            color: white;               /* chữ trắng */-->
-<!--            padding: 10px 24px;         /* cao + dài */-->
-<!--            font-size: 16px;-->
-<!--            font-weight: 600;-->
-<!--            border-radius: 8px;         /* bo góc mềm mại */-->
-<!--            text-decoration: none;      /* bỏ gạch chân */-->
-<!--            box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* nổi bật hơn */-->
-<!--            transition: background 0.2s, transform 0.2s;-->
-<!--        }-->
+        .btn-log {
+            display: inline-block;
+            background-color: #2563eb;   /* xanh nổi bật */
+            color: white;               /* chữ trắng */
+            padding: 10px 24px;         /* cao + dài */
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;         /* bo góc mềm mại */
+            text-decoration: none;      /* bỏ gạch chân */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* nổi bật hơn */
+            transition: background 0.2s, transform 0.2s;
+        }
 
-<!--        .btn-log:hover {-->
-<!--            background-color: #1d4ed8;  /* đậm hơn khi hover */-->
-<!--            transform: translateY(-2px);-->
-<!--        }-->
+        .btn-log:hover {
+            background-color: #1d4ed8;  /* đậm hơn khi hover */
+            transform: translateY(-2px);
+        }
 
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<header>-->
-<!--    <div class="header-inner"-->
-<!--         style="display:flex; align-items:center; justify-content:space-between;">-->
-
-
-<!--        <h1 style="margin:0; font-size:22px; color:white;">Manager Dashboard</h1>-->
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner"
+         style="display:flex; align-items:center; justify-content:space-between;">
 
 
-<!--        <div style="display:flex; align-items:center; gap:16px;">-->
-
-<!--            <div style="font-size:16px; color:white;"-->
-<!--                 th:text="|Xin chào, ${manager.username}|">-->
-<!--            </div>-->
-
-<!--            <div th:if="${manager.avatar != null}" class="avatar"-->
-<!--                 style="width:40px; height:40px; border-radius:50%; overflow:hidden; cursor:pointer;"-->
-<!--                 onclick="window.location.href='/manager/profile'">-->
-<!--                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}"-->
-<!--                     alt="Avatar" style="width:100%; height:100%; object-fit:cover;">-->
-<!--            </div>-->
-
-<!--            <div th:if="${manager.avatar == null}" class="avatar-fallback"-->
-<!--                 style="width:40px; height:40px; border-radius:50%; background:#555; color:white;-->
-<!--                    display:flex; align-items:center; justify-content:center;-->
-<!--                    font-weight:bold; cursor:pointer;"-->
-<!--                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"-->
-<!--                 onclick="window.location.href='/manager/profile'">-->
-<!--            </div>-->
+        <h1 style="margin:0; font-size:22px; color:white;">Manager Dashboard</h1>
 
 
-<!--            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">-->
-<!--                <button type="submit"-->
-<!--                        style="padding:8px 14px; background:#dc2626; color:white; border:none;-->
-<!--                           border-radius:6px; cursor:pointer; font-weight:500;">-->
-<!--                    Log out-->
-<!--                </button>-->
-<!--            </form>-->
-<!--        </div>-->
-<!--    </div>-->
+        <div style="display:flex; align-items:center; gap:16px;">
 
-<!--</header>-->
-<!--<style>-->
-<!--    .avatar, .avatar-fallback {-->
-<!--        width: 40px;-->
-<!--        height: 40px;-->
-<!--        border-radius: 50%;-->
-<!--        overflow: hidden;-->
-<!--        display: flex;-->
-<!--        align-items: center;-->
-<!--        justify-content: center;-->
-<!--        cursor: pointer;-->
-<!--    }-->
+            <div style="font-size:16px; color:white;"
+                 th:text="|Xin chào, ${manager.username}|">
+            </div>
 
-<!--    .avatar img {-->
-<!--        width: 100%;-->
-<!--        height: 100%;-->
-<!--        object-fit: cover;-->
-<!--    }-->
+            <div th:if="${manager.avatar != null}" class="avatar"
+                 style="width:40px; height:40px; border-radius:50%; overflow:hidden; cursor:pointer;"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}"
+                     alt="Avatar" style="width:100%; height:100%; object-fit:cover;">
+            </div>
 
-<!--    .avatar-fallback {-->
-<!--        background: #fff;-->
-<!--        color: #000;-->
-<!--        font-weight: bold;-->
-<!--        font-size: 18px;-->
-<!--        border: 1px solid #ccc;-->
-<!--    }-->
-
-<!--    .avatar:hover, .avatar-fallback:hover {-->
-<!--        opacity: 0.85;-->
-<!--    }-->
-<!--</style>-->
-<!--<nav>-->
-<!--    <div class="nav-inner">-->
-<!--        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>-->
-<!--        <a th:href="@{/orders}">Đơn hàng</a>-->
-<!--        <a th:href="@{/financial}">Báo cáo tài chính</a>-->
-<!--        <a th:href="@{/report}">Báo cáo khách hàng</a>-->
-<!--    </div>-->
-<!--</nav>-->
-
-<!--<div id="messagePopup" th:if="${msg}"-->
-<!--     style="position:fixed; top:20px; right:20px; background:#28a745; color:#fff;-->
-<!--            padding:12px 20px; border-radius:6px; z-index:1000;">-->
-<!--    <span th:text="${msg}"></span>-->
-<!--</div>-->
+            <div th:if="${manager.avatar == null}" class="avatar-fallback"
+                 style="width:40px; height:40px; border-radius:50%; background:#555; color:white;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:bold; cursor:pointer;"
+                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
+                 onclick="window.location.href='/manager/profile'">
+            </div>
 
 
-<!--<script>-->
-<!--    // Ẩn popup sau 3s-->
-<!--    setTimeout(() => {-->
-<!--        const popup = document.getElementById("messagePopup");-->
-<!--        if (popup) popup.style.display = "none";-->
-<!--    }, 3000);-->
+            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                           border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
 
-<!--</script>-->
-<!--<div class="dashboard">-->
-<!--    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">-->
-<!--        <h2>Danh sách Đơn hàng</h2>-->
-<!--    </div>-->
+</header>
+<style>
+    .avatar, .avatar-fallback {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
 
-<!--    &lt;!&ndash; Form Thêm sản phẩm &ndash;&gt;-->
-<!--    <h3>Thêm sản phẩm</h3>-->
-<!--    <form th:action="@{/manageOrder/searchOrder}" th:object="${newProduct}" method="post" required>-->
-<!--        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>-->
-<!--        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh" required>-->
-<!--        <input type="text" th:field="*{description}" placeholder="Mô tả" required>-->
-<!--        <select th:field="*{categoryId}" required>-->
-<!--            <option value="">&#45;&#45; Chọn danh mục &#45;&#45;</option>-->
-<!--            <option th:each="c : ${categories}"-->
-<!--                    th:value="${c.id}"-->
-<!--                    th:text="${c.name}">-->
-<!--            </option>-->
-<!--        </select>-->
-<!--        <button type="submit" style="background:var(&#45;&#45;blue);color:white;">Lưu</button>-->
-<!--    </form>-->
-<!--    <table border="1">-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--            <th>STT</th>-->
-<!--            <th>Ảnh</th>-->
-<!--            <th>Tên sản phẩm</th>-->
-<!--            <th>Gói sản phẩm</th>-->
-<!--            <th>Trạng thái</th>-->
-<!--            <th>Hành động</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody th:each="p, iterStat : ${productList}">-->
-<!--        <tr>-->
-<!--            &lt;!&ndash; STT &ndash;&gt;-->
-<!--            <td th:text="${iterStat.count}"></td>-->
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-<!--            &lt;!&ndash; Ảnh sản phẩm &ndash;&gt;-->
-<!--            <td>-->
-<!--                <img th:src="${p.img_url}" style="width:60px;">-->
-<!--            </td>-->
+    .avatar-fallback {
+        background: #fff;
+        color: #000;
+        font-weight: bold;
+        font-size: 18px;
+        border: 1px solid #ccc;
+    }
 
-<!--            &lt;!&ndash; Tên sản phẩm &ndash;&gt;-->
-<!--            <td th:text="${p.name}"></td>-->
+    .avatar:hover, .avatar-fallback:hover {
+        opacity: 0.85;
+    }
+</style>
+<nav>
+    <div class="nav-inner">
+        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
+        <a th:href="@{/manage/category}">Danh mục</a>
+        <a th:href="@{/manageOrder/viewOrder}">Đơn hàng</a>
+        <a th:href="@{/financial}">Báo cáo tài chính</a>
+        <a th:href="@{/report}">Báo cáo khách hàng</a>
+    </div>
+</nav>
 
-
-<!--            &lt;!&ndash; Trạng thái sản phẩm &ndash;&gt;-->
-<!--            <td th:text="${p.status}"></td>-->
-
-<!--            &lt;!&ndash; Hành động sản phẩm &ndash;&gt;-->
-<!--            <td style="gap:6px; padding:8px;">-->
-<!--                &lt;!&ndash; Nút Ẩn (khi đang available) &ndash;&gt;-->
-<!--                <a th:if="${p.status == 'available'}"-->
-<!--                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"-->
-<!--                   class="btn btn-del"-->
-<!--                   style="margin-right: 8px;">-->
-<!--                    Ẩn-->
-<!--                </a>-->
-
-<!--                &lt;!&ndash; Nút Hiện lại (khi đang unavailable) &ndash;&gt;-->
-<!--                <a th:if="${p.status == 'unavailable'}"-->
-<!--                   th:href="@{/manage/statusProduct/{id}(id=${p.id})}"-->
-<!--                   class="btn btn-edit"-->
-<!--                   style="margin-right: 8px; background-color: #28a745">-->
-<!--                    Hiện-->
-<!--                </a>-->
-
-<!--                <a th:href="@{/manage/updateProduct/{id}(id=${p.id})}"-->
-<!--                   class="btn btn-edit">-->
-<!--                    Sửa-->
-<!--                </a>-->
-<!--            </td>-->
-<!--        </tr>-->
-<!--        </tbody>-->
+<div id="messagePopup" th:if="${msg}"
+     style="position:fixed; top:20px; right:20px; background:#28a745; color:#fff;
+            padding:12px 20px; border-radius:6px; z-index:1000;">
+    <span th:text="${msg}"></span>
+</div>
 
 
-<!--    </table>-->
+<script>
+    // Ẩn popup sau 3s
+    setTimeout(() => {
+        const popup = document.getElementById("messagePopup");
+        if (popup) popup.style.display = "none";
+    }, 3000);
 
-<!--</div>-->
-<!--</body>-->
-<!--</html>-->
+</script>
+<div class="dashboard">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2>Danh sách Đơn hàng</h2>
+    </div>
+
+    <form th:action="@{/manageOrder/viewOrder}" method="get"
+          style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; flex-direction:column;">
+        <label for="orderCode" style="font-size:0.9em; color:#555;">Mã đơn hàng:</label>
+        <input type="text" name="orderCode" id="orderCode" placeholder="Tìm theo mã đơn hàng"
+               th:value="${orderCode}"
+               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
+        </div>
+
+        <div style="display:flex; flex-direction:column;">
+        <label for="status" style="font-size:0.9em; color:#555;">Trạng thái đơn:</label>
+        <select name="status"
+                id="status"
+                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option th:each="s : ${statusList}"
+                    th:value="${s}"
+                    th:text="${s}"
+                    th:selected="${status == s}">
+            </option>
+        </select>
+        </div>
+
+        <!-- Từ ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="startDate" style="font-size:0.9em; color:#555;">Từ ngày</label>
+            <input type="date" id="startDate" name="startDate"
+                   th:value="${startDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+        <!-- Đến ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="endDate" style="font-size:0.9em; color:#555;">Đến ngày</label>
+            <input type="date" id="endDate" name="endDate"
+                   th:value="${endDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+
+        <button type="submit"
+                style="padding:8px 16px; margin-top: 15px; background:var(--blue); color:white; border:none;
+                   border-radius:6px; cursor:pointer; font-weight:500;">
+            Lọc
+        </button>
+
+        <a th:href="@{/manageOrder/viewOrder}"
+           style="padding:8px 14px; background:#6b7280;margin-top: 15px; color:white; border-radius:6px; text-decoration:none;">
+            Đặt lại
+        </a>
+    </form>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mã đơn hàng</th>
+            <th>Ngày đặt</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody th:each="o, iterStat : ${orderList}">
+        <tr>
+            <!-- STT -->
+            <td th:text="${iterStat.count}"></td>
+
+            <td th:text="${o.code}" style="width:60px;">
+
+            <td th:text="${#temporals.format(o.orderDate, 'dd-MM-yyyy HH:mm:ss')}"></td>
+
+            <td th:text="${o.totalAmount}"></td>
+
+            <td th:text="${o.status}"></td>
+
+            <!-- Hành động sản phẩm -->
+            <td style="gap:6px; padding:8px;">
+
+                <a th:href="@{/manage/updateProduct/{id}(id=${o.id})}"
+                   class="btn btn-edit">
+                    Xem chi tiết
+                </a>
+
+                <a th:if="${o.status == 'FAILED'}"
+                   th:href="@{/manage/statusProduct/{id}(id=${o.id})}"
+                   class="btn btn-del"
+                   style="margin-left: 8px;">
+                    Xóa
+                </a>
+
+            </td>
+        </tr>
+        </tbody>
+
+
+    </table>
+
+</div>
+</body>
+</html>
