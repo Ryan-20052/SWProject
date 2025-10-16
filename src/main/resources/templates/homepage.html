@@ -13,7 +13,6 @@
         :root {
             --blue: #2563eb;
             --blue-dark: #1d4ed8;
-            --blue-light: rgba(37,99,235,0.15); /* Light blue for button backgrounds */
             --accent: #f43f5e; /* màu đỏ/đậm cho nút thêm giỏ */
             --white-90: rgba(255,255,255,0.9);
         }
@@ -101,100 +100,66 @@
         }
         .search-clear.hidden { display: none; opacity: 0; }
 
-        /* Actions (Login/Register/Cart/Support/Assistant) */
+        /* Actions (Login/Register/Cart) */
         .actions { display: flex; gap: 8px; align-items: center; }
 
-        /* Reset chung cho các nút trong header (trừ user-avatar) */
-        .actions button, .actions a:not(.user-avatar) {
-            padding: 8px 16px;
+        /* Reset chung cho nút trong header */
+        .actions button {
+            padding: 8px 12px;
+            border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            line-height: 1.5;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             box-sizing: border-box;
-            transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, color 140ms ease;
+            transition: transform 140ms ease, box-shadow 140ms ease, opacity 160ms ease;
             white-space: nowrap;
-            text-decoration: none;
-            color: white;
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
         }
 
-        /* Nút Trợ lý ảo */
-        .assistant-btn {
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
-            color: var(--white-90);
-        }
-        .assistant-btn:hover {
-            background: #2d89ef;
-            border-color: #2d89ef;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
-        }
-
-        /* Nút Đăng nhập */
+        /* Nút Đăng nhập: outline trắng (trong suốt) */
         .auth-login {
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
+            background: transparent;
             color: var(--white-90);
+            border: 1.5px solid rgba(255,255,255,0.18);
+            padding: 8px 14px;
         }
-        .auth-login:hover {
-            background: #2d89ef;
-            border-color: #2d89ef;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
-        }
+        .auth-login:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
 
-        /* Nút Đăng ký */
+        /* Nút Đăng ký: filled để nổi bật */
         .auth-register {
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
-            color: var(--white-90);
-            font-weight: 600;
+            background: white;
+            color: var(--blue);
+            border: 1.5px solid rgba(0,0,0,0.06);
+            padding: 9px 14px;
         }
-        .auth-register:hover {
-            background: #2d89ef;
-            border-color: #2d89ef;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
-        }
+        .auth-register:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.08); }
 
-        /* Nút Giỏ hàng */
-        .cart-btn {
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
+        /* Nút Trợ lý ảo, Giỏ hàng, Hỗ trợ: giống style .auth-login (transparent, border white mờ) */
+        .assistant-btn, .cart-btn, .support-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+            transition: transform 140ms ease, box-shadow 140ms ease, opacity 160ms ease;
+            white-space: nowrap;
+            background: transparent;
             color: var(--white-90);
-        }
-        .cart-btn:hover {
-            background: #2d89ef;
-            border-color:#2d89ef;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
-        }
+            border: 1.5px solid rgba(255,255,255,0.18);
+            padding: 8px 14px;
+            text-decoration: none;
 
-        /* Nút Hỗ trợ */
-        .support-btn {
-            background: var(--blue-light);
-            border: 1.5px solid var(--white-90);
-            color: var(--white-90);
-        }
-        .support-btn:hover {
-            background: #2d89ef;
-            border-color: #2d89ef;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(37,99,235,0.2);
-        }
 
-        /* Khi header compact, giảm kích thước các nút */
-        header.compact .actions button, header.compact .actions a:not(.user-avatar) {
-            padding: 6px 12px;
-            font-size: 13px;
         }
+        .assistant-btn:hover, .cart-btn:hover, .support-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
+
+        /* Khi header compact, giảm kích thước các nút 1 chút */
+        header.compact .actions button { padding: 6px 10px; font-size: 13px; }
 
         /* --------------------
            Navigation
@@ -215,11 +180,11 @@
         }
         .nav-inner .nav-link:hover {
             background: rgba(37,99,235,0.06);
-            color: #2d89ef;
+            color: var(--blue);
             transform: translateY(-2px);
         }
         .nav-inner .nav-link.active {
-            color: #2d89ef;
+            color: var(--blue);
             background: rgba(37,99,235,0.12);
             box-shadow: inset 0 -3px 0 rgba(37,99,235,0.08);
         }
@@ -265,7 +230,7 @@
             padding: 12px 14px;
             width: 100%;
         }
-        .card .add-to-cart svg { width: 18px; height: 18px; flex-shrink: 0; fill: currentColor; }
+        .card .add-to-cart svg { width: 18px; height: 18px; flex-shrink: 0; fill: currentColor;}
         .card .add-to-cart:hover { background: rgba(244,63,94,0.08); transform: translateY(-2px); }
 
         .card .buy {
@@ -297,59 +262,13 @@
         .toast-cart { position: fixed; right: 20px; bottom: 20px; background: #111; color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(10px); opacity: 0; transition: all 240ms ease; z-index: 9999; }
         .toast-cart.show { opacity: 1; transform: translateY(0); }
 
-        /* --------------------
-           Pagination styles
-           -------------------- */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 18px;
-            flex-wrap: wrap;
-        }
-        .page-btn, .page-num {
-            padding: 8px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid rgba(0,0,0,0.06);
-            box-sizing: border-box;
-            display: inline-block;
-        }
-        .page-btn {
-            background: white;
-            color: #111;
-        }
-        .page-num {
-            background: white;
-            color: #111;
-        }
-        .page-num.active {
-            background: var(--blue);
-            color: white;
-            border-color: rgba(0,0,0,0.06);
-        }
-        .page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
-
         /* Responsive: rút gọn layout header cho mobile */
         @media (max-width: 880px) {
             .header-inner { padding: 0 12px; gap: 10px; }
-            .search-box { display: none; } /* ẩn search trên mobile header để gọn */
+            .search-box { display: none; } /* ẩn search trên mobile header để gọn (tùy bạn) */
             .nav-inner { padding: 8px 12px; gap: 12px; overflow-x:auto; }
             .grid-featured, .grid-all { grid-template-columns: repeat(2, 1fr); }
-            .page-num { padding: 6px 8px; font-size: 14px; }
         }
-
-        /* Simple dropdown */
-        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); color: white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
-        .avatar-img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
-        .dropdown { position: absolute; right: 20px; top: 68px; background: white; color: #111; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12); min-width:180px; display:none; z-index:1300; }
-        .dropdown.show { display:block; }
-        .dropdown .item { padding:10px 12px; display:block; text-decoration:none; color:inherit; border-bottom:1px solid rgba(0,0,0,0.04); }
-        .dropdown .item:last-child { border-bottom:none; }
-        .dropdown .item:hover { background: rgba(0,0,0,0.02); }
-
     </style>
 </head>
 <script>
@@ -382,32 +301,8 @@
         <!-- Actions (theo thứ tự: Trợ lý ảo, Giỏ hàng, Hỗ trợ, Profile/Đăng nhập) -->
         <div class="actions" role="group" aria-label="Hành động người dùng">
 
-            <!-- Trợ lý ảo (luôn hiển thị) -->
-            <a th:href="@{/chat}" class="assistant-btn" role="button" aria-label="Trợ lý ảo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/>
-                </svg>
-                Trợ lý ảo
-            </a>
-
-            <!-- Giỏ hàng + Support + Auth (khi chưa đăng nhập) -->
+            <!-- Auth (khi chưa đăng nhập) -->
             <div th:if="${customer == null}" style="display:inline-flex; gap:8px; align-items:center;">
-                <!-- Giỏ hàng (guest) - dùng class chung .cart-btn để JS cập nhật -->
-                <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
-                    </svg>
-                    <span class="cart-text">Giỏ hàng (0)</span>
-                </a>
-
-                <!-- Hỗ trợ khách hàng -->
-                <a th:href="@{/support/view}" class="support-btn" role="button" aria-label="Hỗ trợ khách hàng">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92A2.5 2.5 0 0012.5 12H11v-1h1.5c.28 0 .5-.22.5-.5 0-.13-.05-.26-.15-.35L11.9 7.9A1 1 0 0113 7c.55 0 1 .45 1 1 0 .28-.11.53-.28.75z"/>
-                    </svg>
-                    <span>Hỗ trợ</span>
-                </a>
-
                 <!-- Đăng nhập / Đăng ký -->
                 <a th:href="@{/login.html}" class="auth-login" role="button">Đăng nhập</a>
                 <a th:href="@{/register.html}" class="auth-register" role="button">Đăng ký</a>
@@ -415,19 +310,21 @@
 
             <!-- User menu khi đã đăng nhập -->
             <div class="user-menu" th:if="${customer != null}" style="display:inline-flex; gap:8px; align-items:center;">
-                <!-- Giỏ hàng (user) -->
-                <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
-                    </svg>
-                    <span class="cart-text">Giỏ hàng (0)</span>
+                <!-- Trợ lý ảo (chỉ sau đăng nhập) -->
+                <a th:href="@{/chat}" class="assistant-btn" role="button" aria-label="Trợ lý ảo">
+
+                    Trợ lý ảo
                 </a>
 
-                <!-- Hỗ trợ khách hàng (user) -->
+                <!-- Giỏ hàng (chỉ sau đăng nhập) -->
+                <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
+
+                    <span class="cart-text">Giỏ hàng</span>
+                </a>
+
+                <!-- Hỗ trợ khách hàng (chỉ sau đăng nhập) -->
                 <a th:href="@{/support/view}" class="support-btn" role="button" aria-label="Hỗ trợ khách hàng">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92A2.5 2.5 0 0012.5 12H11v-1h1.5c.28 0 .5-.22.5-.5 0-.13-.05-.26-.15-.35L11.9 7.9A1 1 0 0113 7c.55 0 1 .45 1 1 0 .28-.11.53-.28.75z"/>
-                    </svg>
+
                     <span>Hỗ trợ</span>
                 </a>
 
@@ -481,7 +378,7 @@
 <main id="pageContent" style="margin-top:0;">
     <div style="height: 8px;"></div>
 
-    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418352_770267042671107_6961607438473419344_n.png?stp=dst-png_s720x720&_nc_cat=105&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeHyEG88V0DdnLVBMkWAgYkvokjCGs1qhreiSMIazWqGt9gSNYfky-rFMwsRQ9xtFUnBikEQnwSPNDujEYFs-Zzz&_nc_ohc=imsD9FHbcRkQ7kNvwGKjasb&_nc_oc=AdkJmZJingJ-oIouY3Tr1huLHpiI3L8kQ6tyNoFyga7bCbG7JQqE3Rr8fCdci8I8U4A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&oh=03_Q7cD3gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
+    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418…gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
     </div>
 
     <section class="products">
@@ -606,7 +503,6 @@
     /* =========================
        Local Storage Cart Utils (cập nhật UI cho mọi .cart-btn)
        ========================= */
-
     function updateCartCountUI() {
         const cart = typeof loadCart === 'function' ? loadCart() : [];
         const total = cart.reduce((s, it) => s + (it.qty||1), 0);

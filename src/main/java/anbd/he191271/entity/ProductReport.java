@@ -18,9 +18,9 @@ public class ProductReport {
 
     private String type;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+
+    @Column(name = "customer_id")
+    private int customer_id;
 
     @Column(name = "product_id")
     private Long productId;
@@ -38,14 +38,14 @@ public class ProductReport {
     // Constructors
     public ProductReport() {}
 
-    public ProductReport(Long id, String name, String title, String email, String message, String type, Customer customer, Long productId, LocalDateTime createdAt, LocalDateTime updatedAt, String description, String status) {
+    public ProductReport(Long id, String name, String title, String email, String message, String type, int customer_id, Long productId, LocalDateTime createdAt, LocalDateTime updatedAt, String description, String status) {
         this.id = id;
         this.name = name;
         this.title = title;
         this.email = email;
         this.message = message;
         this.type = type;
-        this.customer = customer;
+        this.customer_id = customer_id;
         this.productId = productId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -96,12 +96,12 @@ public class ProductReport {
         this.type = type;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public int getCustomer_id() {
+        return customer_id;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCustomer_id(int customer_id) {
+        this.customer_id = customer_id;
     }
 
     public Long getProductId() {
@@ -131,7 +131,6 @@ public class ProductReport {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }
@@ -159,4 +158,6 @@ public class ProductReport {
     public void setEmail(String email) {
         this.email = email;
     }
+
+
 }
