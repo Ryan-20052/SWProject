@@ -9,8 +9,10 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -58,6 +60,13 @@ public class ManageOrderController {
         model.addAttribute("manager", manager);
         model.addAttribute("orderList",stream.toList());
         return "manageOrder";
+    }
+
+    @PostMapping("/deleteOrder")
+    public String deleteOrder(@RequestParam int orderId, RedirectAttributes redirectAttributes) {
+        orderService.deleteById(orderId);
+        redirectAttributes.addFlashAttribute("msg", "Đã xóa đơn hàng");
+        return "redirect:/manageOrder/viewOrder";
     }
 
 }

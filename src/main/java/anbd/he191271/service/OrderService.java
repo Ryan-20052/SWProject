@@ -22,5 +22,7 @@ public class OrderService {
     public Order findById(int id) {
         return orderRepository.findById(id).get();
     }
-
+    public void deleteById(int id) {
+        orderRepository.deleteById(id);
+    }
 }
