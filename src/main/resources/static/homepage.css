@@ -214,3 +214,37 @@ nav { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.06); margin-top: 0; 
     transform: translateY(-2px);
     box-shadow: 0 6px 14px rgba(244,63,94,0.3);
 }
+/* --------------------
+           Pagination styles
+           -------------------- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+.page-btn, .page-num {
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-sizing: border-box;
+    display: inline-block;
+}
+.page-btn {
+    background: white;
+    color: #111;
+}
+.page-num {
+    background: white;
+    color: #111;
+}
+.page-num.active {
+    background: var(--blue);
+    color: white;
+    border-color: rgba(0,0,0,0.06);
+}
+.page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }

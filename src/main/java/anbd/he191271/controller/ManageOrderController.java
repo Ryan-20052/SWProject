@@ -2,16 +2,14 @@ package anbd.he191271.controller;
 
 import anbd.he191271.entity.Manager;
 import anbd.he191271.entity.Order;
+import anbd.he191271.entity.OrderDetail;
 import anbd.he191271.service.OrderDetailService;
 import anbd.he191271.service.OrderService;
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -67,6 +65,18 @@ public class ManageOrderController {
         orderService.deleteById(orderId);
         redirectAttributes.addFlashAttribute("msg", "Đã xóa đơn hàng");
         return "redirect:/manageOrder/viewOrder";
+    }
+
+    @GetMapping("/viewOrderDetail/{id}")
+    public String viewOrderDetail(@PathVariable("id") int id, HttpSession session, Model model) {
+        Order order = orderService.findById(id);
+        Manager manager = (Manager)session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+        model.addAttribute("order", order);
+        model.addAttribute("manager", manager);
+        return "OrderDetail";
     }
 
 }

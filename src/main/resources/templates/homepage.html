@@ -261,7 +261,40 @@
         /* toast nhỏ khi thêm giỏ hàng */
         .toast-cart { position: fixed; right: 20px; bottom: 20px; background: #111; color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(10px); opacity: 0; transition: all 240ms ease; z-index: 9999; }
         .toast-cart.show { opacity: 1; transform: translateY(0); }
-
+        /* --------------------
+              Pagination styles
+              -------------------- */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .page-btn, .page-num {
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .page-btn {
+            background: white;
+            color: #111;
+        }
+        .page-num {
+            background: white;
+            color: #111;
+        }
+        .page-num.active {
+            background: var(--blue);
+            color: white;
+            border-color: rgba(0,0,0,0.06);
+        }
+        .page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
         /* Responsive: rút gọn layout header cho mobile */
         @media (max-width: 880px) {
             .header-inner { padding: 0 12px; gap: 10px; }
@@ -378,7 +411,7 @@
 <main id="pageContent" style="margin-top:0;">
     <div style="height: 8px;"></div>
 
-    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418…gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
+    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418352_770267042671107_6961607438473419344_n.png?stp=dst-png_s720x720&_nc_cat=105&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeHyEG88V0DdnLVBMkWAgYkvokjCGs1qhreiSMIazWqGt9gSNYfky-rFMwsRQ9xtFUnBikEQnwSPNDujEYFs-Zzz&_nc_ohc=imsD9FHbcRkQ7kNvwGKjasb&_nc_oc=AdkJmZJingJ-oIouY3Tr1huLHpiI3L8kQ6tyNoFyga7bCbG7JQqE3Rr8fCdci8I8U4A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&oh=03_Q7cD3gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
     </div>
 
     <section class="products">
@@ -503,6 +536,7 @@
     /* =========================
        Local Storage Cart Utils (cập nhật UI cho mọi .cart-btn)
        ========================= */
+
     function updateCartCountUI() {
         const cart = typeof loadCart === 'function' ? loadCart() : [];
         const total = cart.reduce((s, it) => s + (it.qty||1), 0);

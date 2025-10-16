@@ -32,7 +32,7 @@ public class Order {
     private LocalDateTime orderDate;
 
     // Quan hệ 1-n với OrderDetail
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderDetail> orderDetails;
 
     // Trạng thái thanh toán: VD: "PENDING", "PAID", "FAILED"

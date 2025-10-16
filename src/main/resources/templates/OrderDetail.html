@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đơn hàng</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #111;
+        }
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background: #2563eb;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f3f4f6;
+        }
+
+        tbody tr:hover {
+            background: #e5e7eb;
+        }
+
+        th:first-child,
+        td:first-child {
+            text-align: center;
+            width: 50px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Manager Dashboard</h1>
+        <div th:text="|Xin chào, ${manager.username}|"></div>
+    </div>
+</header>
+
+<div class="dashboard">
+    <h2>Chi tiết đơn hàng</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tên</th>
+            <th>Số lượng</th>
+            <th>Giá</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="o, iterStat : ${order.orderDetails}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${o.variant.name}"></td>
+            <td th:text="${o.getAmount()}"></td>
+            <td th:text="${o.variant.price * o.amount}"></td>
+        </tr>
+        </tbody>
+        <tr>
+            <td colspan="3" style="text-align: right; font-weight: bold;">Tổng tiền:</td>
+            <td th:text="|${order.totalAmount} VNĐ|"></td>
+        </tr>
+    </table>
+
+    <a th:href="@{/manageOrder/viewOrder}" class="back-link">Quay lại danh sách đơn hàng</a>
+</div>
+</body>
+</html>
