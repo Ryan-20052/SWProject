@@ -54,11 +54,7 @@ public class CustomerLoginController {
 
         // ✅ Thành công → Lưu session
         session.setAttribute("customer", customer);
-        return ResponseEntity.ok(Map.of(
-                "ok", true,
-                "message", "Đăng nhập thành công",
-                "email", customer.getEmail()
-        ));
+        return ResponseEntity.ok(customer);
     }
 
     @PostMapping("/logout")

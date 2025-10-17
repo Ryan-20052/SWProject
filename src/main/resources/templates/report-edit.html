@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh sửa Báo cáo | License Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh sửa Trạng thái Báo cáo</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/history/update/{id}(id=${report.id})}" method="post">
+                        <!-- Thông tin báo cáo -->
+                        <div class="mb-3">
+                            <label class="form-label"><strong>ID Báo cáo:</strong></label>
+                            <p th:text="${report.id}" class="form-control-plaintext"></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Tiêu đề:</strong></label>
+                            <p th:text="${report.title}" class="form-control-plaintext"></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Người gửi:</strong></label>
+                            <p th:text="${report.name}" class="form-control-plaintext"></p>
+                        </div>
+
+                        <!-- Chọn trạng thái mới -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label"><strong>Trạng thái mới:</strong></label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="pending" th:selected="${report.status == 'pending'}">🟡 Đang chờ xử lý</option>
+                                <option value="approved" th:selected="${report.status == 'approved'}">🟢 Đã phê duyệt</option>
+                                <option value="rejected" th:selected="${report.status == 'rejected'}">🔴 Đã từ chối</option>
+                            </select>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/history}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Cập nhật Trạng thái
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

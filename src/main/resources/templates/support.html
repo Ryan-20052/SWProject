@@ -4,58 +4,136 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hỗ trợ khách hàng | License Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS với màu xanh đồng bộ #0d6efd -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d6efd',
+                        'primary-dark': '#0b5ed7',
+                        'primary-light': '#e6f0ff',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styles for details/summary elements */
+        details {
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            background-color: #f8fafc;
+            border-left: 4px solid #0d6efd;
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:hover {
+            color: #0d6efd;
+        }
+
+        /* Animation for the arrow */
+        .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        details[open] .arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Custom button hover effects */
+        .btn-hover {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Smooth page transitions */
+        body {
+            transition: opacity 0.3s ease;
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
 <!-- HEADER -->
-<header class="bg-indigo-600 text-white shadow-md">
+<header class="bg-primary text-white shadow-md">
     <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
         <button th:onclick="|window.location.href='@{/home/homepage}'|"
-                class="text-2xl font-semibold hover:text-indigo-200 transition">
+                class="text-2xl font-semibold hover:text-blue-200 transition btn-hover">
             License Shop
         </button>
 
         <div class="flex space-x-3">
             <button th:onclick="|window.location.href='@{/home/homepage}'|"
-                    class="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 transition font-medium">
+                    class="px-4 py-2 rounded-lg bg-primary-dark hover:bg-blue-700 transition font-medium btn-hover">
                 Trang chủ
             </button>
 
             <button th:onclick="|window.location.href='@{/cart/view}'|"
-                    class="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 transition font-medium">
+                    class="px-4 py-2 rounded-lg bg-primary-dark hover:bg-blue-700 transition font-medium btn-hover">
                 Giỏ hàng
             </button>
 
             <button th:onclick="|window.location.href='@{/logout}'|"
-                    class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 transition font-medium">
+                    class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 transition font-medium btn-hover">
                 Đăng xuất
             </button>
         </div>
     </div>
 
     <div class="text-center py-6">
-        <h1 class="text-3xl font-semibold">Trung tâm Hỗ trợ Khách hàng</h1>
-        <p class="text-sm opacity-90 mt-2">Chúng tôi luôn sẵn sàng giúp bạn giải đáp mọi thắc mắc</p>
+        <h1 class="text-3xl font-semibold fade-in">Trung tâm Hỗ trợ Khách hàng</h1>
+        <p class="text-sm opacity-90 mt-2 fade-in">Chúng tôi luôn sẵn sàng giúp bạn giải đáp mọi thắc mắc</p>
     </div>
 </header>
 
 <!-- FAQ SECTION -->
 <section class="max-w-4xl mx-auto px-4 py-12">
-    <h2 class="text-2xl font-bold mb-6 text-center">Câu hỏi thường gặp</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center fade-in">Câu hỏi thường gặp</h2>
 
-    <div class="bg-white shadow rounded-2xl divide-y divide-gray-200">
+    <div class="bg-white shadow rounded-2xl divide-y divide-gray-200 fade-in">
 
         <!-- FAQ 1 -->
         <details class="p-4 group">
             <summary class="cursor-pointer font-semibold text-lg flex justify-between items-center">
                 Làm thế nào để kích hoạt license?
-                <span class="text-indigo-500 group-open:rotate-180 transition-transform">▼</span>
+                <span class="text-primary arrow transition-transform">▼</span>
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
-                <p>Sau khi mua, bạn sẽ nhận được email chứa mã kích hoạt. Truy cập trang “Kích hoạt sản phẩm”, nhập mã đó để hoàn tất quá trình.</p>
+                <p>Sau khi mua, bạn sẽ nhận được email chứa mã kích hoạt. Truy cập trang "Kích hoạt sản phẩm", nhập mã đó để hoàn tất quá trình.</p>
                 <button th:onclick="|window.location.href='@{/support/activation-guide}'|"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
             </div>
@@ -65,12 +143,12 @@
         <details class="p-4 group">
             <summary class="cursor-pointer font-semibold text-lg flex justify-between items-center">
                 Tôi không nhận được email xác nhận đơn hàng?
-                <span class="text-indigo-500 group-open:rotate-180 transition-transform">▼</span>
+                <span class="text-primary arrow transition-transform">▼</span>
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
-                <p>Hãy kiểm tra hộp thư rác hoặc tab “Khuyến mãi”. Nếu vẫn không thấy, vui lòng gửi yêu cầu hỗ trợ.</p>
+                <p>Hãy kiểm tra hộp thư rác hoặc tab "Khuyến mãi". Nếu vẫn không thấy, vui lòng gửi yêu cầu hỗ trợ.</p>
                 <button th:onclick="|window.location.href='@{/support/missing-email}'|"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
             </div>
@@ -80,12 +158,12 @@
         <details class="p-4 group">
             <summary class="cursor-pointer font-semibold text-lg flex justify-between items-center">
                 Có thể hoàn tiền sau khi mua không?
-                <span class="text-indigo-500 group-open:rotate-180 transition-transform">▼</span>
+                <span class="text-primary arrow transition-transform">▼</span>
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
                 <p>Chúng tôi hỗ trợ hoàn tiền trong vòng 7 ngày nếu license chưa được kích hoạt.</p>
                 <button th:onclick="|window.location.href='@{/support/refund-policy}'|"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
             </div>
@@ -95,12 +173,12 @@
         <details class="p-4 group">
             <summary class="cursor-pointer font-semibold text-lg flex justify-between items-center">
                 Tôi cần liên hệ với đội ngũ hỗ trợ
-                <span class="text-indigo-500 group-open:rotate-180 transition-transform">▼</span>
+                <span class="text-primary arrow transition-transform">▼</span>
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
                 <p>Bạn có thể gửi yêu cầu hỗ trợ trực tiếp đến chúng tôi qua biểu mẫu chuyên dụng.</p>
                 <button th:onclick="|window.location.href='@{/report/view}'|"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Gửi yêu cầu
                 </button>
             </div>
@@ -109,14 +187,53 @@
 </section>
 
 <!-- FOOTER -->
-<footer class="bg-indigo-50 py-10 border-t border-indigo-100">
+<footer class="bg-primary-light py-10 border-t border-blue-200">
     <div class="max-w-5xl mx-auto px-4 text-center">
-        <h3 class="text-lg font-semibold mb-3 text-indigo-700">Thông tin liên hệ trực tiếp</h3>
-        <p>Email: <a href="mailto:support@licenseshop.vn" class="text-indigo-600 hover:underline">support@licenseshop.vn</a></p>
+        <h3 class="text-lg font-semibold mb-3 text-primary">Thông tin liên hệ trực tiếp</h3>
+        <p>Email: <a href="mailto:support@licenseshop.vn" class="text-primary hover:underline">support@licenseshop.vn</a></p>
         <p>Hotline: <span class="font-medium text-gray-700">(+84) 912 345 678</span></p>
         <p class="mt-3 text-sm text-gray-500">© 2025 License Shop. Mọi quyền được bảo lưu.</p>
     </div>
 </footer>
+
+<!-- JavaScript for enhanced interactions -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation to all elements with the class
+        const fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Add smooth closing for other details when one is opened
+        const detailsElements = document.querySelectorAll('details');
+        detailsElements.forEach(detail => {
+            detail.addEventListener('click', function() {
+                if (this.open) {
+                    detailsElements.forEach(otherDetail => {
+                        if (otherDetail !== this) {
+                            otherDetail.open = false;
+                        }
+                    });
+                }
+            });
+        });
+
+        // Add hover effect to all buttons with btn-hover class
+        const buttons = document.querySelectorAll('.btn-hover');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

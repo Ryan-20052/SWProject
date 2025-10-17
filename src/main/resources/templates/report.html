@@ -1,176 +1,313 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gửi yêu cầu hỗ trợ | License Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 text-gray-800">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Yêu Cầu Hỗ Trợ - License Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+        }
 
-<!-- HEADER -->
-<header class="bg-indigo-600 text-white shadow-md">
-    <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
-        <button th:onclick="|window.location.href='@{/home/homepage}'|"
-                class="text-2xl font-semibold hover:text-indigo-200 transition">
-            License Shop
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: none;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .required-label::after {
+            content: " *";
+            color: red;
+        }
+
+        .alert-success {
+            background-color: #d1edff;
+            border-color: #b6d7ff;
+            color: #0c5460;
+        }
+
+        .subject-option {
+            display: flex;
+            align-items: center;
+        }
+
+        .support-icon {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-info {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #31d2f2;
+            border-color: #31d2f2;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .support-info {
+            background-color: var(--light-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Đảm bảo các link trong navbar có màu trắng */
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .navbar-dark .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-dark .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+<body>
+<!-- Header với màu xanh giống nút Gửi Yêu Cầu -->
+<header class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-shop me-2"></i>License Shop
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="flex space-x-3">
-            <button th:onclick="|window.location.href='@{/support/view}'|"
-                    class="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 transition font-medium">
-                Quay lại Hỗ trợ
-            </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/home/homepage}">
+                        <i class="bi bi-house-door me-1"></i> Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/history}">
+                        <i class="bi bi-clock-history me-1"></i> Lịch sử yêu cầu
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/support/view}">
+                        <i class="bi bi-arrow-return-left me-1"></i> Quay lại hỗ trợ
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </header>
 
-<!-- SUPPORT REQUEST FORM -->
-<section class="max-w-3xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold text-center mb-8">Gửi yêu cầu hỗ trợ</h1>
-    <p class="text-center text-gray-600 mb-6">Vui lòng điền đầy đủ thông tin bên dưới để chúng tôi có thể hỗ trợ bạn nhanh nhất.</p>
+<!-- Main Content -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-headset support-icon text-primary"></i>
+                <h2 class="mb-0">Gửi Yêu Cầu Hỗ Trợ</h2>
+            </div>
 
-    <!-- Flash message -->
-    <div th:if="${successMessage}" class="max-w-3xl mx-auto px-4 mb-6">
-        <div class="bg-green-100 border border-green-200 text-green-800 p-4 rounded">
-            <strong th:text="${successMessage}">Gửi yêu cầu thành công.</strong>
+            <div class="card">
+                <div class="card-body p-4">
+
+                    <!-- Thông báo thành công -->
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span th:text="${successMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <form th:action="@{/report/submit}" method="post">
+                        <!-- Thông tin khách hàng -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label required-label">Họ và tên</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="name"
+                                       name="name"
+                                       th:value="${customer != null ? customer.name : ''}"
+                                       required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label required-label">Email</label>
+                                <input type="email"
+                                       class="form-control"
+                                       id="email"
+                                       name="email"
+                                       th:value="${customer != null ? customer.email : ''}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Chọn sản phẩm (tùy chọn) -->
+                        <div class="mb-3">
+                            <label for="productId" class="form-label">Liên quan đến sản phẩm</label>
+                            <select class="form-select" id="productId" name="productId">
+                                <option value="">-- Chọn sản phẩm (nếu có) --</option>
+                                <option th:each="product : ${products}"
+                                        th:value="${product.id}"
+                                        th:text="${product.name}">
+                                </option>
+                            </select>
+                            <div class="form-text">Chọn sản phẩm nếu yêu cầu của bạn liên quan đến một sản phẩm cụ thể.</div>
+                        </div>
+
+                        <!-- Tiêu đề -->
+                        <div class="mb-3">
+                            <label for="subject" class="form-label required-label">Chủ đề</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="" disabled selected>-- Chọn chủ đề --</option>
+                                <option value="khiếu_nại" class="subject-option">🛑 Khiếu nại</option>
+                                <option value="phản_hồi" class="subject-option">💬 Phản hồi</option>
+                                <option value="đề_xuất" class="subject-option">💡 Đề xuất</option>
+                                <option value="báo_cáo" class="subject-option">⚠️ Báo cáo</option>
+                            </select>
+                            <div class="form-text mt-1">Chọn chủ đề phù hợp với yêu cầu hỗ trợ của bạn</div>
+                        </div>
+
+                        <!-- Nội dung -->
+                        <div class="mb-4">
+                            <label for="message" class="form-label required-label">Nội dung chi tiết</label>
+                            <textarea class="form-control"
+                                      id="message"
+                                      name="message"
+                                      rows="6"
+                                      placeholder="Mô tả chi tiết yêu cầu hoặc vấn đề của bạn..."
+                                      required></textarea>
+                        </div>
+
+                        <!-- Nút gửi -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send me-2"></i>Gửi Yêu Cầu
+                            </button>
+                            <a th:href="@{/history}" class="btn btn-info px-4 ms-2">
+                                <i class="bi bi-clock-history me-2"></i>Lịch sử yêu cầu
+                            </a>
+                            <button type="reset" class="btn btn-outline-secondary ms-2">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Nhập Lại
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Thông tin hỗ trợ -->
+            <div class="card mt-4">
+                <div class="card-body support-info">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle me-2"></i>Thông Tin Hỗ Trợ
+                    </h5>
+                    <p class="card-text">
+                        Chúng tôi sẽ phản hồi yêu cầu của bạn trong thời gian sớm nhất.
+                        Thông thường, bạn sẽ nhận được phản hồi trong vòng 24-48 giờ làm việc.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <i class="bi bi-envelope me-2"></i><strong>Email hỗ trợ:</strong> support@licenseshop.com
+                        </div>
+                        <div class="col-md-6">
+                            <i class="bi bi-telephone me-2"></i><strong>Hotline:</strong> 1800-1234
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <form th:action="@{/report/submit}" method="post" class="space-y-6 bg-white p-8 rounded-2xl shadow" id="supportForm">
-        <th:block th:if="${_csrf != null}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        </th:block>
-
-        <div>
-            <label class="block mb-2 font-medium">Họ và tên</label>
-            <input name="name" type="text" required th:value="${customer?.name}"
-                   class="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                   placeholder="Nguyễn Văn A">
+<!-- Footer -->
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="bi bi-shop me-2"></i>License Shop</h5>
+                <p class="mb-0">Cung cấp các giải pháp phần mềm và bản quyền chính hãng.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0">&copy; 2023 License Shop. All rights reserved.</p>
+            </div>
         </div>
-
-        <div>
-            <label class="block mb-2 font-medium">Email</label>
-            <input name="email" type="email" required th:value="${customer?.email}"
-                   class="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                   placeholder="email@domain.com">
-        </div>
-
-        <!-- PRODUCT SELECT -->
-        <div>
-            <label class="block mb-2 font-medium">Sản phẩm</label>
-            <select name="productId" id="productSelect"
-                    class="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                <option value="" selected>-- Chọn sản phẩm (nếu có) --</option>
-                <th:block th:each="p : ${products}">
-                    <option th:value="${p.id}" th:text="${p.name}"></option>
-                </th:block>
-            </select>
-        </div>
-
-        <!-- CHỦ ĐỀ DROPDOWN -->
-        <div>
-            <label class="block mb-2 font-medium">Chủ đề <span class="text-red-500">*</span></label>
-            <select name="subject" required
-                    class="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-                <option value="" disabled selected>-- Chọn chủ đề --</option>
-                <option value="khiếu_nại">🛑 Khiếu nại</option>
-                <option value="phản_hồi">💬 Phản hồi</option>
-                <option value="đề_xuất">💡 Đề xuất</option>
-                <option value="báo_cáo">⚠️ Báo cáo</option>
-            </select>
-            <p class="mt-1 text-sm text-gray-500">
-                Chọn chủ đề phù hợp với yêu cầu hỗ trợ của bạn
-            </p>
-        </div>
-
-        <div>
-            <label class="block mb-2 font-medium">Nội dung chi tiết <span class="text-red-500">*</span></label>
-            <textarea name="message" rows="6" required
-                      class="w-full border border-gray-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                      placeholder="Mô tả chi tiết vấn đề, kèm mã đơn hàng, ảnh chụp màn hình nếu có..."></textarea>
-        </div>
-
-        <div class="text-center">
-            <button type="submit"
-                    class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition">
-                Gửi yêu cầu
-            </button>
-        </div>
-    </form>
-</section>
-
-<footer class="bg-indigo-50 py-10 border-t border-indigo-100 mt-12">
-    <div class="max-w-5xl mx-auto px-4 text-center">
-        <h3 class="text-lg font-semibold mb-3 text-indigo-700">Thông tin liên hệ trực tiếp</h3>
-        <p>Email: <a href="mailto:support@licenseshop.vn" class="text-indigo-600 hover:underline">support@licenseshop.vn</a></p>
-        <p>Hotline: <span class="font-medium text-gray-700">(+84) 912 345 678</span></p>
-        <p class="mt-3 text-sm text-gray-500">© 2025 License Shop. Mọi quyền được bảo lưu.</p>
     </div>
 </footer>
 
-<!-- JS: cập nhật variant select theo lựa chọn product -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const products = /*[[${products}]]*/ [];
-
-    const productSelect = document.getElementById('productSelect');
-    const variantSelect = document.getElementById('variantSelect');
-    const variantHelp = document.getElementById('variantHelp');
-
-    function clearVariants() {
-        if (variantSelect) {
-            variantSelect.innerHTML = '<option value="">-- Chọn phiên bản --</option>';
-            variantSelect.disabled = true;
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Tự động ẩn thông báo sau 5 giây
+    document.addEventListener('DOMContentLoaded', function() {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            setTimeout(function() {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
         }
-    }
 
-    function populateVariants(variants) {
-        clearVariants();
-        if (!variants || variants.length === 0) {
-            if (variantHelp) variantHelp.textContent = 'Sản phẩm này hiện không có phiên bản (variant).';
-            return;
-        }
-        variants.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.id;
-            opt.textContent = v.name;
-            variantSelect.appendChild(opt);
+        // Xác thực form trước khi gửi
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !email || !subject || !message) {
+                event.preventDefault();
+                alert('Vui lòng điền đầy đủ các trường bắt buộc (có đánh dấu *)');
+            }
         });
-        variantSelect.disabled = false;
-        if (variantHelp) variantHelp.textContent = 'Chọn phiên bản phù hợp.';
-    }
 
-    productSelect.addEventListener('change', function () {
-        const selectedId = this.value;
-        if (!selectedId) {
-            clearVariants();
-            if (variantHelp) variantHelp.textContent = 'Chọn sản phẩm để hiển thị các phiên bản tương ứng.';
-            return;
-        }
-        const prod = products.find(p => String(p.id) === String(selectedId));
-        if (prod) {
-            populateVariants(prod.variants);
-        } else {
-            clearVariants();
-            if (variantHelp) variantHelp.textContent = 'Không tìm thấy phiên bản cho sản phẩm đã chọn.';
+        // Thêm hiệu ứng khi chọn chủ đề
+        const subjectSelect = document.getElementById('subject');
+        if (subjectSelect) {
+            subjectSelect.addEventListener('change', function() {
+                if (this.value) {
+                    this.classList.remove('is-invalid');
+                }
+            });
         }
     });
-
-    (function initFromServer() {
-        const preSel = productSelect.value;
-        if (preSel) {
-            const prod = products.find(p => String(p.id) === String(preSel));
-            if (prod) {
-                populateVariants(prod.variants);
-                const preVar = /*[[${preselectedVariantId}]]*/ null;
-                if (preVar && variantSelect) {
-                    variantSelect.value = preVar;
-                }
-            }
-        }
-    })();
-    /*]]>*/
 </script>
 </body>
 </html>
