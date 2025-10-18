@@ -2,6 +2,10 @@ package anbd.he191271.service;
 
 import anbd.he191271.entity.Customer;
 import anbd.he191271.repository.CustomerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +71,10 @@ public class CustomerService {
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
         c.setStatus("ACTIVE");
         customerRepository.save(c);
+    }
+    public Page<Customer> searchCustomers(String username, String email, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return customerRepository.searchCustomers(username, email, status, pageable);
     }
 
 }

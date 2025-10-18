@@ -71,6 +71,16 @@
 
 <div class="container">
     <h2>Quản lý tài khoản Customer</h2>
+    <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+        <input id="searchUsername" type="text" placeholder="Tìm theo username" style="padding:8px;">
+        <input id="searchEmail" type="text" placeholder="Tìm theo email" style="padding:8px;">
+        <select id="searchStatus" style="padding:8px;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="BANNED">Bị khóa</option>
+        </select>
+        <button onclick="loadCustomers(0)" style="padding:8px 16px; background:#1976d2;color:white;border:none;border-radius:4px;">🔍 Tìm kiếm</button>
+    </div>
     <table>
         <thead>
         <tr><th>ID</th><th>Username</th><th>Email</th><th>Trạng thái</th><th>Hành động</th></tr>
@@ -96,17 +106,33 @@
 
     function goLogin() { window.location.href = "login.html"; }
 
-    async function loadCustomers() {
+    let currentPage = 0;
+    let totalPages = 0;
+    const PAGE_SIZE = 5;
+
+    async function loadCustomers(page = 0) {
         try {
-            const res = await fetch(API_URL);
+            const username = document.getElementById("searchUsername").value.trim();
+            const email = document.getElementById("searchEmail").value.trim();
+            const status = document.getElementById("searchStatus").value;
+
+            const params = new URLSearchParams({
+                page,
+                size: PAGE_SIZE,
+                username: username || "",
+                email: email || "",
+                status: status || ""
+            });
+
+            const res = await fetch(`${API_URL}/search?${params.toString()}`);
             const data = await res.json();
+            console.log(data);
 
             const table = document.getElementById("customerTable");
             table.innerHTML = "";
 
-            data.forEach(c => {
+            data.content.forEach(c => {
                 const isBanned = c.status === "BANNED";
-
                 const row = `
                 <tr>
                     <td>${c.id}</td>
@@ -127,6 +153,11 @@
                 </tr>`;
                 table.innerHTML += row;
             });
+
+            // Cập nhật phân trang
+            currentPage = page;
+            totalPages = data.totalPages;
+            renderPagination();
         } catch (err) {
             console.error("Lỗi khi load customers:", err);
         }
@@ -150,6 +181,33 @@
         if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
             await fetch("/auth/admin/logout", { method: "GET" });
             window.location.href = "/home/homepage";
+        }
+    }
+    function renderPagination() {
+        const container = document.getElementById("pagination");
+        if (!container) {
+            const div = document.createElement("div");
+            div.id = "pagination";
+            div.style.marginTop = "20px";
+            div.style.textAlign = "center";
+            document.querySelector(".container").appendChild(div);
+        }
+
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        for (let i = 0; i < totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i + 1;
+            btn.style.margin = "0 4px";
+            btn.style.padding = "6px 12px";
+            btn.style.border = "1px solid #1976d2";
+            btn.style.background = i === currentPage ? "#1976d2" : "white";
+            btn.style.color = i === currentPage ? "white" : "#1976d2";
+            btn.style.cursor = "pointer";
+
+            btn.onclick = () => loadCustomers(i);
+            pagination.appendChild(btn);
         }
     }
 
