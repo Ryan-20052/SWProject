@@ -2,6 +2,7 @@ package anbd.he191271;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,6 +17,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LicenseClientApp extends Application {
 
@@ -135,7 +138,11 @@ public class LicenseClientApp extends Application {
 
                 if (response.contains("\"ok\":true")) {
                     String expired = extractJsonField(response, "expiredAt");
+                    String customerName = extractJsonField(response, "customerName");
+                    String productName = extractJsonField(response, "productName");
+
                     resultLabel.setText("✅ License hợp lệ — hết hạn: " + expired);
+                    showLicenseInfoScene(customerName, productName, expired);
                 } else {
                     String msg = extractJsonField(response, "message");
                     resultLabel.setText("❌ Không hợp lệ: " + (msg.isEmpty() ? "Key sai hoặc hết hạn" : msg));
@@ -188,14 +195,28 @@ public class LicenseClientApp extends Application {
     }
 
     private static String extractJsonField(String json, String field) {
-        String pat = "\"" + field + "\":";
-        int idx = json.indexOf(pat);
-        if (idx == -1) return "";
-        int start = json.indexOf("\"", idx + pat.length());
-        if (start == -1) return "";
-        int end = json.indexOf("\"", start + 1);
-        if (end == -1) return "";
-        return json.substring(start + 1, end);
+        Pattern p = Pattern.compile("\"" + field + "\":\"(.*?)\"");
+        Matcher m = p.matcher(json);
+        return m.find() ? m.group(1) : "";
+    }
+
+    private void showLicenseInfoScene(String customerName, String productName, String expiredAt) {
+        Label title = new Label("🎉 Kích hoạt thành công!");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: green;");
+
+        Label customerLabel = new Label("Khách hàng: " + customerName);
+        Label productLabel = new Label("Sản phẩm: " + productName);
+        Label expiredLabel = new Label("Ngày hết hạn: " + expiredAt);
+
+        Button closeBtn = new Button("Đóng");
+        closeBtn.setOnAction(e -> stage.close());
+
+        VBox root = new VBox(15, title, customerLabel, productLabel, expiredLabel, closeBtn);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        stage.setScene(new Scene(root, 400, 250));
+        stage.show();
     }
 
     public static void main(String[] args) {

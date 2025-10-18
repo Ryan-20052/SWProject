@@ -31,8 +31,14 @@ public class LicenseController {
         if (!r.isOk()) {
             return ResponseEntity.ok(Map.of("ok", false, "message", r.getMessage()));
         } else {
-            String expired = fmt.format(r.getExpiredAt());
-            return ResponseEntity.ok(Map.of("ok", true, "message", "Key hợp lệ", "expiredAt", expired));
+            String expired = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(r.getExpiredAt());
+            return ResponseEntity.ok(Map.of(
+                    "ok", true,
+                    "message", "Key hợp lệ",
+                    "expiredAt", expired,
+                    "customerName", r.getCustomerName(),
+                    "productName", r.getProductName()
+            ));
         }
     }
 }
