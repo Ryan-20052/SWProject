@@ -43,15 +43,6 @@ public class ProductReportService {
         return productReportRepository.save(report);
     }
 
-    // Cập nhật trạng thái báo cáo
-    public void updateReportStatus(Long id, String status) {
-        ProductReport report = getReportById(id);
-        if (report != null) {
-            report.setStatus(status);
-            productReportRepository.save(report);
-        }
-    }
-
     // XÓA BÁO CÁO - CHỈ CHO PHÉP XÓA KHI STATUS LÀ "pending"
     public boolean deleteReport(Long id) {
         ProductReport report = getReportById(id);
@@ -134,4 +125,5 @@ public class ProductReportService {
         public long getApproved() { return approved; }
         public long getRejected() { return rejected; }
     }
+
 }

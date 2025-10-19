@@ -85,6 +85,58 @@
             background-color: #0d6efd !important;
             color: white !important;
         }
+
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .filter-results {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e9ecef;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .filter-tag .remove-filter {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .filter-tag .remove-filter:hover {
+            color: #dc3545;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .filter-actions {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -207,6 +259,46 @@
         </div>
     </div>
 
+    <!-- Bộ lọc nâng cao -->
+    <div class="card filter-section">
+        <div class="filter-header">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Bộ lọc nâng cao</h5>
+            <div class="filter-actions">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearFilters">
+                    <i class="fas fa-times me-1"></i> Xóa bộ lọc
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="applyFilters">
+                    <i class="fas fa-search me-1"></i> Áp dụng
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="searchKeyword" class="form-label">Tìm kiếm</label>
+                <input type="text" class="form-control" id="searchKeyword" placeholder="Nhập từ khóa tìm kiếm...">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="dateFrom" class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" id="dateFrom">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="dateTo" class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" id="dateTo">
+            </div>
+        </div>
+
+        <!-- Hiển thị các bộ lọc đang áp dụng -->
+        <div id="activeFilters" class="d-none">
+            <h6 class="mb-2">Bộ lọc đang áp dụng:</h6>
+            <div id="filterTags"></div>
+        </div>
+
+        <div class="filter-results" id="filterResults">
+            Hiển thị <span id="filteredCount">0</span> trong tổng số <span th:text="${statistics.total}">0</span> báo cáo
+        </div>
+    </div>
+
     <!-- Bulk Actions - Chỉ hiển thị khi có báo cáo pending được chọn -->
     <div class="bulk-actions" id="bulkActions" style="display: none;">
         <div class="d-flex justify-content-between align-items-center">
@@ -247,7 +339,7 @@
                         <th>Thao tác</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="reportsTableBody">
                     <tr th:each="report : ${reports}">
                         <!-- CHỈ CHO PHÉP CHỌN BÁO CÁO PENDING -->
                         <td th:if="${currentFilter == 'pending' or currentFilter == 'all' or currentFilter == null}">
@@ -282,6 +374,7 @@
                         <td th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                         <td>
                             <div class="btn-group" role="group">
+                                <!-- NÚT XEM CHI TIẾT -->
                                 <a th:href="@{/history/view/{id}(id=${report.id})}"
                                    class="btn btn-sm btn-outline-primary"
                                    title="Xem chi tiết">
@@ -291,7 +384,7 @@
                                 <a th:href="@{/history/edit/{id}(id=${report.id})}"
                                    th:if="${report.status == 'pending'}"
                                    class="btn btn-sm btn-outline-warning"
-                                   title="Chỉnh sửa trạng thái">
+                                   title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <!-- CHỈ HIỂN THỊ NÚT XÓA CHO BÁO CÁO PENDING -->
@@ -367,6 +460,9 @@
 
         // Khởi tạo chức năng chọn nhiều (chỉ khi có báo cáo pending)
         initBulkActions();
+
+        // Khởi tạo bộ lọc
+        initFilters();
     });
 
     // Chức năng chọn nhiều báo cáo PENDING để xóa
@@ -450,6 +546,175 @@
             document.body.appendChild(form);
             form.submit();
         }
+    }
+
+    // Hàm khởi tạo bộ lọc
+    function initFilters() {
+        const applyBtn = document.getElementById('applyFilters');
+        const clearBtn = document.getElementById('clearFilters');
+
+        // Áp dụng bộ lọc khi nhấn nút
+        applyBtn.addEventListener('click', applyFilters);
+
+        // Xóa bộ lọc khi nhấn nút
+        clearBtn.addEventListener('click', clearFilters);
+
+        // Áp dụng bộ lọc khi nhấn Enter trong ô tìm kiếm
+        document.getElementById('searchKeyword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Áp dụng bộ lọc ban đầu
+        applyFilters();
+    }
+
+    // Hàm áp dụng bộ lọc
+    function applyFilters() {
+        const searchKeyword = document.getElementById('searchKeyword').value.toLowerCase();
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+
+        // Lấy tất cả các hàng trong bảng
+        const rows = document.querySelectorAll('#reportsTableBody tr');
+        let visibleCount = 0;
+
+        // Hiển thị các bộ lọc đang áp dụng
+        const activeFilters = document.getElementById('activeFilters');
+        const filterTags = document.getElementById('filterTags');
+        filterTags.innerHTML = '';
+
+        // Lặp qua từng hàng và áp dụng bộ lọc
+        rows.forEach(row => {
+            let showRow = true;
+
+            // Lọc theo từ khóa tìm kiếm
+            if (searchKeyword && row) {
+                const titleCell = row.querySelector('td:nth-child(2)');
+                const nameCell = row.querySelector('td:nth-child(3)');
+                const emailCell = row.querySelector('td:nth-child(4)');
+
+                const titleText = titleCell ? titleCell.textContent.toLowerCase() : '';
+                const nameText = nameCell ? nameCell.textContent.toLowerCase() : '';
+                const emailText = emailCell ? emailCell.textContent.toLowerCase() : '';
+
+                if (!titleText.includes(searchKeyword) &&
+                    !nameText.includes(searchKeyword) &&
+                    !emailText.includes(searchKeyword)) {
+                    showRow = false;
+                }
+            }
+
+            // Lọc theo ngày
+            const dateCell = row.querySelector('td:nth-child(7)');
+            if (dateFrom && dateCell) {
+                const cellDate = parseDate(dateCell.textContent.trim());
+                const fromDate = new Date(dateFrom);
+                if (cellDate < fromDate) showRow = false;
+            }
+
+            if (dateTo && dateCell) {
+                const cellDate = parseDate(dateCell.textContent.trim());
+                const toDate = new Date(dateTo);
+                toDate.setHours(23, 59, 59, 999); // Đặt thời gian cuối ngày
+                if (cellDate > toDate) showRow = false;
+            }
+
+            // Hiển thị hoặc ẩn hàng
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+
+            // Thêm tag cho các bộ lọc đang áp dụng
+            if (searchKeyword) {
+                addFilterTag(`Tìm kiếm: "${searchKeyword}"`, 'search');
+            }
+
+            if (dateFrom) {
+                addFilterTag(`Từ: ${formatDisplayDate(dateFrom)}`, 'dateFrom');
+            }
+
+            if (dateTo) {
+                addFilterTag(`Đến: ${formatDisplayDate(dateTo)}`, 'dateTo');
+            }
+        });
+
+        // Cập nhật số lượng kết quả
+        document.getElementById('filteredCount').textContent = visibleCount;
+
+        // Hiển thị phần bộ lọc đang áp dụng nếu có
+        if (filterTags.children.length > 0) {
+            activeFilters.classList.remove('d-none');
+        } else {
+            activeFilters.classList.add('d-none');
+        }
+    }
+
+    // Hàm xóa tất cả bộ lọc
+    function clearFilters() {
+        document.getElementById('searchKeyword').value = '';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+
+        applyFilters();
+    }
+
+    // Hàm thêm tag bộ lọc
+    function addFilterTag(text, type) {
+        const filterTags = document.getElementById('filterTags');
+
+        // Kiểm tra xem tag đã tồn tại chưa
+        const existingTags = filterTags.querySelectorAll('.filter-tag');
+        for (let tag of existingTags) {
+            if (tag.dataset.type === type) {
+                return; // Đã tồn tại, không thêm nữa
+            }
+        }
+
+        const tagElement = document.createElement('div');
+        tagElement.className = 'filter-tag';
+        tagElement.dataset.type = type;
+
+        tagElement.innerHTML = `
+            ${text}
+            <span class="remove-filter" onclick="removeFilter('${type}')">
+                <i class="fas fa-times"></i>
+            </span>
+        `;
+
+        filterTags.appendChild(tagElement);
+    }
+
+    // Hàm xóa một bộ lọc cụ thể
+    function removeFilter(type) {
+        switch(type) {
+            case 'search':
+                document.getElementById('searchKeyword').value = '';
+                break;
+            case 'dateFrom':
+                document.getElementById('dateFrom').value = '';
+                break;
+            case 'dateTo':
+                document.getElementById('dateTo').value = '';
+                break;
+        }
+
+        applyFilters();
+    }
+
+    // Hàm chuyển đổi ngày từ định dạng dd/MM/yyyy sang Date object
+    function parseDate(dateString) {
+        const parts = dateString.split(' ')[0].split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    // Hàm định dạng ngày hiển thị
+    function formatDisplayDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 </script>
 </body>

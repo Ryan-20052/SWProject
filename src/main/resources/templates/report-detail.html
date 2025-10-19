@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Báo cáo | License Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            border: none;
+        }
+
+        .detail-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .info-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 150px;
+        }
+
+        .info-value {
+            color: #212529;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .badge-approved {
+            background-color: #198754;
+            color: #fff;
+        }
+
+        .badge-rejected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .content-box {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .card-header-pending {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+
+        .card-header-approved {
+            background-color: #198754 !important;
+            color: #fff !important;
+        }
+
+        .card-header-rejected {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<header class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/home/homepage}">
+            <i class="fas fa-shop me-2"></i>License Shop
+        </a>
+
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/history}">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container mt-4 py-4">
+    <div class="detail-container">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-file-alt me-2"></i> Chi tiết Báo cáo</h1>
+            <div class="btn-group">
+                <a th:href="@{/history}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-2"></i> Danh sách
+                </a>
+                <!-- Chỉ hiển thị nút chỉnh sửa cho báo cáo pending -->
+                <a th:href="@{/history/edit/{id}(id=${report.id})}"
+                   th:if="${report.status == 'pending'}"
+                   class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i> Chỉnh sửa
+                </a>
+            </div>
+        </div>
+
+        <!-- Report Information Card -->
+        <div class="card">
+            <!-- Sửa lỗi: Sử dụng th:if riêng biệt cho từng trạng thái -->
+            <div th:if="${report.status == 'pending'}" class="card-header card-header-pending">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông tin Báo cáo #<span th:text="${report.id}"></span>
+                </h5>
+            </div>
+            <div th:if="${report.status == 'approved'}" class="card-header card-header-approved">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông tin Báo cáo #<span th:text="${report.id}"></span>
+                </h5>
+            </div>
+            <div th:if="${report.status == 'rejected'}" class="card-header card-header-rejected">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông tin Báo cáo #<span th:text="${report.id}"></span>
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <!-- Status and Dates -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="info-label me-3">Trạng thái:</span>
+                            <span th:if="${report.status == 'pending'}"
+                                  class="badge badge-pending fs-6">
+                                <i class="fas fa-clock me-1"></i> Đang chờ xử lý
+                            </span>
+                            <span th:if="${report.status == 'approved'}"
+                                  class="badge badge-approved fs-6">
+                                <i class="fas fa-check me-1"></i> Đã phê duyệt
+                            </span>
+                            <span th:if="${report.status == 'rejected'}"
+                                  class="badge badge-rejected fs-6">
+                                <i class="fas fa-times me-1"></i> Đã từ chối
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Ngày tạo: <span th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-check me-1"></i>
+                                Cập nhật: <span th:text="${#temporals.format(report.updatedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information -->
+                <div class="info-section">
+                    <h6 class="mb-3 border-bottom pb-2">
+                        <i class="fas fa-user me-2"></i>Thông tin người gửi
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <span class="info-label">Họ và tên:</span>
+                                <span class="info-value" th:text="${report.name}"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value" th:text="${report.email}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Information -->
+                <div class="info-section">
+                    <h6 class="mb-3 border-bottom pb-2">
+                        <i class="fas fa-box me-2"></i>Thông tin sản phẩm
+                    </h6>
+                    <div class="d-flex">
+                        <span class="info-label">Liên quan đến sản phẩm:</span>
+                        <span th:if="${report.productId != null}"
+                              class="info-value fw-bold text-primary"
+                              th:text="${report.productId}"></span>
+                        <span th:if="${report.productId == null}"
+                              class="text-muted">Không có</span>
+                    </div>
+                </div>
+
+                <!-- Report Content -->
+                <div class="info-section">
+                    <h6 class="mb-3 border-bottom pb-2">
+                        <i class="fas fa-file-text me-2"></i>Nội dung báo cáo
+                    </h6>
+
+                    <!-- Tiêu đề -->
+                    <div class="mb-3">
+                        <div class="d-flex">
+                            <span class="info-label">Tiêu đề:</span>
+                            <span class="info-value fw-bold text-dark" th:text="${report.title}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Nội dung chi tiết -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <span class="info-label">Nội dung chi tiết:</span>
+                            <div class="flex-grow-1">
+                                <div class="content-box">
+                                    <span th:text="${report.message}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin bổ sung (nếu có) -->
+                    <div th:if="${report.description != null and report.description != ''}" class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <span class="info-label">Thông tin bổ sung:</span>
+                            <div class="flex-grow-1">
+                                <div class="content-box">
+                                    <span th:text="${report.description}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a th:href="@{/history}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Quay lại danh sách
+                    </a>
+
+                    <div class="btn-group">
+                        <!-- Chỉ hiển thị nút chỉnh sửa cho báo cáo pending -->
+                        <a th:href="@{/history/edit/{id}(id=${report.id})}"
+                           th:if="${report.status == 'pending'}"
+                           class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i> Chỉnh sửa
+                        </a>
+
+                        <!-- Nút xóa (chỉ cho pending) -->
+                        <form th:if="${report.status == 'pending'}"
+                              th:action="@{/history/delete/{id}(id=${report.id})}"
+                              method="post"
+                              style="display: inline;"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa báo cáo này?')">
+                            <button type="submit" class="btn btn-danger ms-2">
+                                <i class="fas fa-trash me-2"></i> Xóa
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Tổng báo cáo</h6>
+                        <h4 th:text="${statistics.total}" class="mb-0"></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Đang chờ</h6>
+                        <h4 th:text="${statistics.pending}" class="mb-0"></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Đã xử lý</h6>
+                        <h4 th:text="${statistics.approved + statistics.rejected}" class="mb-0"></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="fas fa-shop me-2"></i>License Shop</h5>
+                <p class="mb-0">Cung cấp các giải pháp phần mềm và bản quyền chính hãng.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0">&copy; 2023 License Shop. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Tự động ẩn thông báo sau 5 giây
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(function() {
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        });
+    });
+</script>
+</body>
+</html>

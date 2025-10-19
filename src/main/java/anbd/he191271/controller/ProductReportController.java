@@ -1,7 +1,9 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.entity.Product;
 import anbd.he191271.entity.ProductReport;
 import anbd.he191271.service.ProductReportService;
+import anbd.he191271.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,8 +16,14 @@ import java.util.List;
 @RequestMapping("/history")
 public class ProductReportController {
 
-    @Autowired
+
+    private ProductService productService;
     private ProductReportService service;
+    @Autowired
+    public ProductReportController(ProductReportService service, ProductService productService) {
+        this.service = service;
+        this.productService = productService;
+    }
 
     @GetMapping
     public String listReports(Model model) {
@@ -27,23 +35,39 @@ public class ProductReportController {
         return "list";
     }
 
-    // Xem chi tiết báo cáo
+    // XEM CHI TIẾT BÁO CÁO
     @GetMapping("/view/{id}")
     public String viewReportDetail(@PathVariable Long id, Model model) {
-        ProductReport report = service.getReportById(id);
-        if (report != null) {
-            model.addAttribute("report", report);
-            return "report-detail";
-        } else {
-            return "redirect:/history?error=Report+not+found";
+        try {
+            ProductReport report = service.getReportById(id);
+            if (report != null) {
+                model.addAttribute("report", report);
+                // THÊM STATISTICS VÀO MODEL
+                ProductReportService.ReportStatistics statistics = service.getReportStatistics();
+                model.addAttribute("statistics", statistics);
+                return "report-detail"; // Đảm bảo trả về đúng tên template
+            } else {
+                return "redirect:/history?error=Báo+cáo+không+tồn+tại";
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // In lỗi ra console để debug
+            return "redirect:/history?error=Lỗi+hệ+thống";
         }
     }
 
-    // Chỉnh sửa báo cáo (chuyển trạng thái) - CHỈ CHO PENDING
+    // Chỉnh sửa báo cáo (chỉ cho pending)
     @GetMapping("/edit/{id}")
     public String editReportForm(@PathVariable Long id, Model model) {
         ProductReport report = service.getReportById(id);
         if (report != null && "pending".equals(report.getStatus())) {
+            // Thêm danh sách sản phẩm
+            List<Product> products = productService.getAllProduct();
+            model.addAttribute("products", products);
+
+            // Thêm danh sách các loại tiêu đề
+            String[] reportTypes = {"Đề xuất", "Báo cáo", "Phản hồi", "Khiếu nại"};
+            model.addAttribute("reportTypes", reportTypes);
+
             model.addAttribute("report", report);
             return "report-edit";
         } else {
@@ -51,20 +75,29 @@ public class ProductReportController {
         }
     }
 
-    // Cập nhật báo cáo - CÓ THỂ CHUYỂN THÀNH approved HOẶC rejected
+    // Cập nhật báo cáo
     @PostMapping("/update/{id}")
     public String updateReport(@PathVariable Long id,
-                               @RequestParam String status,
+                               @ModelAttribute ProductReport updatedReport,
                                RedirectAttributes redirectAttributes) {
         try {
-            // Validate status
-            if (!"approved".equals(status) && !"rejected".equals(status) && !"pending".equals(status)) {
-                redirectAttributes.addFlashAttribute("error", "Trạng thái không hợp lệ");
-                return "redirect:/history/edit/" + id;
+            ProductReport existingReport = service.getReportById(id);
+            if (existingReport == null || !"pending".equals(existingReport.getStatus())) {
+                redirectAttributes.addFlashAttribute("error", "Không thể chỉnh sửa báo cáo đã được xử lý");
+                return "redirect:/history";
             }
 
-            service.updateReportStatus(id, status);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái báo cáo thành công!");
+            // Chỉ cập nhật các trường mà customer được phép sửa
+            existingReport.setName(updatedReport.getName());
+            existingReport.setEmail(updatedReport.getEmail());
+            existingReport.setProductId(updatedReport.getProductId());
+            existingReport.setTitle(updatedReport.getTitle());
+            existingReport.setMessage(updatedReport.getMessage());
+            existingReport.setDescription(updatedReport.getDescription());
+
+            service.saveReport(existingReport);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật báo cáo thành công!");
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật báo cáo: " + e.getMessage());
         }
