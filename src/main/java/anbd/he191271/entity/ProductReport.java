@@ -31,14 +31,15 @@ public class ProductReport {
     @Column(name = "update_at")
     private LocalDateTime updatedAt;
 
-    private String description;
+    @Column(name = "manager_msg")
+    private String managerMsg;
 
     private String status; // ví dụ: "pending", "approved", "rejected"
 
     // Constructors
     public ProductReport() {}
 
-    public ProductReport(Long id, String name, String title, String email, String message, String type, int customer_id, Long productId, LocalDateTime createdAt, LocalDateTime updatedAt, String description, String status) {
+    public ProductReport(Long id, String name, String title, String email, String message, String type, int customer_id, Long productId, LocalDateTime createdAt, LocalDateTime updatedAt, String managerMsg, String status) {
         this.id = id;
         this.name = name;
         this.title = title;
@@ -49,7 +50,7 @@ public class ProductReport {
         this.productId = productId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.description = description;
+        this.managerMsg = managerMsg;
         this.status = status;
     }
 
@@ -128,11 +129,11 @@ public class ProductReport {
         this.updatedAt = updatedAt;
     }
 
-    public String getDescription() {
-        return description;
+    public String getManagerMsg() {
+        return managerMsg;
     }
-    public void setDescription(String description) {
-        this.description = description;
+    public void setManagerMsg(String description) {
+        this.managerMsg = description;
     }
 
     public String getStatus() {
