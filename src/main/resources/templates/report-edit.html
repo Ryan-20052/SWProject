@@ -115,7 +115,7 @@
                             <option th:each="type : ${reportTypes}"
                                     th:value="${type}"
                                     th:text="${type}"
-                                    th:selected="${report.title == type}">
+                                    th:selected="${reverseMapping[report.title] == type}">
                             </option>
                         </select>
                     </div>
@@ -134,18 +134,7 @@
                                   th:text="${report.message}"></textarea>
                     </div>
 
-                    <!-- Mô tả thêm (nếu có) -->
-                    <div class="mb-4">
-                        <label for="description" class="form-label">
-                            <i class="fas fa-comment me-2"></i><strong>Thông tin bổ sung</strong>
-                        </label>
-                        <textarea class="form-control"
-                                  id="description"
-                                  name="description"
-                                  rows="3"
-                                  placeholder="Bất kỳ thông tin bổ sung nào khác..."
-                                  th:text="${report.description}"></textarea>
-                    </div>
+
 
                     <!-- Thông báo quan trọng -->
                     <div class="alert alert-info">

@@ -255,12 +255,12 @@
                     </div>
 
                     <!-- Thông tin bổ sung (nếu có) -->
-                    <div th:if="${report.description != null and report.description != ''}" class="mb-3">
+                    <div th:if="${report.managerMsg != null and report.managerMsg != ''}" class="mb-3">
                         <div class="d-flex align-items-start">
                             <span class="info-label">Thông tin bổ sung:</span>
                             <div class="flex-grow-1">
                                 <div class="content-box">
-                                    <span th:text="${report.description}"></span>
+                                    <span th:text="${report.managerMsg}"></span>
                                 </div>
                             </div>
                         </div>

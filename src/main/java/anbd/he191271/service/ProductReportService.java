@@ -3,8 +3,15 @@ package anbd.he191271.service;
 import anbd.he191271.entity.ProductReport;
 import anbd.he191271.repository.ProductReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -124,6 +131,67 @@ public class ProductReportService {
         public long getPending() { return pending; }
         public long getApproved() { return approved; }
         public long getRejected() { return rejected; }
+    }
+
+
+    public List<ProductReport> getReportsByTitle(String title) {
+        return productReportRepository.findByTitle(title);
+    }
+
+    public List<ProductReport> getReportsByStatusAndTitle(String status, String title) {
+        return productReportRepository.findByStatusAndTitle(status, title);
+    }
+
+    public List<ProductReport> getReportsByDateRange(LocalDateTime start, LocalDateTime end) {
+        return productReportRepository.findByCreatedAtBetween(start, end);
+    }
+
+    public List<ProductReport> getReportsByStatusAndDateRange(String status, LocalDateTime start, LocalDateTime end) {
+        return productReportRepository.findByStatusAndCreatedAtBetween(status, start, end);
+    }
+
+    public List<ProductReport> getReportsByTitleAndDateRange(String title, LocalDateTime start, LocalDateTime end) {
+        return productReportRepository.findByTitleAndCreatedAtBetween(title, start, end);
+    }
+
+    public List<ProductReport> getReportsByStatusAndTitleAndDateRange(String status, String title, LocalDateTime start, LocalDateTime end) {
+        return productReportRepository.findByStatusAndTitleAndCreatedAtBetween(status, title, start, end);
+    }
+    public Page<ProductReport> getReportsPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return productReportRepository.findAll(pageable);
+    }
+
+    // Lọc với phân trang
+    public Page<ProductReport> filterReportsWithPagination(String status, String title, LocalDate startDate, LocalDate endDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Nếu không có bộ lọc, trả về tất cả
+        if ((status == null || status.equals("all")) &&
+                (title == null || title.isEmpty()) &&
+                startDate == null && endDate == null) {
+            return productReportRepository.findAll(pageable);
+        }
+
+        // Xây dựng Specification để lọc
+        Specification<ProductReport> spec = Specification.where(null);
+
+        if (status != null && !status.equals("all")) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("title"), title));
+        }
+
+        if (startDate != null && endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.between(root.get("createdAt"),
+                            startDate.atStartOfDay(),
+                            endDate.atTime(23, 59, 59)));
+        }
+
+        return productReportRepository.findAll(spec, pageable);
     }
 
 }

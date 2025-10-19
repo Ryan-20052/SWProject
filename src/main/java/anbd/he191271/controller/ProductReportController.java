@@ -5,33 +5,92 @@ import anbd.he191271.entity.ProductReport;
 import anbd.he191271.service.ProductReportService;
 import anbd.he191271.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/history")
 public class ProductReportController {
 
-
     private ProductService productService;
     private ProductReportService service;
+
     @Autowired
     public ProductReportController(ProductReportService service, ProductService productService) {
         this.service = service;
         this.productService = productService;
     }
 
-    @GetMapping
-    public String listReports(Model model) {
-        List<ProductReport> reports = service.getAllReports();
-        ProductReportService.ReportStatistics statistics = service.getReportStatistics();
+    // Map để chuyển đổi giữa display value và database value
+    private final Map<String, String> titleMapping = new HashMap<String, String>() {{
+        put("Đề xuất", "đề_xuất");
+        put("Báo cáo", "báo_cáo");
+        put("Phản hồi", "phản_hồi");
+        put("Khiếu nại", "khiếu_nại");
+    }};
 
-        model.addAttribute("reports", reports);
-        model.addAttribute("statistics", statistics);
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    @GetMapping
+    public String listReports(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+
+        size = (size <= 0) ? DEFAULT_PAGE_SIZE : size;
+        Page<ProductReport> reportPage = service.getReportsPaginated(page, size);
+
+        model.addAttribute("reports", reportPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("totalItems", reportPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("titleMapping", titleMapping);
+
+        return "list";
+    }
+
+    // Lọc báo cáo với phân trang
+    @GetMapping("/filter")
+    public String filterReports(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+
+        size = (size <= 0) ? DEFAULT_PAGE_SIZE : size;
+
+        // Chuyển đổi title từ display value sang database value
+        String dbTitle = null;
+        if (title != null && !title.isEmpty()) {
+            dbTitle = titleMapping.get(title);
+        }
+
+        Page<ProductReport> reportPage = service.filterReportsWithPagination(status, dbTitle, startDate, endDate, page, size);
+
+        model.addAttribute("reports", reportPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("totalItems", reportPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("currentFilter", status);
+        model.addAttribute("currentTitle", title);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("titleMapping", titleMapping);
+
         return "list";
     }
 
@@ -42,15 +101,15 @@ public class ProductReportController {
             ProductReport report = service.getReportById(id);
             if (report != null) {
                 model.addAttribute("report", report);
-                // THÊM STATISTICS VÀO MODEL
                 ProductReportService.ReportStatistics statistics = service.getReportStatistics();
                 model.addAttribute("statistics", statistics);
-                return "report-detail"; // Đảm bảo trả về đúng tên template
+                model.addAttribute("titleMapping", titleMapping);
+                return "report-detail";
             } else {
                 return "redirect:/history?error=Báo+cáo+không+tồn+tại";
             }
         } catch (Exception e) {
-            e.printStackTrace(); // In lỗi ra console để debug
+            e.printStackTrace();
             return "redirect:/history?error=Lỗi+hệ+thống";
         }
     }
@@ -67,6 +126,13 @@ public class ProductReportController {
             // Thêm danh sách các loại tiêu đề
             String[] reportTypes = {"Đề xuất", "Báo cáo", "Phản hồi", "Khiếu nại"};
             model.addAttribute("reportTypes", reportTypes);
+
+            // Thêm reverse mapping để hiển thị đúng giá trị đã chọn
+            Map<String, String> reverseMapping = new HashMap<>();
+            for (Map.Entry<String, String> entry : titleMapping.entrySet()) {
+                reverseMapping.put(entry.getValue(), entry.getKey());
+            }
+            model.addAttribute("reverseMapping", reverseMapping);
 
             model.addAttribute("report", report);
             return "report-edit";
@@ -87,13 +153,21 @@ public class ProductReportController {
                 return "redirect:/history";
             }
 
+            // Chuyển đổi title từ display value sang database value
+            String displayTitle = updatedReport.getTitle();
+            String dbTitle = titleMapping.get(displayTitle);
+            if (dbTitle != null) {
+                existingReport.setTitle(dbTitle);
+            } else {
+                existingReport.setTitle(displayTitle);
+            }
+
             // Chỉ cập nhật các trường mà customer được phép sửa
             existingReport.setName(updatedReport.getName());
             existingReport.setEmail(updatedReport.getEmail());
             existingReport.setProductId(updatedReport.getProductId());
-            existingReport.setTitle(updatedReport.getTitle());
             existingReport.setMessage(updatedReport.getMessage());
-            existingReport.setDescription(updatedReport.getDescription());
+            existingReport.setManagerMsg(updatedReport.getManagerMsg());
 
             service.saveReport(existingReport);
             redirectAttributes.addFlashAttribute("success", "Cập nhật báo cáo thành công!");
@@ -142,23 +216,5 @@ public class ProductReportController {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa báo cáo: " + e.getMessage());
         }
         return "redirect:/history";
-    }
-
-    // Lọc báo cáo theo trạng thái
-    @GetMapping("/filter")
-    public String filterReports(@RequestParam String status, Model model) {
-        List<ProductReport> filteredReports;
-        ProductReportService.ReportStatistics statistics = service.getReportStatistics();
-
-        if ("all".equals(status)) {
-            filteredReports = service.getAllReports();
-        } else {
-            filteredReports = service.getReportsByStatus(status);
-        }
-
-        model.addAttribute("reports", filteredReports);
-        model.addAttribute("statistics", statistics);
-        model.addAttribute("currentFilter", status);
-        return "list";
     }
 }
