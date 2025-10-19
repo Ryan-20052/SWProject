@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Report khách hàng</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669;
+            --gray-bg: #f8f9fa;
+            --light-gray: #f3f4f6;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: var(--gray-bg);
+            color: #111;
+        }
+
+        header {
+            background: var(--blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        nav {
+            background: #1e3a8a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-inner {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+        }
+
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-inner a:hover {
+            background: var(--blue);
+            transform: translateY(-1px);
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--blue);
+        }
+
+        /* ===== BẢNG ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        thead th {
+            background: var(--blue);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-top: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--light-gray);
+        }
+
+        tbody tr:hover {
+            background: #e5e7eb;
+        }
+
+        th:first-child, td:first-child {
+            text-align: center;
+            width: 50px;
+            font-weight: bold;
+        }
+
+        /* ===== NÚT HÀNH ĐỘNG ===== */
+        .action-btn {
+            display: inline-block;
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white;
+            margin-right: 6px;
+        }
+
+        .view-btn { background: var(--blue); }
+        .view-btn:hover { background: var(--blue-dark); }
+
+        .approve-btn { background: #16a34a; }
+        .approve-btn:hover { background: #15803d; }
+
+        .reject-btn { background: var(--red); }
+        .reject-btn:hover { background: #b91c1c; }
+
+        /* ===== TRẠNG THÁI ===== */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: #fde68a;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #bbf7d0;
+            color: #166534;
+        }
+
+        .status-rejected {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        /* ===== LINK ===== */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            text-decoration: none;
+            color: var(--blue);
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== AVATAR ===== */
+        .avatar, .avatar-fallback {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-fallback {
+            background: #555;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .avatar:hover, .avatar-fallback:hover {
+            opacity: 0.85;
+        }
+
+        /* ===== THÔNG BÁO ===== */
+        #messagePopup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            z-index: 1000;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: #e5e7eb;
+            color: #111;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.25s;
+        }
+
+        .tab-btn:hover {
+            background: #d1d5db;
+        }
+
+        .active-tab {
+            background: var(--blue);
+            color: white !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Manager Dashboard</h1>
+
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:16px; color:white;" th:text="|Xin chào, ${manager.username}|"></div>
+
+            <div th:if="${manager.avatar != null}" class="avatar"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}" alt="Avatar">
+            </div>
+
+            <div th:if="${manager.avatar == null}" class="avatar-fallback"
+                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
+                 onclick="window.location.href='/manager/profile'">
+            </div>
+
+            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                           border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<nav>
+    <div class="nav-inner">
+        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
+        <a th:href="@{/manage/category}">Danh mục</a>
+        <a th:href="@{/manageOrder/viewOrder}">Đơn hàng</a>
+        <a th:href="@{/financial}">Báo cáo tài chính</a>
+        <a th:href="@{/manageReport/viewReportList}">Báo cáo khách hàng</a>
+    </div>
+</nav>
+
+<div id="messagePopup" th:if="${msg}">
+    <span th:text="${msg}"></span>
+</div>
+
+<div class="dashboard">
+    <h2>Quản lý Report khách hàng</h2>
+
+    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+        <a th:href="@{/manageReport/viewPendingReport}"
+           class="tab-btn">Đơn đang chờ</a>
+
+        <a th:href="@{/manageReport/viewHandledReport}"
+           class="tab-btn">Đơn đã duyệt</a>
+
+    </div>
+
+    <form th:action="${statusList != null} ? @{/manageReport/viewHandledReport} : @{/manageReport/viewPendingReport}" method="get"
+          style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; flex-direction:column;">
+            <label for="customerName" style="font-size:0.9em; color:#555;">Mã đơn hàng:</label>
+            <input type="text" name="customerName" id="customerName" placeholder="Tìm theo tên khách hàng"
+                   th:value="${customerName}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
+        </div>
+
+        <div th:if="${statusList != null}" style="display:flex; flex-direction:column;">
+            <label for="status" style="font-size:0.9em; color:#555;">Trạng thái đơn:</label>
+            <select name="status"
+                    id="status"
+                    style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option th:each="s : ${statusList}"
+                        th:value="${s}"
+                        th:text="${s}"
+                        th:selected="${status == s}">
+                </option>
+            </select>
+        </div>
+
+        <div style="display:flex; flex-direction:column;">
+            <label for="title" style="font-size:0.9em; color:#555;">Loại đơn:</label>
+            <select id="title" name="title" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
+                <option value="" disabled selected>-- Chọn loại đơn --</option>
+                <option value="khiếu_nại" class="subject-option">Khiếu nại</option>
+                <option value="phản_hồi" class="subject-option">Phản hồi</option>
+                <option value="đề_xuất" class="subject-option">Đề xuất</option>
+                <option value="báo_cáo" class="subject-option">Báo cáo</option>
+            </select>
+        </div>
+
+        <!-- Từ ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="startDate" style="font-size:0.9em; color:#555;">Từ ngày</label>
+            <input type="date" id="startDate" name="startDate"
+                   th:value="${startDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+        <!-- Đến ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="endDate" style="font-size:0.9em; color:#555;">Đến ngày</label>
+            <input type="date" id="endDate" name="endDate"
+                   th:value="${endDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+
+        <button type="submit"
+                style="padding:8px 16px; margin-top: 15px; background:var(--blue); color:white; border:none;
+                   border-radius:6px; cursor:pointer; font-weight:500;">
+            Lọc
+        </button>
+
+        <a th:href="${statusList != null} ? @{/manageReport/viewHandledReport} : @{/manageReport/viewPendingReport}"
+           style="padding:8px 14px; background:#6b7280; margin-top:15px; color:white; border-radius:6px; text-decoration:none;">
+            Đặt lại
+        </a>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tiêu đề</th>
+            <th>Tên KH</th>
+            <th>Email</th>
+            <th>Loại</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r, iterStat : ${reportList}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${r.title}"></td>
+            <td th:text="${r.name}"></td>
+            <td th:text="${r.email}"></td>
+            <td th:text="${r.type}"></td>
+            <td th:text="${r.status}"></td>
+            <td th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}"></td>
+            <td style="display: flex; gap: 6px;">
+
+                <form th:action="@{/manageReport/reportDetail/{id}(id=${r.id})}" method="get" style="margin:0;">
+
+                    <button type="submit" class="action-btn view-btn">Xem</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
