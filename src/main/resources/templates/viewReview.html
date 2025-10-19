@@ -484,6 +484,38 @@
                         <img th:if="${r.reviewImage != null and r.reviewImage.length > 0}"
                              th:src="@{/review/image/{id}(id=${r.id})}"
                              class="review-img" alt="Ảnh review">
+
+                        <!-- NÚT BÁO VI PHẠM - ĐÃ THÊM ĐIỀU KIỆN THÔNG MINH -->
+                        <div class="review-actions" style="margin-top: 12px;">
+                            <!-- Kiểm tra đã đăng nhập chưa -->
+                            <div th:if="${session.customer != null}">
+                                <!-- Kiểm tra không phải review của chính mình -->
+                                <div th:if="${r.customer.id != session.customer.id}">
+                                    <!-- Nút báo cáo sẽ được xử lý bằng JavaScript -->
+                                    <a th:href="@{/report/review/form/{reviewId}(reviewId=${r.id})}"
+                                       class="btn btn-outline-danger btn-sm report-btn"
+                                       th:attr="data-review-id=${r.id}"
+                                       style="display: none;">
+                                        <i class="fas fa-flag"></i> Báo vi phạm
+                                    </a>
+                                    <!-- Thông báo đã báo cáo -->
+                                    <div class="already-reported" th:attr="data-review-id=${r.id}" style="display: none;">
+                                        <small class="text-muted">
+                                            <i class="fas fa-check-circle text-success"></i> Đã báo cáo
+                                        </small>
+                                    </div>
+                                </div>
+                                <!-- Nếu là review của chính mình -->
+                                <div th:if="${r.customer.id == session.customer.id}" class="text-muted">
+                                    <small><i class="fas fa-info-circle"></i> Đánh giá của bạn</small>
+                                </div>
+                            </div>
+
+                            <!-- Nếu chưa đăng nhập -->
+                            <!-- Nếu chưa đăng nhập - ẨN HOÀN TOÀN -->
+                            <div th:if="${session.customer == null}" style="display: none;">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -530,6 +562,45 @@
                 this.style.transform = 'translateY(0)';
             });
         });
+
+        // ========== KIỂM TRA REPORT STATUS ==========
+        const reportButtons = document.querySelectorAll('.report-btn');
+
+        if (reportButtons.length > 0) {
+            // Kiểm tra từng review
+            reportButtons.forEach(button => {
+                const reviewId = button.getAttribute('data-review-id');
+
+                // Gọi API kiểm tra xem đã report chưa
+                fetch('/report/review/check/' + reviewId)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const reportBtn = document.querySelector('.report-btn[data-review-id="' + reviewId + '"]');
+                        const alreadyReportedDiv = document.querySelector('.already-reported[data-review-id="' + reviewId + '"]');
+
+                        if (data.hasReported) {
+                            // Đã report rồi -> ẩn nút, hiển thị thông báo
+                            if (reportBtn) reportBtn.style.display = 'none';
+                            if (alreadyReportedDiv) alreadyReportedDiv.style.display = 'block';
+                        } else {
+                            // Chưa report -> hiển thị nút
+                            if (reportBtn) reportBtn.style.display = 'inline-block';
+                            if (alreadyReportedDiv) alreadyReportedDiv.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking report status:', error);
+                        // Nếu có lỗi, vẫn hiển thị nút báo cáo
+                        const reportBtn = document.querySelector('.report-btn[data-review-id="' + reviewId + '"]');
+                        if (reportBtn) reportBtn.style.display = 'inline-block';
+                    });
+            });
+        }
     });
 </script>
 </body>

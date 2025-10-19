@@ -55,7 +55,7 @@ public class ProfileController {
                 return "redirect:/login.html";
             }
 
-            if (name != null) customer.setName(name);
+            if (name != null && !name.isEmpty()) customer.setName(name);
 
             if (dob != null && !dob.isEmpty()) {
                 try {

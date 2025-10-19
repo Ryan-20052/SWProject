@@ -18,7 +18,10 @@ public class ReviewService {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
+    public Review getReviewById(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review không tồn tại"));
+    }
     public Page<Review> getFilteredReviews(int productId,
                                            Integer rating,
                                            Boolean hasImage,

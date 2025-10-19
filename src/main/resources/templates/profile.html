@@ -36,6 +36,10 @@
       margin-bottom: 20px;
       cursor: pointer;
     }
+    .avatar-wrap.disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
     .avatar-img {
       width: 100px;
       height: 100px;
@@ -107,6 +111,10 @@
     .btn.save:hover {
       background: #0056b3;
     }
+    .btn.save:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
     .btn.cancel, .btn.ghost, .link-edit {
       background: #f1f1f1;
       color: #333;
@@ -123,8 +131,9 @@
   <section class="profile-card">
     <h2 class="card-title">Thông tin cá nhân</h2>
 
-    <!-- Avatarr -->
-    <div class="avatar-wrap" id="avatarDisplay">
+    <!-- Avatar -->
+    <div class="avatar-wrap" id="avatarDisplay"
+         th:classappend="${editMode} ? 'disabled' : ''">
       <img th:if="${customer.avatar != null}"
            th:src="@{/customer/avatar/{id}(id=${customer.id})}"
            alt="avatar"
@@ -161,7 +170,7 @@
     </div>
 
     <!-- EDIT mode -->
-    <form th:if="${editMode}" th:action="@{/customer/profile/update}" method="post" class="info-edit">
+    <form th:if="${editMode}" th:action="@{/customer/profile/update}" method="post" class="info-edit" id="editForm">
       <div class="edit-row">
         <label for="name">Họ tên</label>
         <input id="name" name="name" type="text" th:value="${customer.name}" class="input-underline"/>
@@ -175,7 +184,7 @@
         <input id="dob" name="dob" type="date" th:value="${customer.dob}" class="input-underline"/>
       </div>
       <div class="controls-row">
-        <button type="submit" class="btn save">Save</button>
+        <button type="submit" class="btn save" id="saveButton" disabled>Save</button>
         <a th:href="@{/customer/profile}" class="btn cancel">Cancel</a>
       </div>
     </form>
@@ -184,26 +193,82 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    const avatarDisplay = document.getElementById("avatarDisplay"); // div bọc ngoài
+    const avatarDisplay = document.getElementById("avatarDisplay");
     const avatarInput = document.getElementById("avatarInput");
     const avatarForm = document.getElementById("avatarForm");
+    const saveButton = document.getElementById('saveButton');
+    const editForm = document.getElementById('editForm');
 
-    if (avatarDisplay) {
+    // Kiểm tra xem có đang ở edit mode không
+    const isEditMode = avatarDisplay.classList.contains('disabled');
+
+    // Lưu giá trị ban đầu của form
+    const initialValues = {
+      name: document.getElementById('name')?.value || '',
+      dob: document.getElementById('dob')?.value || ''
+    };
+
+    // Hàm kiểm tra thay đổi
+    function checkChanges() {
+      if (!editForm) return;
+
+      const currentName = document.getElementById('name')?.value || '';
+      const currentDob = document.getElementById('dob')?.value || '';
+
+      const hasChanges = currentName !== initialValues.name || currentDob !== initialValues.dob;
+
+      if (saveButton) {
+        saveButton.disabled = !hasChanges;
+      }
+    }
+
+    // Thêm event listeners cho các input
+    const nameInput = document.getElementById('name');
+    const dobInput = document.getElementById('dob');
+
+    if (nameInput) {
+      nameInput.addEventListener('input', checkChanges);
+    }
+
+    if (dobInput) {
+      dobInput.addEventListener('input', checkChanges);
+    }
+
+    // Kiểm tra ban đầu
+    checkChanges();
+
+    // Xử lý avatar (giữ nguyên từ trước)
+    if (avatarDisplay && !isEditMode) {
       avatarDisplay.addEventListener("click", () => {
-        avatarInput.click(); // mở hộp chọn file
+        avatarInput.click();
       });
     }
 
     avatarInput.addEventListener("change", () => {
-      if (avatarInput.files.length > 0) {
+      if (avatarInput.files.length > 0 && !isEditMode) {
         const confirmChange = confirm("Bạn có chắc muốn đổi avatar không?");
         if (confirmChange) {
           avatarForm.submit();
         } else {
-          avatarInput.value = ""; // reset nếu hủy
+          avatarInput.value = "";
         }
       }
     });
+
+    // Ngăn submit form nếu không có thay đổi (thêm layer bảo vệ)
+    if (editForm) {
+      editForm.addEventListener('submit', function(e) {
+        const currentName = document.getElementById('name')?.value || '';
+        const currentDob = document.getElementById('dob')?.value || '';
+
+        const hasChanges = currentName !== initialValues.name || currentDob !== initialValues.dob;
+
+        if (!hasChanges) {
+          e.preventDefault();
+          alert('Không có thay đổi nào để lưu!');
+        }
+      });
+    }
   });
 </script>
 
