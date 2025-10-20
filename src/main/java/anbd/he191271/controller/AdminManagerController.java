@@ -84,4 +84,15 @@ public class AdminManagerController {
                     .body(Map.of("error", "Lỗi khi mở khóa Manager: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchManagers(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return ResponseEntity.ok(managerService.searchManagers(username, email, status, page, size));
+    }
 }

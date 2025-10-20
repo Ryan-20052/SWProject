@@ -144,6 +144,7 @@
                         </span>
                     </td>
                     <td>
+                    <button onclick="goEditCustomer(${c.id})" style="background:#0288d1;">✏️ Sửa</button>
                         ${
                     isBanned
                         ? `<button class="btn-unban" onclick="unbanCustomer(${c.id})">Mở khóa</button>`
@@ -209,6 +210,9 @@
             btn.onclick = () => loadCustomers(i);
             pagination.appendChild(btn);
         }
+    }
+    function goEditCustomer(id) {
+        window.location.href = `adminEditCustomer.html?id=${id}`;
     }
 
     window.onload = () => { checkSession(); loadCustomers(); }

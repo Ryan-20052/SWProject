@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa Customer - Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .profile-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            width: 420px;
+        }
+        .profile-container h2 {
+            text-align: center;
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .avatar-img, .avatar-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .avatar-circle {
+            background: #1976d2;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            align-items: center;
+        }
+        .info-row span.label {
+            font-weight: bold;
+            color: #333;
+            width: 120px;
+        }
+        input, select {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .save-btn { background: #1976d2; }
+        .save-btn:hover { background: #1259a6; }
+        .cancel-btn { background: #e53935; }
+        .cancel-btn:hover { background: #c62828; }
+    </style>
+</head>
+<body>
+<div class="profile-container">
+    <h2>🧩 Chỉnh sửa thông tin khách hàng</h2>
+
+    <div class="avatar-section">
+        <img id="avatarPreview" class="avatar-img" src="default-avatar.png" alt="Avatar" style="display:none;">
+        <div id="avatarCircle" class="avatar-circle" style="display:none;"></div>
+        <input type="file" id="avatar" name="avatar" style="display:none;">
+    </div>
+
+    <div class="info-row">
+        <span class="label">Họ tên:</span>
+        <input type="text" id="name">
+    </div>
+    <div class="info-row">
+        <span class="label">Username:</span>
+        <input type="text" id="username">
+    </div>
+    <div class="info-row">
+        <span class="label">Email:</span>
+        <input type="email" id="email">
+    </div>
+    <div class="info-row">
+        <span class="label">Ngày sinh:</span>
+        <input type="date" id="dob">
+    </div>
+    <div class="info-row">
+        <span class="label">Trạng thái:</span>
+        <select id="status">
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="BANNED">BANNED</option>
+        </select>
+    </div>
+
+    <div class="button-group">
+        <button class="save-btn" id="saveBtn">💾 Lưu</button>
+        <button class="cancel-btn" id="cancelBtn">Hủy</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/admin/customers";
+    const params = new URLSearchParams(window.location.search);
+    const customerId = params.get("id");
+    let customerData = {};
+
+    // 🟦 Load dữ liệu khách hàng
+    async function loadCustomer() {
+        try {
+            const res = await fetch(`${API_URL}/${customerId}`);
+            if (!res.ok) throw new Error("Không thể tải dữ liệu khách hàng!");
+            const data = await res.json();
+            customerData = data;
+
+            document.getElementById("name").value = data.name || "";
+            document.getElementById("username").value = data.username || "";
+            document.getElementById("email").value = data.email || "";
+            document.getElementById("dob").value = data.dob || "";
+            document.getElementById("status").value = data.status || "ACTIVE";
+
+            // Avatar hiển thị chữ hoặc ảnh
+            if (data.avatar && data.avatar.startsWith("data:image")) {
+                document.getElementById("avatarPreview").src = data.avatar;
+                document.getElementById("avatarPreview").style.display = "block";
+                document.getElementById("avatarCircle").style.display = "none";
+            } else if (data.avatar && (data.avatar.endsWith(".jpg") || data.avatar.endsWith(".png"))) {
+                document.getElementById("avatarPreview").src = "/" + data.avatar;
+                document.getElementById("avatarPreview").style.display = "block";
+                document.getElementById("avatarCircle").style.display = "none";
+            } else {
+                const firstLetter = (data.username || "?")[0].toUpperCase();
+                document.getElementById("avatarCircle").innerText = firstLetter;
+                document.getElementById("avatarCircle").style.display = "flex";
+                document.getElementById("avatarPreview").style.display = "none";
+            }
+        } catch (err) {
+            alert("❌ " + err.message);
+            console.error(err);
+        }
+    }
+
+    // 🟢 Cập nhật thông tin
+    async function saveProfile(file) {
+        try {
+            const formData = new FormData();
+            formData.append("name", document.getElementById("name").value);
+            formData.append("username", document.getElementById("username").value);
+            formData.append("email", document.getElementById("email").value);
+            formData.append("dob", document.getElementById("dob").value);
+            formData.append("status", document.getElementById("status").value);
+            if (file) {
+                formData.append("avatar", file);
+            }
+
+            const res = await fetch(`${API_URL}/${customerId}/form`, {
+                method: "PUT",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err);
+            }
+
+            alert("✅ Cập nhật thành công!");
+            window.location.href = "adminCustomerController.html";
+        } catch (e) {
+            alert("❌ Lỗi khi cập nhật: " + e.message);
+        }
+    }
+
+    // 🟠 Nút lưu
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        await saveProfile();
+    });
+
+    // 🔴 Nút hủy
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+        if (confirm("Bạn có chắc muốn hủy thay đổi không?")) {
+            window.location.href = "adminCustomerController.html";
+        }
+    });
+
+    // 🟣 Chọn avatar
+    document.getElementById("avatarPreview").addEventListener("click", () => document.getElementById("avatar").click());
+    document.getElementById("avatarCircle").addEventListener("click", () => document.getElementById("avatar").click());
+    document.getElementById("avatar").addEventListener("change", async () => {
+        const file = document.getElementById("avatar").files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById("avatarPreview").style.display = "block";
+                document.getElementById("avatarPreview").src = e.target.result;
+                document.getElementById("avatarCircle").style.display = "none";
+            };
+            reader.readAsDataURL(file);
+            await saveProfile(file);
+        }
+    });
+
+    loadCustomer();
+</script>
+</body>
+</html>

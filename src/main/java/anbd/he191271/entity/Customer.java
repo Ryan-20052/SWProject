@@ -1,5 +1,6 @@
 package anbd.he191271.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Customer {
 
     private LocalDate dob; // ngày sinh
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Order> orders;
 
     public List<Order> getOrders() {

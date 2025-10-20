@@ -55,7 +55,7 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public Customer saveCustomer(Customer customer) {
+    public Customer save(Customer customer) {
         return customerRepository.save(customer);
     }
 
@@ -76,5 +76,7 @@ public class CustomerService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return customerRepository.searchCustomers(username, email, status, pageable);
     }
+
+
 
 }

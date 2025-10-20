@@ -19,6 +19,8 @@ public class ProductReport {
     private String type;
 
 
+
+
     @Column(name = "customer_id")
     private int customer_id;
 

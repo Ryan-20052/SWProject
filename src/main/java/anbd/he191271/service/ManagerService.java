@@ -2,6 +2,10 @@ package anbd.he191271.service;
 
 import anbd.he191271.entity.Manager;
 import anbd.he191271.repository.ManagerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +72,12 @@ public class ManagerService {
         }
         manager.setStatus("ACTIVE");
         managerRepository.save(manager);
+    }
+
+    // ✅ Tìm kiếm + Phân trang
+    public Page<Manager> searchManagers(String username, String email, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return managerRepository.searchManagers(username, email, status, pageable);
     }
 
 
