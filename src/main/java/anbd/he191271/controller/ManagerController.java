@@ -9,9 +9,11 @@ import anbd.he191271.service.ManagerLogService;
 import anbd.he191271.service.ProductService;
 import anbd.he191271.service.VariantService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
@@ -65,10 +67,14 @@ public class ManagerController {
     }
 
     @PostMapping("/addProduct")
-    public String addProduct(@ModelAttribute("newProduct") ProductDTO request, HttpSession session) {
+    public String addProduct(@Valid @ModelAttribute("newProduct") ProductDTO request, BindingResult bindingResult,HttpSession session, Model model) {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
+        }
+        if(bindingResult.hasErrors()){
+            model.addAttribute("manager", manager);
+            return "manageHome";
         }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add product "+ request.getName());
         managerLogService.save(log);
@@ -109,7 +115,10 @@ public class ManagerController {
     }
 
     @PostMapping("/addVariant")
-    public String addVariant(@ModelAttribute("newVariant") VariantDTO request, HttpSession session) {
+    public String addVariant(@Valid @ModelAttribute("newVariant") VariantDTO request, BindingResult bindingResult, HttpSession session) {
+        if (bindingResult.hasErrors()) {
+            return "manage/addVariant";
+        }
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";

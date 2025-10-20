@@ -315,8 +315,17 @@
     <h3>Thêm sản phẩm</h3>
     <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post" required>
         <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
+        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
+
         <input type="text" th:field="*{imgUrl}" placeholder="link ảnh" required>
+        <div th:if="${#fields.hasErrors('imgUrl')}" th:errors="*{imgUrl}"
+             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
+
         <input type="text" th:field="*{description}" placeholder="Mô tả" required>
+        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
+
         <select th:field="*{categoryId}" required>
             <option value="">-- Chọn danh mục --</option>
             <option th:each="c : ${categories}"

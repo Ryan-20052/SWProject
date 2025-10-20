@@ -1,6 +1,7 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ public class Product {
 
     @Column(name = "name")
     private String name;
-
 
     @Column(name = "manager_id")
     private int manager_id;
