@@ -182,15 +182,15 @@
         <label for="managerMsg" style="font-weight: bold;">Phản hồi của quản lý:</label>
         <textarea id="managerMsg" name="managerMsg" th:text="${report.managerMsg}" placeholder="Nhập phản hồi tại đây..."></textarea>
         <input type="hidden" name="reportId" th:value="${report.id}">
-        <div class="action-buttons" th:if="${report.status == 'Pending'}">
+        <div class="action-buttons" th:if="${report.status == 'pending'}">
             <button type="submit" name="action" value="Approve" class="btn btn-approve">Chấp nhận</button>
             <button type="submit" name="action" value="Reject" class="btn btn-reject">Từ chối</button>
         </div>
 
     </form>
 
-    <a th:if="${report.status == 'Pending'}" th:href="@{/manageReport/viewPendingReport}" class="back-link">← Quay lại danh sách báo cáo</a>
-    <a th:unless="${report.status == 'Pending'}" th:href="@{/manageReport/viewHandledReport}" class="back-link">← Quay lại danh sách báo cáo</a>
+    <a th:if="${report.status == 'pending'}" th:href="@{/manageReport/viewPendingReport}" class="back-link">← Quay lại danh sách báo cáo</a>
+    <a th:unless="${report.status == 'pending'}" th:href="@{/manageReport/viewHandledReport}" class="back-link">← Quay lại danh sách báo cáo</a>
 
 </div>
 </body>
