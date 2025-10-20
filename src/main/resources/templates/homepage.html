@@ -373,6 +373,8 @@
                     <div class="item item-name" th:text="${customer.name}">Tên user</div>
                     <a th:href="@{/customer/profile}" class="item">Profile</a>
                     <a th:href="@{/purchasedlicenses}" class="item">Purchased License</a>
+                    <!-- SỬA LINK NÀY -->
+                    <a th:href="@{/home/my-reported-reviews}" class="item">My Reported Reviews</a>
                     <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
                         <button type="submit" class="item" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;">
                             Log out

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Đã Báo Cáo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS styles giữ nguyên như trước */
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: var(--secondary);
+            font-size: 16px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px;
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Filter Form Styles */
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .report-item {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: white;
+            position: relative;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge.approved {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .badge.rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .review-preview {
+            background: var(--light);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .review-author {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .review-stars {
+            margin-bottom: 8px;
+        }
+
+        .star {
+            color: #d1d5db;
+        }
+
+        .star.filled {
+            color: var(--warning);
+        }
+
+        .review-comment {
+            color: var(--secondary);
+            line-height: 1.5;
+        }
+
+        .no-reports {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary);
+        }
+
+        .no-reports i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn, .page-num {
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        .page-btn {
+            background: white;
+            color: #111;
+        }
+
+        .page-num {
+            background: white;
+            color: #111;
+        }
+
+        .page-num.active {
+            background: var(--primary);
+            color: white;
+            border-color: rgba(0,0,0,0.06);
+        }
+
+        .page-num:hover, .page-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a th:href="@{/home/homepage}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Trang chủ
+        </a>
+        <h1><i class="fas fa-flag"></i> Reviews Đã Báo Cáo</h1>
+        <p>Danh sách các đánh giá bạn đã báo cáo vi phạm</p>
+    </div>
+
+    <!-- Thống kê -->
+    <div class="card">
+        <div class="card-body">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" th:text="${totalItems}">0</div>
+                    <div class="stat-label">Tổng số báo cáo</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" th:text="${pendingCount != null ? pendingCount : 0}">0</div>
+                    <div class="stat-label">Đang chờ xử lý</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" th:text="${approvedCount != null ? approvedCount : 0}">0</div>
+                    <div class="stat-label">Đã duyệt</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bộ lọc và tìm kiếm -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-filter"></i> Bộ lọc & Tìm kiếm</h2>
+        </div>
+        <div class="card-body">
+            <form class="filter-form" th:action="@{/home/my-reported-reviews}" method="get">
+                <!-- Tìm kiếm theo sản phẩm -->
+                <div class="form-group">
+                    <label for="productSearch"><i class="fas fa-search"></i> Tìm theo sản phẩm</label>
+                    <input type="text" id="productSearch" name="productSearch" th:value="${productSearch}"
+                           class="form-control" placeholder="Tên sản phẩm...">
+                </div>
+
+                <!-- Lọc theo trạng thái -->
+                <div class="form-group">
+                    <label for="status"><i class="fas fa-tasks"></i> Trạng thái</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${status == 'PENDING'}">Đang chờ</option>
+                        <option value="APPROVED" th:selected="${status == 'APPROVED'}">Đã duyệt</option>
+                        <option value="REJECTED" th:selected="${status == 'REJECTED'}">Đã từ chối</option>
+                    </select>
+                </div>
+
+                <!-- Lọc theo lý do -->
+                <div class="form-group">
+                    <label for="reason"><i class="fas fa-tag"></i> Lý do báo cáo</label>
+                    <select id="reason" name="reason" class="form-control">
+                        <option value="">Tất cả lý do</option>
+                        <option value="SPAM" th:selected="${reason == 'SPAM'}">Spam hoặc quảng cáo</option>
+                        <option value="INAPPROPRIATE" th:selected="${reason == 'INAPPROPRIATE'}">Nội dung không phù hợp</option>
+                        <option value="HARASSMENT" th:selected="${reason == 'HARASSMENT'}">Quấy rối hoặc đe dọa</option>
+                        <option value="FALSE_INFORMATION" th:selected="${reason == 'FALSE_INFORMATION'}">Thông tin sai sự thật</option>
+                        <option value="HATE_SPEECH" th:selected="${reason == 'HATE_SPEECH'}">Ngôn từ thù ghét</option>
+                        <option value="OTHER" th:selected="${reason == 'OTHER'}">Lý do khác</option>
+                    </select>
+                </div>
+
+                <!-- Lọc theo ngày -->
+                <div class="form-group">
+                    <label for="startDate"><i class="far fa-calendar-alt"></i> Từ ngày</label>
+                    <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate"><i class="far fa-calendar-alt"></i> Đến ngày</label>
+                    <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="form-control">
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div class="filter-actions">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-search"></i> Áp dụng
+                        </button>
+                        <a th:href="@{/home/my-reported-reviews}" class="btn btn-outline">
+                            <i class="fas fa-redo"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách reports -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-list"></i> Danh sách báo cáo
+                <small th:if="${reports != null}">(<span th:text="${reports.size()}">0</span> kết quả)</small>
+            </h2>
+        </div>
+        <div class="card-body">
+            <div th:if="${reports != null and !reports.empty}">
+                <div th:each="report : ${reports}" class="report-item">
+                    <div class="report-header">
+                        <div>
+                            <strong>Review ID:</strong> #<span th:text="${report.review.id}"></span>
+                            <div class="text-muted" style="font-size: 12px; margin-top: 4px;">
+                                Sản phẩm: <span th:text="${report.product.name}"></span>
+                            </div>
+                        </div>
+                        <!-- Status Badge -->
+                        <div th:if="${report.status.name() == 'PENDING'}" class="badge pending">
+                            Đang chờ
+                        </div>
+                        <div th:if="${report.status.name() == 'APPROVED'}" class="badge approved">
+                            Đã duyệt
+                        </div>
+                        <div th:if="${report.status.name() == 'REJECTED'}" class="badge rejected">
+                            Đã từ chối
+                        </div>
+                    </div>
+
+                    <div class="report-meta">
+                        <div>
+                            <strong><i class="fas fa-calendar"></i> Ngày báo cáo:</strong>
+                            <span th:text="${#temporals.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+                        <div>
+                            <strong><i class="fas fa-tag"></i> Lý do:</strong>
+                            <span th:if="${report.reportReason.name() == 'SPAM'}">Spam hoặc quảng cáo</span>
+                            <span th:if="${report.reportReason.name() == 'INAPPROPRIATE'}">Nội dung không phù hợp</span>
+                            <span th:if="${report.reportReason.name() == 'HARASSMENT'}">Quấy rối hoặc đe dọa</span>
+                            <span th:if="${report.reportReason.name() == 'FALSE_INFORMATION'}">Thông tin sai sự thật</span>
+                            <span th:if="${report.reportReason.name() == 'HATE_SPEECH'}">Ngôn từ thù ghét</span>
+                            <span th:if="${report.reportReason.name() == 'OTHER'}">Lý do khác</span>
+                        </div>
+                    </div>
+
+                    <!-- Preview review bị report -->
+                    <div class="review-preview">
+                        <div class="review-author">
+                            Đánh giá từ: <span th:text="${report.review.customer.name}">Người dùng</span>
+                            <span class="text-muted" style="font-size: 12px; margin-left: 10px;">
+                                (<span th:text="${report.review.rating}"></span> sao)
+                            </span>
+                        </div>
+                        <div class="review-stars">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:class="${i <= report.review.rating} ? 'star filled' : 'star'">
+                                <i class="fas fa-star"></i>
+                            </span>
+                        </div>
+                        <div class="review-comment" th:text="${report.review.comment}">
+                            Nội dung review...
+                        </div>
+                    </div>
+
+                    <!-- Mô tả báo cáo -->
+                    <div th:if="${report.description != null and report.description != ''}">
+                        <strong>Mô tả của bạn:</strong>
+                        <p th:text="${report.description}" style="margin-top: 5px;"></p>
+                    </div>
+
+                    <!-- Ghi chú của admin -->
+                    <div th:if="${report.adminNotes != null and report.adminNotes != ''}"
+                         style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-top: 12px;">
+                        <strong><i class="fas fa-user-shield"></i> Ghi chú từ quản trị viên:</strong>
+                        <p th:text="${report.adminNotes}" style="margin-top: 5px;"></p>
+                    </div>
+
+                    <!-- Thời gian xử lý -->
+                    <div th:if="${report.resolvedAt != null}" class="text-muted mt-2">
+                        <small>
+                            <i class="fas fa-check-circle"></i> Đã xử lý lúc:
+                            <span th:text="${#temporals.format(report.resolvedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <!-- Action Buttons -->
+                    <div class="report-actions">
+                        <!-- Chỉ cho phép edit khi đang pending -->
+                        <a th:if="${report.status.name() == 'PENDING'}"
+                           th:href="@{/report/review/edit/{reportId}(reportId=${report.id})}"
+                           class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Chỉnh sửa
+                        </a>
+                        <a th:href="@{/product/{id}(id=${report.product.id})}"
+                           class="btn btn-outline btn-sm">
+                            <i class="fas fa-external-link-alt"></i> Xem sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${reports == null or reports.empty}" class="no-reports">
+                <i class="far fa-flag"></i>
+                <h3>Chưa có báo cáo nào</h3>
+                <p th:if="${hasFilters}">Không tìm thấy báo cáo nào phù hợp với bộ lọc của bạn.</p>
+                <p th:if="${!hasFilters}">Bạn chưa báo cáo đánh giá vi phạm nào.</p>
+                <a th:href="@{/home/homepage}" class="btn" style="margin-top: 15px;">
+                    <i class="fas fa-shopping-bag"></i> Khám phá sản phẩm
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination" th:if="${totalPages > 1}">
+        <!-- Previous -->
+        <a th:if="${hasPrev}"
+           th:href="@{|/home/my-reported-reviews?page=${currentPage - 1}${filterParams}|}"
+           class="page-btn">
+            <i class="fas fa-chevron-left"></i> Trước
+        </a>
+
+        <!-- Page numbers -->
+        <a th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{|/home/my-reported-reviews?page=${pageNum}${filterParams}|}"
+           th:text="${pageNum + 1}"
+           th:classappend="${pageNum == currentPage} ? 'active page-link' : 'page-link'">
+        </a>
+
+        <!-- Next -->
+        <a th:if="${hasNext}"
+           th:href="@{|/home/my-reported-reviews?page=${currentPage + 1}${filterParams}|}"
+           class="page-btn">
+            Tiếp <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+
+        // Auto-submit form khi select thay đổi (optional)
+        const autoSubmitSelects = document.querySelectorAll('#status, #reason');
+        autoSubmitSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+    });
+</script>
+</body>
+</html>

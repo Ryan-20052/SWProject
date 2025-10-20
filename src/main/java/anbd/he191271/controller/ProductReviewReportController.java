@@ -270,4 +270,86 @@ public class ProductReviewReportController {
         model.addAttribute("report", report);
         return "report-detail";
     }
+    @GetMapping("/edit/{reportId}")
+    public String editReportForm(@PathVariable Long reportId,
+                                 Model model,
+                                 HttpSession session,
+                                 HttpServletRequest request) {
+
+        // Kiểm tra đăng nhập
+        Customer currentCustomer = (Customer) session.getAttribute("customer");
+        if (currentCustomer == null) {
+            String currentUrl = request.getRequestURL().toString();
+            return "redirect:/login.html?redirect=" + currentUrl;
+        }
+
+        // Lấy report theo ID
+        ProductReviewReport report = reportService.getReportById(reportId);
+
+        // Kiểm tra report tồn tại và thuộc về user hiện tại
+        if (report == null || report.getReporter().getId() != currentCustomer.getId()) {
+            model.addAttribute("error", "Báo cáo không tồn tại hoặc bạn không có quyền chỉnh sửa");
+            return "redirect:/home/my-reported-reviews";
+        }
+
+        // Kiểm tra chỉ cho phép chỉnh sửa khi status là PENDING
+        if (report.getStatus() != ProductReviewReport.ReportStatus.PENDING) {
+            model.addAttribute("error", "Chỉ có thể chỉnh sửa báo cáo đang chờ xử lý");
+            return "redirect:/home/my-reported-reviews";
+        }
+
+        model.addAttribute("report", report);
+        model.addAttribute("review", report.getReview());
+        model.addAttribute("isEdit", true); // Flag để biết là đang edit
+        return "reviewReportForm"; // Sử dụng cùng template nhưng với mode edit
+    }
+    // Xử lý cập nhật report
+    @PostMapping("/update/{reportId}")
+    public String updateReport(@PathVariable Long reportId,
+                               @RequestParam String reportReason,
+                               @RequestParam(required = false) String description,
+                               HttpSession session,
+                               Model model) {
+
+        // Kiểm tra đăng nhập
+        Customer currentCustomer = (Customer) session.getAttribute("customer");
+        if (currentCustomer == null) {
+            return "redirect:/login.html";
+        }
+
+        try {
+            // Lấy report hiện tại
+            ProductReviewReport existingReport = reportService.getReportById(reportId);
+
+            // Kiểm tra quyền
+            if (existingReport == null || existingReport.getReporter().getId() != currentCustomer.getId()) {
+                model.addAttribute("error", "Báo cáo không tồn tại hoặc bạn không có quyền chỉnh sửa");
+                return "redirect:/home/my-reported-reviews";
+            }
+
+            // Kiểm tra status
+            if (existingReport.getStatus() != ProductReviewReport.ReportStatus.PENDING) {
+                model.addAttribute("error", "Chỉ có thể chỉnh sửa báo cáo đang chờ xử lý");
+                return "redirect:/home/my-reported-reviews";
+            }
+
+            ProductReviewReport.ReportReason reason =
+                    ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
+
+            // Cập nhật report
+            ProductReviewReport updatedReport = reportService.updateReport(reportId, reason, description);
+
+            // ĐẢM BẢO TRUYỀN ĐẦY ĐỦ DỮ LIỆU
+            model.addAttribute("success", true);
+            model.addAttribute("message", "Cập nhật báo cáo thành công!");
+            model.addAttribute("review", updatedReport.getReview()); // QUAN TRỌNG: thêm review
+            model.addAttribute("report", updatedReport);
+
+            return "reportSuccess";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi cập nhật báo cáo: " + e.getMessage());
+            return "reviewReportForm";
+        }
+    }
 }

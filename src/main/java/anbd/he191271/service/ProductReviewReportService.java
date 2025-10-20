@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,5 +94,20 @@ public class ProductReviewReportService {
         stats.put("approved", countReportsByStatus(ProductReviewReport.ReportStatus.APPROVED));
         stats.put("rejected", countReportsByStatus(ProductReviewReport.ReportStatus.REJECTED));
         return stats;
+    }
+    // Lấy tất cả reports của 1 user
+    public List<ProductReviewReport> getReportsByReporterId(Long reporterId) {
+        return reportRepository.findByReporterId(reporterId);
+    }
+
+    public ProductReviewReport updateReport(Long reportId, ProductReviewReport.ReportReason reason, String description) {
+        ProductReviewReport report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report không tồn tại"));
+
+        report.setReportReason(reason);
+        report.setDescription(description);
+        report.setUpdatedAt(LocalDateTime.now());
+
+        return reportRepository.save(report);
     }
 }

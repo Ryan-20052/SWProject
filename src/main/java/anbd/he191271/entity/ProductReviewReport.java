@@ -23,14 +23,14 @@ public class ProductReviewReport {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ReportReasonConverter.class)
     @Column(name = "report_reason", nullable = false)
     private ReportReason reportReason;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ReportStatusConverter.class)
     @Column(name = "status", nullable = false)
     private ReportStatus status = ReportStatus.PENDING;
 
@@ -79,6 +79,47 @@ public class ProductReviewReport {
 
         public String getValue() {
             return value;
+        }
+    }
+
+    // ====== CONVERTERS ======
+    @Converter
+    public static class ReportReasonConverter implements AttributeConverter<ReportReason, String> {
+        @Override
+        public String convertToDatabaseColumn(ReportReason reason) {
+            return reason == null ? null : reason.getValue();
+        }
+
+        @Override
+        public ReportReason convertToEntityAttribute(String dbData) {
+            if (dbData == null) return null;
+
+            for (ReportReason reason : ReportReason.values()) {
+                if (reason.getValue().equals(dbData)) {
+                    return reason;
+                }
+            }
+            throw new IllegalArgumentException("Unknown report reason: " + dbData);
+        }
+    }
+
+    @Converter
+    public static class ReportStatusConverter implements AttributeConverter<ReportStatus, String> {
+        @Override
+        public String convertToDatabaseColumn(ReportStatus status) {
+            return status == null ? null : status.getValue();
+        }
+
+        @Override
+        public ReportStatus convertToEntityAttribute(String dbData) {
+            if (dbData == null) return null;
+
+            for (ReportStatus status : ReportStatus.values()) {
+                if (status.getValue().equals(dbData)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown report status: " + dbData);
         }
     }
 
