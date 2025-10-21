@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 
 public class ProductDTO {
     private Integer productId;
-    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @NotBlank(message = "Không được để trống")
     private String name;
     private Integer categoryId;
-    @NotBlank(message = "Link ảnh sản phẩm không được để trống")
+    @NotBlank(message = "Không được để trống")
     private String imgUrl;
-    @NotBlank(message = "Mô tả sản phẩm không được để trống")
+    @NotBlank(message = "Không được để trống")
     private String description;
 
     public ProductDTO() {

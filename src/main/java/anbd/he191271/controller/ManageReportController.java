@@ -33,16 +33,16 @@ public class ManageReportController {
         Stream<ProductReport> stream = productReportService.getAllReports().stream();
         if (status != null) {
             if(status.equalsIgnoreCase("pending")){
-                stream = stream.filter(r -> r.getStatus().equalsIgnoreCase("Pending"));
+                stream = stream.filter(r -> r.getStatus().equalsIgnoreCase("pending"));
             }else{
                 stream = stream.filter(r -> r.getStatus().equalsIgnoreCase(status));
-                List<String> statusList = List.of("Approve", "Reject") ;
+                List<String> statusList = List.of("approved", "rejected") ;
                 model.addAttribute("statusList", statusList);
                 model.addAttribute("status", status);
             }
         }else{
-            stream = stream.filter(r -> !r.getStatus().equalsIgnoreCase("Pending"));
-            List<String> statusList = List.of("Approve", "Reject") ;
+            stream = stream.filter(r -> !r.getStatus().equalsIgnoreCase("pending"));
+            List<String> statusList = List.of("approved", "rejected") ;
             model.addAttribute("statusList", statusList);
             model.addAttribute("status", status);
         }
@@ -84,7 +84,7 @@ public class ManageReportController {
                                   @RequestParam(required = false) String type,
                                   @RequestParam(required = false) String startDate,
                                   @RequestParam(required = false) String endDate){
-        String status = "Pending";
+        String status = "pending";
         return viewReport(model, session, customerName, title, type, status, startDate, endDate);
     }
 

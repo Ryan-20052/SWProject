@@ -265,91 +265,161 @@
 
 </script>
 <div class="dashboard">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2>Danh sách sản phẩm</h2>
-        <a th:href="@{/manage/manageLog}" class="btn-log">Xem Log</a>
+    <div style="max-width:1200px; margin:20px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+
+        <!-- ========================== TIÊU ĐỀ + NÚT XEM LOG ========================== -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0; color:#2563eb;">Danh sách sản phẩm</h2>
+            <a th:href="@{/manage/manageLog}" class="btn-log"
+               style="background:#2563eb; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; box-shadow:0 3px 6px rgba(0,0,0,0.15); transition:0.2s;">
+                Xem Log
+            </a>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:40px; justify-content:space-between; margin-bottom:40px;">
+
+            <!-- FORM THÊM SẢN PHẨM -->
+            <div style="flex:1; min-width:350px;">
+                <h3 style="color:#1d4ed8; margin-bottom:12px;">Thêm sản phẩm</h3>
+                <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post" required
+                      style="display:flex; flex-direction:column; gap:12px; background:#f9fafb; padding:16px; border-radius:10px; border:1px solid #e5e7eb;">
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Tên sản phẩm</label>
+                        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Link ảnh</label>
+                        <input type="text" th:field="*{imgUrl}" placeholder="Link ảnh sản phẩm" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('imgUrl')}" th:errors="*{imgUrl}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Mô tả</label>
+                        <input type="text" th:field="*{description}" placeholder="Mô tả sản phẩm" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Danh mục</label>
+                        <select th:field="*{categoryId}" required
+                                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="">-- Chọn danh mục --</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            style="background:#2563eb; color:white; border:none; border-radius:6px; padding:10px 18px; font-weight:600; cursor:pointer;">
+                        Lưu sản phẩm
+                    </button>
+                </form>
+            </div>
+
+            <!-- FORM THÊM VARIANT -->
+            <div style="flex:1; min-width:350px;">
+                <h3 style="color:#1d4ed8; margin-bottom:12px;">Thêm Variant</h3>
+                <form th:action="@{/manage/addVariant}" th:object="${newVariant}" method="post" required
+                      style="display:flex; flex-direction:column; gap:12px; background:#f9fafb; padding:16px; border-radius:10px; border:1px solid #e5e7eb;">
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Tên gói sản phẩm</label>
+                        <input type="text" th:field="*{name}" placeholder="Tên gói" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Thời hạn</label>
+                        <input type="text" th:field="*{duration}" placeholder="Thời hạn" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Giá</label>
+                        <input type="text" th:field="*{price}" placeholder="Giá" required
+                               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                        <div th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
+                             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column;">
+                        <label style="font-weight:600; margin-bottom:4px;">Sản phẩm liên kết</label>
+                        <select th:field="*{productId}" required
+                                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            <option th:each="p : ${productListAvai}" th:value="${p.id}" th:text="${p.name}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            style="background:#2563eb; color:white; border:none; border-radius:6px; padding:10px 18px; font-weight:600; cursor:pointer;">
+                        Lưu Variant
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================== FORM BỘ LỌC / TÌM KIẾM ========================== -->
+        <div style="border-top:2px solid #e5e7eb; padding-top:24px;">
+            <h3 style="color:#1d4ed8; margin-bottom:12px;">Tìm kiếm / Lọc sản phẩm</h3>
+
+            <form th:action="@{/manage/manageHome}" method="get"
+                  style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-size:0.9em; color:#444; margin-bottom:4px;">Tên sản phẩm</label>
+                    <input type="text" name="name" placeholder="Tìm theo tên sản phẩm"
+                           th:value="${productName}"
+                           style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:200px;">
+                </div>
+
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-size:0.9em; color:#444; margin-bottom:4px;">Danh mục</label>
+                    <select name="categoryId"
+                            style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
+                        <option value="">-- Tất cả danh mục --</option>
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId == c.id}"></option>
+                    </select>
+                </div>
+
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-size:0.9em; color:#444; margin-bottom:4px;">Trạng thái</label>
+                    <select name="status"
+                            style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:150px;">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="available" th:selected="${status == 'available'}">Available</option>
+                        <option value="unavailable" th:selected="${status == 'unavailable'}">Unavailable</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:4px;">
+                    <button type="submit"
+                            style="padding:10px 18px; background:#2563eb; color:white; border:none;
+                               border-radius:6px; cursor:pointer; font-weight:500;">
+                        Lọc
+                    </button>
+                    <a th:href="@{/manage/manageHome}"
+                       style="padding:10px 18px; background:#6b7280; color:white; border-radius:6px; text-decoration:none;">
+                        Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Bộ lọc tìm kiếm sản phẩm -->
-    <form th:action="@{/manage/manageHome}" method="get"
-          style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
 
-        <!-- Lọc theo tên sản phẩm -->
-        <input type="text" name="name" placeholder="Tìm theo tên sản phẩm"
-               th:value="${productName}"
-               style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
-
-        <!-- Lọc theo danh mục -->
-        <select name="categoryId"
-                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
-            <option value="">-- Tất cả danh mục --</option>
-            <option th:each="c : ${categories}"
-                    th:value="${c.id}"
-                    th:text="${c.name}"
-                    th:selected="${categoryId == c.id}">
-            </option>
-        </select>
-
-        <!-- Lọc theo trạng thái -->
-        <select name="status"
-                style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:150px;">
-            <option value="">-- Tất cả trạng thái --</option>
-            <option value="available" th:selected="${status == 'available'}">available</option>
-            <option value="unavailable" th:selected="${status == 'unavailable'}">unavailable</option>
-        </select>
-
-        <button type="submit"
-                style="padding:8px 16px; background:var(--blue); color:white; border:none;
-                   border-radius:6px; cursor:pointer; font-weight:500;">
-            Lọc
-        </button>
-
-        <a th:href="@{/manage/manageHome}"
-           style="padding:8px 14px; background:#6b7280; color:white; border-radius:6px; text-decoration:none;">
-            Đặt lại
-        </a>
-    </form>
-
-
-    <!-- Form Thêm sản phẩm -->
-    <h3>Thêm sản phẩm</h3>
-    <form th:action="@{/manage/addProduct}" th:object="${newProduct}" method="post" required>
-        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
-        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
-             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
-
-        <input type="text" th:field="*{imgUrl}" placeholder="link ảnh" required>
-        <div th:if="${#fields.hasErrors('imgUrl')}" th:errors="*{imgUrl}"
-             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
-
-        <input type="text" th:field="*{description}" placeholder="Mô tả" required>
-        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
-             style="color:#dc2626; font-size:0.9em; margin:4px 0 8px 4px;"></div>
-
-        <select th:field="*{categoryId}" required>
-            <option value="">-- Chọn danh mục --</option>
-            <option th:each="c : ${categories}"
-                    th:value="${c.id}"
-                    th:text="${c.name}">
-            </option>
-        </select>
-        <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
-    </form>
-
-    <h3>Thêm Variant</h3>
-    <form th:action="@{/manage/addVariant}" th:object="${newVariant}" method="post" required>
-        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
-        <input type="text" th:field="*{duration}" placeholder="Thời hạn" required>
-        <input type="text" th:field="*{price}" placeholder="Giá" required>
-        <select th:field="*{productId}" required>
-            <option value="">-- Chọn sản phẩm --</option>
-            <option th:each="p : ${productListAvai}"
-                    th:value="${p.id}"
-                    th:text="${p.name}">
-            </option>
-        </select>
-        <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
-    </form>
 
     <table border="1">
         <thead>

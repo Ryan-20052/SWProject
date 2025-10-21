@@ -73,6 +73,10 @@ public class ManagerController {
             return "redirect:/login.html";
         }
         if(bindingResult.hasErrors()){
+            model.addAttribute("productListAvai", productService.getAllProductByStatus("available"));
+            model.addAttribute("productList", productService.getAllProduct());
+            model.addAttribute("newVariant", new VariantDTO());
+            model.addAttribute("categories", categoryService.getAllCategoriesByStatus("available"));
             model.addAttribute("manager", manager);
             return "manageHome";
         }
@@ -115,13 +119,18 @@ public class ManagerController {
     }
 
     @PostMapping("/addVariant")
-    public String addVariant(@Valid @ModelAttribute("newVariant") VariantDTO request, BindingResult bindingResult, HttpSession session) {
-        if (bindingResult.hasErrors()) {
-            return "manage/addVariant";
-        }
+    public String addVariant(@Valid @ModelAttribute("newVariant") VariantDTO request, BindingResult bindingResult, HttpSession session, Model  model) {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("productListAvai", productService.getAllProductByStatus("available"));
+            model.addAttribute("productList", productService.getAllProduct());
+            model.addAttribute("newProduct", new ProductDTO());
+            model.addAttribute("categories", categoryService.getAllCategoriesByStatus("available"));
+            model.addAttribute("manager", manager);
+            return "manageHome";
         }
         Product product = productService.findProductById(request.getProductId());
         Variant variant = new Variant(request.getName(),request.getDuration(),request.getPrice(), product);
