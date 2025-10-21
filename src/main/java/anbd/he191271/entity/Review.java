@@ -11,41 +11,52 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "variant_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id")
     private Variant variant;
 
     @Column(name = "rating", nullable = false)
-    private int rating;
+    private Integer rating;
 
-    @Column(name = "comment", length = 255)
+    @Column(name = "comment", length = 1000)
     private String comment;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     @Lob
-    @Column(name = "review_image", columnDefinition = "LONGBLOB")
+    @Column(name = "review_image")
     private byte[] reviewImage;
 
     @Column(name = "has_image")
-    private boolean hasImage;
+    private Boolean hasImage = false;
+
+    // ===== Constructors =====
+    public Review() {
+        this.createdAt = new Date();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = new Date();
+        }
+    }
 
     // ===== Getter & Setter =====
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -61,8 +72,14 @@ public class Review {
     public Variant getVariant() { return variant; }
     public void setVariant(Variant variant) { this.variant = variant; }
 
-    public int getRating() { return rating; }
-    public void setRating(int rating) { this.rating = rating; }
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) {
+        if (rating != null && rating >= 1 && rating <= 5) {
+            this.rating = rating;
+        } else {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+    }
 
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
@@ -77,6 +94,24 @@ public class Review {
         this.hasImage = (reviewImage != null && reviewImage.length > 0);
     }
 
-    public boolean isHasImage() { return hasImage; }
-    public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
+    public Boolean getHasImage() { return hasImage; }
+    public void setHasImage(Boolean hasImage) {
+        this.hasImage = hasImage != null ? hasImage : false;
+    }
+
+    // ===== Utility Methods =====
+    public boolean hasImage() {
+        return Boolean.TRUE.equals(hasImage);
+    }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "id=" + id +
+                ", customer=" + (customer != null ? customer.getId() : "null") +
+                ", product=" + (product != null ? product.getId() : "null") +
+                ", rating=" + rating +
+                ", hasImage=" + hasImage +
+                '}';
+    }
 }
