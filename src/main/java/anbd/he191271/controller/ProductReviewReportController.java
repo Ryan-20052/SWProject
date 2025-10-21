@@ -33,45 +33,49 @@ public class ProductReviewReportController {
 
     // ====== CUSTOMER SIDE ======
 
-    // Hiển thị form báo cáo (trang riêng) - SỬA LẠI PHẦN NÀY
+    // Hiển thị form báo cáo (trang riêng) - ĐÃ SỬA
     @GetMapping("/form/{reviewId}")
     public String showReportForm(@PathVariable Long reviewId,
                                  Model model,
                                  HttpSession session,
-                                 HttpServletRequest request) { // THÊM HttpSession và HttpServletRequest
+                                 HttpServletRequest request) {
 
-        // Kiểm tra đăng nhập - CÁCH ĐÚNG
+        // Kiểm tra đăng nhập
         Customer currentCustomer = (Customer) session.getAttribute("customer");
         if (currentCustomer == null) {
-            // Lưu URL hiện tại để redirect sau khi login
             String currentUrl = request.getRequestURL().toString();
             return "redirect:/login.html?redirect=" + currentUrl;
         }
 
         Review review = reviewService.getReviewById(reviewId);
+        if (review == null) {
+            model.addAttribute("error", "Đánh giá không tồn tại");
+            return "redirect:/home/homepage";
+        }
 
-        // Kiểm tra không được report chính mình
+        // Kiểm tra không được report chính mình - ĐÃ SỬA
         if (review.getCustomer().getId() == currentCustomer.getId()) {
             model.addAttribute("error", "Bạn không thể báo cáo chính đánh giá của mình");
             return "redirect:/review/list?productId=" + review.getProduct().getId();
         }
 
-        // Kiểm tra đã report chưa
+        // Kiểm tra đã report chưa - ĐÃ SỬA
         if (reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId())) {
             model.addAttribute("error", "Bạn đã báo cáo đánh giá này rồi");
             return "redirect:/review/list?productId=" + review.getProduct().getId();
         }
 
         model.addAttribute("review", review);
+        model.addAttribute("isEdit", false);
         return "reviewReportForm";
     }
 
-    // Xử lý submit form báo cáo (POST) - SỬA LẠI PHẦN NÀY
+    // Xử lý submit form báo cáo (POST) - ĐÃ SỬA
     @PostMapping("/submit")
     public String submitReport(@RequestParam Long reviewId,
                                @RequestParam String reportReason,
                                @RequestParam(required = false) String description,
-                               HttpSession session, // THAY ĐỔI: dùng HttpSession thay vì @SessionAttribute
+                               HttpSession session,
                                Model model) {
 
         // Kiểm tra đăng nhập
@@ -83,22 +87,28 @@ public class ProductReviewReportController {
         Review review = null;
         try {
             review = reviewService.getReviewById(reviewId);
+            if (review == null) {
+                model.addAttribute("error", "Đánh giá không tồn tại");
+                return "reviewReportForm";
+            }
 
-            // THÊM KIỂM TRA TRONG POST
+            // Kiểm tra trong POST - ĐÃ SỬA
             if (review.getCustomer().getId() == currentCustomer.getId()) {
                 model.addAttribute("error", "Bạn không thể báo cáo chính đánh giá của mình");
                 model.addAttribute("review", review);
+                model.addAttribute("isEdit", false);
                 return "reviewReportForm";
             }
 
+            // ĐÃ SỬA
             if (reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId())) {
                 model.addAttribute("error", "Bạn đã báo cáo đánh giá này rồi");
                 model.addAttribute("review", review);
+                model.addAttribute("isEdit", false);
                 return "reviewReportForm";
             }
 
-            ProductReviewReport.ReportReason reason =
-                    ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
+            ProductReviewReport.ReportReason reason = ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
 
             ProductReviewReport report = reportService.createReport(
                     review, currentCustomer, review.getProduct(), reason, description);
@@ -108,34 +118,35 @@ public class ProductReviewReportController {
             model.addAttribute("review", review);
 
         } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", "Lý do báo cáo không hợp lệ: " + e.getMessage());
             if (review == null) {
                 review = reviewService.getReviewById(reviewId);
             }
             model.addAttribute("review", review);
+            model.addAttribute("isEdit", false);
             return "reviewReportForm";
         } catch (Exception e) {
-            model.addAttribute("error", "Có lỗi xảy ra khi gửi báo cáo");
+            model.addAttribute("error", "Có lỗi xảy ra khi gửi báo cáo: " + e.getMessage());
             if (review == null) {
                 review = reviewService.getReviewById(reviewId);
             }
             model.addAttribute("review", review);
+            model.addAttribute("isEdit", false);
             return "reviewReportForm";
         }
 
         return "reportSuccess";
     }
 
-    // API tạo report (AJAX) - SỬA LẠI PHẦN NÀY
+    // API tạo report (AJAX) - ĐÃ SỬA
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<?> createReport(
             @RequestParam Long reviewId,
             @RequestParam String reportReason,
             @RequestParam(required = false) String description,
-            HttpSession session) { // THAY ĐỔI: dùng HttpSession
+            HttpSession session) {
 
-        // Kiểm tra đăng nhập
         Customer currentCustomer = (Customer) session.getAttribute("customer");
         if (currentCustomer == null) {
             return ResponseEntity.status(401).body(
@@ -144,20 +155,24 @@ public class ProductReviewReportController {
 
         try {
             Review review = reviewService.getReviewById(reviewId);
+            if (review == null) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("success", false, "message", "Đánh giá không tồn tại"));
+            }
 
-            // THÊM KIỂM TRA
+            // Kiểm tra - ĐÃ SỬA
             if (review.getCustomer().getId() == currentCustomer.getId()) {
                 return ResponseEntity.badRequest().body(
                         Map.of("success", false, "message", "Bạn không thể báo cáo chính đánh giá của mình"));
             }
 
+            // ĐÃ SỬA
             if (reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId())) {
                 return ResponseEntity.badRequest().body(
                         Map.of("success", false, "message", "Bạn đã báo cáo đánh giá này rồi"));
             }
 
-            ProductReviewReport.ReportReason reason =
-                    ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
+            ProductReviewReport.ReportReason reason = ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
 
             ProductReviewReport report = reportService.createReport(
                     review, currentCustomer, review.getProduct(), reason, description);
@@ -171,31 +186,31 @@ public class ProductReviewReportController {
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", e.getMessage()));
+                    Map.of("success", false, "message", "Lý do báo cáo không hợp lệ"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    Map.of("success", false, "message", "Có lỗi xảy ra"));
+                    Map.of("success", false, "message", "Có lỗi xảy ra khi gửi báo cáo"));
         }
     }
 
-    // API kiểm tra user đã report review chưa - SỬA LẠI PHẦN NÀY
+    // API kiểm tra user đã report review chưa - ĐÃ SỬA
     @GetMapping("/check/{reviewId}")
     @ResponseBody
     public ResponseEntity<?> checkUserReported(
             @PathVariable Long reviewId,
-            HttpSession session) { // THAY ĐỔI: dùng HttpSession
+            HttpSession session) {
 
         Customer currentCustomer = (Customer) session.getAttribute("customer");
         if (currentCustomer == null) {
             return ResponseEntity.ok(Map.of("hasReported", false, "isLoggedIn", false));
         }
 
+        // ĐÃ SỬA
         boolean hasReported = reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId());
         return ResponseEntity.ok(Map.of("hasReported", hasReported, "isLoggedIn", true));
     }
 
     // ====== ADMIN SIDE ======
-    // ... (phần admin giữ nguyên) ...
 
     // Trang quản lý reports
     @GetMapping("/admin")
@@ -209,8 +224,7 @@ public class ProductReviewReportController {
 
         if (status != null && !status.isEmpty()) {
             try {
-                ProductReviewReport.ReportStatus reportStatus =
-                        ProductReviewReport.ReportStatus.valueOf(status.toUpperCase());
+                ProductReviewReport.ReportStatus reportStatus = ProductReviewReport.ReportStatus.valueOf(status.toUpperCase());
                 reportsPage = reportService.getReportsByStatus(reportStatus, page, size);
             } catch (IllegalArgumentException e) {
                 reportsPage = reportService.getAllReports(page, size);
@@ -240,9 +254,9 @@ public class ProductReviewReportController {
             @RequestParam(required = false) String adminNotes) {
 
         try {
-            ProductReviewReport.ReportStatus status =
-                    "approve".equals(action) ? ProductReviewReport.ReportStatus.APPROVED
-                            : ProductReviewReport.ReportStatus.REJECTED;
+            ProductReviewReport.ReportStatus status = "approve".equals(action)
+                    ? ProductReviewReport.ReportStatus.APPROVED
+                    : ProductReviewReport.ReportStatus.REJECTED;
 
             ProductReviewReport report = reportService.resolveReport(reportId, status, adminNotes);
 
@@ -270,6 +284,8 @@ public class ProductReviewReportController {
         model.addAttribute("report", report);
         return "report-detail";
     }
+
+    // Form chỉnh sửa report - ĐÃ SỬA
     @GetMapping("/edit/{reportId}")
     public String editReportForm(@PathVariable Long reportId,
                                  Model model,
@@ -286,7 +302,7 @@ public class ProductReviewReportController {
         // Lấy report theo ID
         ProductReviewReport report = reportService.getReportById(reportId);
 
-        // Kiểm tra report tồn tại và thuộc về user hiện tại
+        // Kiểm tra report tồn tại và thuộc về user hiện tại - ĐÃ SỬA
         if (report == null || report.getReporter().getId() != currentCustomer.getId()) {
             model.addAttribute("error", "Báo cáo không tồn tại hoặc bạn không có quyền chỉnh sửa");
             return "redirect:/home/my-reported-reviews";
@@ -300,10 +316,11 @@ public class ProductReviewReportController {
 
         model.addAttribute("report", report);
         model.addAttribute("review", report.getReview());
-        model.addAttribute("isEdit", true); // Flag để biết là đang edit
-        return "reviewReportForm"; // Sử dụng cùng template nhưng với mode edit
+        model.addAttribute("isEdit", true);
+        return "reviewReportForm";
     }
-    // Xử lý cập nhật report
+
+    // Xử lý cập nhật report - ĐÃ SỬA
     @PostMapping("/update/{reportId}")
     public String updateReport(@PathVariable Long reportId,
                                @RequestParam String reportReason,
@@ -321,7 +338,7 @@ public class ProductReviewReportController {
             // Lấy report hiện tại
             ProductReviewReport existingReport = reportService.getReportById(reportId);
 
-            // Kiểm tra quyền
+            // Kiểm tra quyền - ĐÃ SỬA
             if (existingReport == null || existingReport.getReporter().getId() != currentCustomer.getId()) {
                 model.addAttribute("error", "Báo cáo không tồn tại hoặc bạn không có quyền chỉnh sửa");
                 return "redirect:/home/my-reported-reviews";
@@ -333,22 +350,34 @@ public class ProductReviewReportController {
                 return "redirect:/home/my-reported-reviews";
             }
 
-            ProductReviewReport.ReportReason reason =
-                    ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
+            ProductReviewReport.ReportReason reason = ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
 
             // Cập nhật report
             ProductReviewReport updatedReport = reportService.updateReport(reportId, reason, description);
 
-            // ĐẢM BẢO TRUYỀN ĐẦY ĐỦ DỮ LIỆU
             model.addAttribute("success", true);
             model.addAttribute("message", "Cập nhật báo cáo thành công!");
-            model.addAttribute("review", updatedReport.getReview()); // QUAN TRỌNG: thêm review
+            model.addAttribute("review", updatedReport.getReview());
             model.addAttribute("report", updatedReport);
 
             return "reportSuccess";
 
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", "Lý do báo cáo không hợp lệ: " + e.getMessage());
+
+            ProductReviewReport report = reportService.getReportById(reportId);
+            model.addAttribute("report", report);
+            model.addAttribute("review", report.getReview());
+            model.addAttribute("isEdit", true);
+            return "reviewReportForm";
+
         } catch (Exception e) {
             model.addAttribute("error", "Có lỗi xảy ra khi cập nhật báo cáo: " + e.getMessage());
+
+            ProductReviewReport report = reportService.getReportById(reportId);
+            model.addAttribute("report", report);
+            model.addAttribute("review", report.getReview());
+            model.addAttribute("isEdit", true);
             return "reviewReportForm";
         }
     }
