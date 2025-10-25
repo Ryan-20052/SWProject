@@ -16,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -209,14 +211,38 @@ public class ManagerController {
     }
 
     @GetMapping("/manageLog")
-    public String manageLog(Model model, HttpSession session) {
-        List<ManagerLog> manageLogList = managerLogService.findAll();
+    public String manageLog(Model model, HttpSession session,
+                            @RequestParam(required = false) String managerName,
+                            @RequestParam(required = false) String action,
+                            @RequestParam(required = false) String startDate,
+                            @RequestParam(required = false) String endDate) {
+        Stream<ManagerLog> stream = managerLogService.findAll().stream();
+
+        if(managerName!= null && !managerName.trim().isEmpty()) {
+            stream = stream.filter(l -> l.getManagerName().contains(managerName));
+        }
+        if(action != null && !action.trim().isEmpty()) {
+            stream = stream.filter(l -> l.getAction().contains(action));
+        }
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            LocalDate start = LocalDate.parse(startDate);
+            stream = stream.filter(l -> !l.getTime().toLocalDate().isBefore(start));
+        }
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            LocalDate end = LocalDate.parse(endDate);
+            stream = stream.filter(o -> !o.getTime().toLocalDate().isAfter(end));
+        }
+
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
         }
         model.addAttribute("manager", manager);
-        model.addAttribute("manageLogList", manageLogList.reversed());
+        model.addAttribute("manageLogList", stream.toList().reversed());
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("action", action);
+        model.addAttribute("managerName",  managerName);
         return "manageLogPage";
     }
 

@@ -324,10 +324,10 @@
             <label for="title" style="font-size:0.9em; color:#555;">Loại đơn:</label>
             <select id="title" name="title" style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
                 <option value="" disabled selected>-- Chọn loại đơn --</option>
-                <option value="khiếu_nại" class="subject-option">Khiếu nại</option>
-                <option value="phản_hồi" class="subject-option">Phản hồi</option>
-                <option value="đề_xuất" class="subject-option">Đề xuất</option>
-                <option value="báo_cáo" class="subject-option">Báo cáo</option>
+                <option value="khiếu_nại" th:selected="${title == 'khiếu_nại'}" class="subject-option">Khiếu nại</option>
+                <option value="phản_hồi" th:selected="${title == 'phản_hồi'}" class="subject-option">Phản hồi</option>
+                <option value="đề_xuất" th:selected="${title == 'đề_xuất'}" class="subject-option">Đề xuất</option>
+                <option value="báo_cáo" th:selected="${title == 'báo_cáo'}" class="subject-option">Báo cáo</option>
             </select>
         </div>
 

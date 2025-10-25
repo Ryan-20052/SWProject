@@ -15,6 +15,13 @@
         /* Dashboard container */
         .dashboard { max-width:1200px; margin:20px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
 
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669; /* ← cần thêm dấu ; ở cuối */
+        }
+
         /* Nút quay lại */
         .btn-back {
             background-color: #2563eb;
@@ -120,28 +127,22 @@
 
     <h2>Danh sách log</h2>
 
-    <form th:action="@{/manageOrder/viewOrder}" method="get"
+    <form th:action="@{/manage/manageLog}" method="get"
           style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
         <div style="display:flex; flex-direction:column;">
-            <label for="orderCode" style="font-size:0.9em; color:#555;">Mã đơn hàng:</label>
-            <input type="text" name="orderCode" id="orderCode" placeholder="Tìm theo mã đơn hàng"
-                   th:value="${orderCode}"
+            <label for="managerName" style="font-size:0.9em; color:#555;">Tên quản lý:</label>
+            <input type="text" name="managerName" id="managerName" placeholder="Tìm theo tên quản lý"
+                   th:value="${managerName}"
                    style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
         </div>
 
         <div style="display:flex; flex-direction:column;">
-            <label for="status" style="font-size:0.9em; color:#555;">Trạng thái đơn:</label>
-            <select name="status"
-                    id="status"
-                    style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
-                <option value="">-- Tất cả trạng thái --</option>
-                <option th:each="s : ${statusList}"
-                        th:value="${s}"
-                        th:text="${s}"
-                        th:selected="${status == s}">
-                </option>
-            </select>
+            <label for="action" style="font-size:0.9em; color:#555;">Từ khóa:</label>
+            <input type="text" name="action" id="action" placeholder="Tìm theo từ khóa hành động,tên sản phẩm"
+                   th:value="${action}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
         </div>
+
 
         <!-- Từ ngày -->
         <div style="display:flex; flex-direction:column;">
@@ -164,7 +165,7 @@
             Lọc
         </button>
 
-        <a th:href="@{/manageOrder/viewOrder}"
+        <a th:href="@{/manage/manageLog}"
            style="padding:8px 14px; background:#6b7280;margin-top: 15px; color:white; border-radius:6px; text-decoration:none;">
             Đặt lại
         </a>

@@ -51,6 +51,7 @@ public class ManageReportController {
         }
         if (title != null && !title.trim().isEmpty()) {
             stream = stream.filter(r -> r.getTitle().equalsIgnoreCase(title));
+            model.addAttribute("title", title);
         }
         if (type != null && !type.trim().isEmpty()) {
             stream = stream.filter(r -> r.getType().equalsIgnoreCase(type));
