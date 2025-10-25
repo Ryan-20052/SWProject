@@ -11,5 +11,20 @@ public class SupportController {
     public String viewSupportPage() {
         return "support.html";
     }
+
+    @GetMapping("/refund")
+    public String RefundPage() {
+        return "refund.html";
+    }
+
+    @GetMapping("/noemail")
+    public String NoEmailPage() {
+        return "noemail.html";
+    }
+
+    @GetMapping("/activelicense")
+    public String ActivePage() {
+        return "activelicense.html";
+    }
 }
 

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Kích Hoạt License - License Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .activation-code {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px dashed #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- Header -->
+<header class="bg-blue-600 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
+        <button onclick="window.location.href='/home/homepage'"
+                class="text-2xl font-semibold hover:text-blue-200 transition btn-hover">
+            License Shop
+        </button>
+
+        <div class="flex space-x-3">
+            <button onclick="window.location.href='/home/homepage'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Trang chủ
+            </button>
+
+            <button onclick="window.location.href='/cart/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Giỏ hàng
+            </button>
+
+            <button onclick="window.location.href='/report/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 transition font-medium btn-hover">
+                Liên hệ hỗ trợ
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Page Title -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Làm Thế Nào Để Kích Hoạt License?</h1>
+        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+            Hướng dẫn chi tiết từng bước để kích hoạt sản phẩm của bạn sau khi mua hàng.
+        </p>
+    </div>
+
+    <!-- Success Alert -->
+    <div class="bg-green-50 border-l-4 border-green-400 p-6 mb-8 rounded-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-400 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-green-800">Quá trình đơn giản và nhanh chóng</h3>
+                <div class="mt-2 text-green-700">
+                    <p>
+                        Chỉ cần làm theo các bước dưới đây, bạn sẽ kích hoạt license thành công trong vòng vài phút.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activation Steps -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Step 1: Receive Email -->
+        <div class="step-card bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    <span class="font-bold">1</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Nhận Email Xác Nhận</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <i class="fas fa-envelope text-blue-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Kiểm tra hộp thư</h3>
+                        <p class="text-gray-600 mt-1">Sau khi mua hàng thành công, bạn sẽ nhận được email xác nhận từ License Shop.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-key text-blue-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Tìm mã kích hoạt</h3>
+                        <p class="text-gray-600 mt-1">Email sẽ chứa mã kích hoạt license của bạn, thường có định dạng:</p>
+                        <div class="mt-2 activation-code">XXXX-XXXX-XXXX-XXXX</div>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg mt-4">
+                    <div class="flex">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-2"></i>
+                        <p class="text-yellow-700 text-sm">Nếu không tìm thấy email, hãy kiểm tra thư mục spam hoặc <a href="https://support.google.com/mail/answer/9259955?hl=vi" class="underline font-medium">xem hướng dẫn tại đây</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Activate Product -->
+        <div class="step-card bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+            <div class="flex items-center mb-4">
+                <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    <span class="font-bold">2</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Kích Hoạt Sản Phẩm</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <i class="fas fa-mouse-pointer text-green-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Truy cập trang kích hoạt</h3>
+                        <p class="text-gray-600 mt-1">Truy cập trang "Kích hoạt sản phẩm" trên website License Shop.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-keyboard text-green-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Nhập mã kích hoạt</h3>
+                        <p class="text-gray-600 mt-1">Sao chép và dán mã kích hoạt từ email vào ô tương ứng trên trang.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Hoàn tất kích hoạt</h3>
+                        <p class="text-gray-600 mt-1">Nhấn nút "Kích hoạt" để hoàn tất quá trình. Bạn sẽ nhận được thông báo xác nhận.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Notes -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-12">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-exclamation-circle text-orange-500 text-2xl mr-3"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Lưu ý Quan Trọng</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex items-start">
+                <i class="fas fa-clock text-orange-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-800">Thời hạn kích hoạt</h3>
+                    <p class="text-gray-600 mt-1">Mã kích hoạt có thời hạn sử dụng. Hãy kích hoạt sớm sau khi nhận được email.</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <i class="fas fa-desktop text-orange-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-800">Giới hạn thiết bị</h3>
+                    <p class="text-gray-600 mt-1">Mỗi license thường chỉ được kích hoạt trên một số lượng thiết bị nhất định.</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <i class="fas fa-redo text-orange-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-800">Kích hoạt lại</h3>
+                    <p class="text-gray-600 mt-1">Nếu cần kích hoạt lại trên thiết bị mới, hãy liên hệ hỗ trợ để được hướng dẫn.</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <i class="fas fa-shield-alt text-orange-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-800">Bảo mật thông tin</h3>
+                    <p class="text-gray-600 mt-1">Không chia sẻ mã kích hoạt với người khác để tránh mất bản quyền.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-blue-50 rounded-xl p-8 border border-blue-200">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Sẵn Sàng Kích Hoạt?</h2>
+            <p class="text-gray-600 mt-2">Truy cập ngay trang kích hoạt để bắt đầu sử dụng sản phẩm của bạn</p>
+        </div>
+        <div class="flex flex-col md:flex-row justify-center gap-4">
+            <button
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition btn-hover">
+                <i class="fas fa-rocket mr-2"></i> Đến Trang Kích Hoạt
+            </button>
+            <button onclick="window.location.href='/report/view'"
+                    class="px-6 py-3 bg-white hover:bg-gray-100 text-blue-600 border border-blue-600 font-medium rounded-lg transition btn-hover">
+                <i class="fas fa-headset mr-2"></i> Cần Hỗ Trợ Kích Hoạt
+            </button>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mt-12">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-question-circle text-purple-500 text-2xl mr-3"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Câu Hỏi Thường Gặp</h2>
+        </div>
+        <div class="space-y-6">
+            <div class="border-b border-gray-200 pb-4">
+                <h3 class="font-semibold text-gray-800 mb-2">Tôi không tìm thấy mã kích hoạt trong email?</h3>
+                <p class="text-gray-600">Hãy kiểm tra kỹ thư mục spam và các tab khác trong hộp thư. Nếu vẫn không thấy, vui lòng liên hệ hỗ trợ để được gửi lại email.</p>
+            </div>
+            <div class="border-b border-gray-200 pb-4">
+                <h3 class="font-semibold text-gray-800 mb-2">Mã kích hoạt không hoạt động?</h3>
+                <p class="text-gray-600">Đảm bảo bạn đã nhập đúng mã, không có khoảng trắng thừa. Nếu vẫn không được, có thể mã đã hết hạn hoặc đã được sử dụng.</p>
+            </div>
+            <div class="border-b border-gray-200 pb-4">
+                <h3 class="font-semibold text-gray-800 mb-2">Tôi có thể kích hoạt trên nhiều thiết bị không?</h3>
+                <p class="text-gray-600">Tùy thuộc vào loại license bạn mua. Vui lòng kiểm tra thông tin sản phẩm để biết số lượng thiết bị được phép kích hoạt.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-gray-800 mb-2">Làm gì khi thay đổi thiết bị?</h3>
+                <p class="text-gray-600">Nếu bạn cần kích hoạt lại trên thiết bị mới, hãy liên hệ hỗ trợ. Trong một số trường hợp, bạn có thể cần mua license mới.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <h3 class="text-xl font-bold mb-2">License Shop</h3>
+                <p class="text-gray-400">Cung cấp các giải pháp phần mềm và bản quyền chính hãng.</p>
+            </div>
+            <div class="text-gray-400">
+                <p>&copy; 2025 License Shop. Mọi quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

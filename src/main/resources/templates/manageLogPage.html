@@ -120,6 +120,56 @@
 
     <h2>Danh sách log</h2>
 
+    <form th:action="@{/manageOrder/viewOrder}" method="get"
+          style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; flex-direction:column;">
+            <label for="orderCode" style="font-size:0.9em; color:#555;">Mã đơn hàng:</label>
+            <input type="text" name="orderCode" id="orderCode" placeholder="Tìm theo mã đơn hàng"
+                   th:value="${orderCode}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
+        </div>
+
+        <div style="display:flex; flex-direction:column;">
+            <label for="status" style="font-size:0.9em; color:#555;">Trạng thái đơn:</label>
+            <select name="status"
+                    id="status"
+                    style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; min-width:180px;">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option th:each="s : ${statusList}"
+                        th:value="${s}"
+                        th:text="${s}"
+                        th:selected="${status == s}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Từ ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="startDate" style="font-size:0.9em; color:#555;">Từ ngày</label>
+            <input type="date" id="startDate" name="startDate"
+                   th:value="${startDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+        <!-- Đến ngày -->
+        <div style="display:flex; flex-direction:column;">
+            <label for="endDate" style="font-size:0.9em; color:#555;">Đến ngày</label>
+            <input type="date" id="endDate" name="endDate"
+                   th:value="${endDate}"
+                   style="padding:8px 12px; border-radius:6px; border:1px solid #ccc;">
+        </div>
+
+        <button type="submit"
+                style="padding:8px 16px; margin-top: 15px; background:var(--blue); color:white; border:none;
+                   border-radius:6px; cursor:pointer; font-weight:500;">
+            Lọc
+        </button>
+
+        <a th:href="@{/manageOrder/viewOrder}"
+           style="padding:8px 14px; background:#6b7280;margin-top: 15px; color:white; border-radius:6px; text-decoration:none;">
+            Đặt lại
+        </a>
+    </form>
+
     <div class="table-wrapper">
         <table>
             <thead>

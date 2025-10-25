@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chính Sách Hoàn Tiền - License Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .policy-card {
+            transition: all 0.3s ease;
+        }
+        .policy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- Header - Đã sửa màu sắc -->
+<header class="bg-blue-600 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
+        <button onclick="window.location.href='/home/homepage'"
+                class="text-2xl font-semibold hover:text-blue-200 transition btn-hover">
+            License Shop
+        </button>
+
+        <div class="flex space-x-3">
+            <button onclick="window.location.href='/home/homepage'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Trang chủ
+            </button>
+            <button onclick="window.location.href='/support/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Hỗ Trợ
+            </button>
+
+            <button onclick="window.location.href='/cart/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Giỏ hàng
+            </button>
+
+            <button onclick="window.location.href='/report/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 transition font-medium btn-hover">
+                Liên hệ hỗ trợ
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Page Title -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Chính Sách Hoàn Tiền</h1>
+        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+            Tại License Shop, chúng tôi cam kết cung cấp dịch vụ và sản phẩm chất lượng cao.
+            Tuy nhiên, có một số trường hợp chúng tôi không thể hỗ trợ hoàn tiền.
+        </p>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8 rounded-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-yellow-800">Lưu ý quan trọng</h3>
+                <div class="mt-2 text-yellow-700">
+                    <p>
+                        License Shop chỉ hỗ trợ hoàn tiền trong vòng 7 ngày kể từ ngày mua hàng
+                        và chỉ áp dụng khi license chưa được kích hoạt.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Non-refundable Cases -->
+        <div class="policy-card bg-white rounded-xl shadow-md p-6 border-t-4 border-red-500">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-times-circle text-red-500 text-2xl mr-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Trường hợp không thể hoàn tiền</h2>
+            </div>
+            <ul class="space-y-3">
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>License đã được kích hoạt trên bất kỳ thiết bị nào</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>Thời gian yêu cầu hoàn tiền vượt quá 7 ngày kể từ ngày mua hàng</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>Sản phẩm đã được sử dụng hoặc đã tải xuống</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>Khách hàng đã nhận được key bản quyền cho sản phẩm</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>Yêu cầu hoàn tiền không hợp lệ hoặc vi phạm điều khoản sử dụng</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-minus text-red-500 mt-1 mr-2"></i>
+                    <span>Sản phẩm đã được mua trong các chương trình khuyến mãi đặc biệt không áp dụng hoàn tiền</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Refundable Cases -->
+        <div class="policy-card bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Trường hợp có thể hoàn tiền</h2>
+            </div>
+            <ul class="space-y-3">
+                <li class="flex items-start">
+                    <i class="fas fa-plus text-green-500 mt-1 mr-2"></i>
+                    <span>License chưa được kích hoạt và yêu cầu hoàn tiền trong vòng 7 ngày kể từ ngày mua</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-plus text-green-500 mt-1 mr-2"></i>
+                    <span>Giao dịch bị lỗi kỹ thuật dẫn đến việc thanh toán bị trùng lặp</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-plus text-green-500 mt-1 mr-2"></i>
+                    <span>Sản phẩm không đúng với mô tả hoặc không hoạt động như cam kết</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Refund Process -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-12">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-list-ol text-blue-500 text-2xl mr-3"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Quy trình xử lý hoàn tiền</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-blue-600 font-bold text-xl">1</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Gửi yêu cầu</h3>
+                <p class="text-gray-600">Khách hàng gửi yêu cầu hoàn tiền qua email hoặc form liên hệ</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-blue-600 font-bold text-xl">2</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Xác minh thông tin</h3>
+                <p class="text-gray-600">Đội ngũ hỗ trợ xác minh thông tin và trạng thái license trong 24-48 giờ</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-blue-600 font-bold text-xl">3</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Xử lý hoàn tiền</h3>
+                <p class="text-gray-600">Nếu yêu cầu hợp lệ, hoàn tiền sẽ được thực hiện trong 5-7 ngày làm việc</p>
+            </div>
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-blue-600 font-bold text-xl">4</span>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Nhận tiền</h3>
+                <p class="text-gray-600">Thời gian nhận lại tiền phụ thuộc vào phương thức thanh toán và ngân hàng</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="bg-blue-50 rounded-xl p-8 border border-blue-200">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Cần Hỗ Trợ Thêm?</h2>
+            <p class="text-gray-600 mt-2">Nếu bạn có bất kỳ câu hỏi nào về chính sách hoàn tiền, đừng ngần ngại liên hệ với chúng tôi</p>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0">
+                <div class="flex items-center mb-3">
+                    <i class="fas fa-envelope text-blue-500 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Email hỗ trợ</p>
+                        <p class="text-gray-700">support@licenseshop.vn</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-phone text-blue-500 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Hotline</p>
+                        <p class="text-gray-700">(+84) 912 345 678</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="window.location.href='/report/view'"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition btn-hover">
+                <i class="fas fa-headset mr-2"></i> Liên Hệ Hỗ Trợ Ngay
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <h3 class="text-xl font-bold mb-2">License Shop</h3>
+                <p class="text-gray-400">Cung cấp các giải pháp phần mềm và bản quyền chính hãng.</p>
+            </div>
+            <div class="text-gray-400">
+                <p>&copy; 2025 License Shop. Mọi quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

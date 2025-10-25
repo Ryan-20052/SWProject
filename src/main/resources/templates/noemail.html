@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không Nhận Được Email Xác Nhận - License Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .solution-card {
+            transition: all 0.3s ease;
+        }
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- Header -->
+<header class="bg-blue-600 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center px-4 py-4">
+        <button onclick="window.location.href='/home/homepage'"
+                class="text-2xl font-semibold hover:text-blue-200 transition btn-hover">
+            License Shop
+        </button>
+
+        <div class="flex space-x-3">
+            <button onclick="window.location.href='/home/homepage'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Trang chủ
+            </button>
+
+            <button onclick="window.location.href='/cart/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition font-medium btn-hover">
+                Giỏ hàng
+            </button>
+
+            <button onclick="window.location.href='/report/view'"
+                    class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 transition font-medium btn-hover">
+                Liên hệ hỗ trợ
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Page Title -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Không Nhận Được Email Xác Nhận Đơn Hàng?</h1>
+        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+            Đừng lo lắng! Đây là vấn đề phổ biến và thường có thể giải quyết nhanh chóng.
+        </p>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-6 mb-8 rounded-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-400 text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-blue-800">Thông tin quan trọng</h3>
+                <div class="mt-2 text-blue-700">
+                    <p>
+                        Email xác nhận đơn hàng thường được gửi ngay lập tức sau khi bạn hoàn tất thanh toán.
+                        Nếu bạn không thấy email, hãy thử các giải pháp dưới đây.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solutions Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Common Issues -->
+        <div class="solution-card bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-search text-orange-500 text-2xl mr-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Kiểm tra các vị trí sau</h2>
+            </div>
+            <ul class="space-y-4">
+                <li class="flex items-start">
+                    <div class="bg-orange-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-trash-alt text-orange-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Hộp thư rác (Spam)</h3>
+                        <p class="text-gray-600 mt-1">Email xác nhận có thể bị lọc nhầm vào thư mục spam hoặc junk mail.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-orange-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-tag text-orange-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Tab "Khuyến mãi" (Promotions)</h3>
+                        <p class="text-gray-600 mt-1">Nếu bạn dùng Gmail, hãy kiểm tra tab "Khuyến mãi" vì email có thể bị phân loại vào đây.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-orange-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-envelope text-orange-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Tất cả thư mục</h3>
+                        <p class="text-gray-600 mt-1">Kiểm tra tất cả các thư mục và bộ lọc trong hộp thư của bạn.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-orange-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-search text-orange-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Tìm kiếm với từ khóa</h3>
+                        <p class="text-gray-600 mt-1">Tìm kiếm với từ khóa "License Shop", "xác nhận đơn hàng" hoặc địa chỉ email "support@licenseshop.vn".</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Solutions -->
+        <div class="solution-card bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-tools text-green-500 text-2xl mr-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Giải pháp khắc phục</h2>
+            </div>
+            <ul class="space-y-4">
+                <li class="flex items-start">
+                    <div class="bg-green-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-sync-alt text-green-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Chờ trong vài phút</h3>
+                        <p class="text-gray-600 mt-1">Đôi khi email có thể bị chậm trễ từ 5-15 phút do tắc nghẽn mạng.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-green-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Kiểm tra lại địa chỉ email</h3>
+                        <p class="text-gray-600 mt-1">Đảm bảo bạn đã nhập chính xác địa chỉ email khi đặt hàng.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-green-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-filter text-green-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Thêm vào danh sách an toàn</h3>
+                        <p class="text-gray-600 mt-1">Thêm địa chỉ support@licenseshop.vn vào danh sách người gửi an toàn.</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <div class="bg-green-100 rounded-full p-2 mr-3">
+                        <i class="fas fa-redo text-green-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Yêu cầu gửi lại email</h3>
+                        <p class="text-gray-600 mt-1">Sử dụng tính năng "Gửi lại email xác nhận" trong tài khoản của bạn hoặc liên hệ hỗ trợ.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- What to do next -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-12">
+        <div class="flex items-center mb-6">
+            <i class="fas fa-question-circle text-blue-500 text-2xl mr-3"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Vẫn không tìm thấy email?</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center p-4">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-check text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Kiểm tra tài khoản</h3>
+                <p class="text-gray-600">Đăng nhập vào tài khoản License Shop của bạn để kiểm tra trạng thái đơn hàng.</p>
+            </div>
+            <div class="text-center p-4">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Kiểm tra tài khoản ngân hàng</h3>
+                <p class="text-gray-600">Xác nhận xem giao dịch đã được thanh toán thành công chưa.</p>
+            </div>
+            <div class="text-center p-4">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Liên hệ hỗ trợ</h3>
+                <p class="text-gray-600">Đội ngũ hỗ trợ của chúng tôi có thể kiểm tra và gửi lại email xác nhận cho bạn.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="bg-blue-50 rounded-xl p-8 border border-blue-200">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Cần Hỗ Trợ Thêm?</h2>
+            <p class="text-gray-600 mt-2">Nếu bạn đã thử tất cả các giải pháp trên mà vẫn không nhận được email xác nhận, hãy liên hệ với chúng tôi</p>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0">
+                <div class="flex items-center mb-3">
+                    <i class="fas fa-envelope text-blue-500 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Email hỗ trợ</p>
+                        <p class="text-gray-700">support@licenseshop.vn</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-phone text-blue-500 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Hotline</p>
+                        <p class="text-gray-700">(+84) 912 345 678</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="window.location.href='/report/view'"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition btn-hover">
+                <i class="fas fa-headset mr-2"></i> Liên Hệ Hỗ Trợ Ngay
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <h3 class="text-xl font-bold mb-2">License Shop</h3>
+                <p class="text-gray-400">Cung cấp các giải pháp phần mềm và bản quyền chính hãng.</p>
+            </div>
+            <div class="text-gray-400">
+                <p>&copy; 2025 License Shop. Mọi quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

@@ -132,7 +132,7 @@
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
                 <p>Sau khi mua, bạn sẽ nhận được email chứa mã kích hoạt. Truy cập trang "Kích hoạt sản phẩm", nhập mã đó để hoàn tất quá trình.</p>
-                <button th:onclick="|window.location.href='@{/support/activation-guide}'|"
+                <button th:onclick="|window.location.href='@{/support/activelicense}'|"
                         class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
@@ -147,7 +147,7 @@
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
                 <p>Hãy kiểm tra hộp thư rác hoặc tab "Khuyến mãi". Nếu vẫn không thấy, vui lòng gửi yêu cầu hỗ trợ.</p>
-                <button th:onclick="|window.location.href='@{/support/missing-email}'|"
+                <button th:onclick="|window.location.href='@{/support/noemail}'|"
                         class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
@@ -162,7 +162,7 @@
             </summary>
             <div class="mt-3 text-gray-600 space-y-3">
                 <p>Chúng tôi hỗ trợ hoàn tiền trong vòng 7 ngày nếu license chưa được kích hoạt.</p>
-                <button th:onclick="|window.location.href='@{/support/refund-policy}'|"
+                <button th:onclick="|window.location.href='@{/support/refund}'|"
                         class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition btn-hover">
                     Xem chi tiết
                 </button>
