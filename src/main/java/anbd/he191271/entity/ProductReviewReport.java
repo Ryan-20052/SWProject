@@ -1,5 +1,6 @@
 package anbd.he191271.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -13,14 +14,17 @@ public class ProductReviewReport {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id", nullable = false)
+    @JsonIgnore
     private Review review;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_user_id", nullable = false)
+    @JsonIgnore
     private Customer reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore
     private Product product;
 
     @Convert(converter = ReportReasonConverter.class)
@@ -95,7 +99,7 @@ public class ProductReviewReport {
             if (dbData == null) return null;
 
             for (ReportReason reason : ReportReason.values()) {
-                if (reason.getValue().equals(dbData)) {
+                if (reason.getValue().equalsIgnoreCase(dbData)) {
                     return reason;
                 }
             }
@@ -115,7 +119,7 @@ public class ProductReviewReport {
             if (dbData == null) return null;
 
             for (ReportStatus status : ReportStatus.values()) {
-                if (status.getValue().equals(dbData)) {
+                if (status.getValue().equalsIgnoreCase(dbData)) {
                     return status;
                 }
             }

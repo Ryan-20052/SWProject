@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Báo cáo Review - Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; }
+        .navbar {
+            background: #1976d2; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
+        }
+        .navbar h1 { color: white; font-size: 20px; margin: 0; }
+        .navbar a, .logout-btn {
+            color: white; text-decoration: none; padding: 14px 20px;
+            display: inline-block; transition: background 0.3s; border: none;
+            background: transparent; cursor: pointer; font-size: 14px;
+        }
+        .navbar a:hover, .logout-btn:hover { background: #1259a6; }
+        .navbar-menu { display: flex; gap: 10px; }
+        .container { padding: 30px; }
+        h2 { color: #333; margin-bottom: 20px; }
+
+        table {
+            width: 100%; border-collapse: collapse; background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #1976d2; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+
+        button {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-approve { background: #43a047; }
+        .btn-approve:hover { background: #2e7d32; }
+        .btn-reject { background: #e53935; }
+        .btn-reject:hover { background: #c62828; }
+
+        .status {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .status-pending {
+            color: #ff9800;
+            background: #fff3e0;
+        }
+        .status-approved {
+            color: #2e7d32;
+            background: #c8e6c9;
+        }
+        .status-rejected {
+            color: #c62828;
+            background: #ffcdd2;
+        }
+
+        textarea {
+            width: 95%;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <h1>Admin Dashboard</h1>
+    <div class="navbar-menu">
+        <a href="adminDashboard.html">🏠 Dashboard</a>
+        <a href="adminCustomerController.html">👤 Quản lý Customer</a>
+        <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
+        <a href="adminLogs.html">📜 Logs</a>
+        <a href="adminReportController.html" style="background:#1259a6;">📝 Báo cáo Review</a>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Quản lý Báo cáo Review</h2>
+    <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+        <select id="filterStatus" style="padding:8px;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="PENDING">Chờ xử lý</option>
+            <option value="APPROVED">Đã duyệt</option>
+            <option value="REJECTED">Đã từ chối</option>
+        </select>
+        <button onclick="loadReports(0)" style="padding:8px 16px; background:#1976d2;color:white;border:none;border-radius:4px;">🔍 Lọc</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Người báo cáo</th>
+            <th>Người bị báo cáo</th>
+            <th>Lý do</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Thời gian tạo</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody id="reportTable"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/admin/reports";
+    const PAGE_SIZE = 10;
+    let currentPage = 0;
+    let totalPages = 0;
+
+    async function loadReports(page = 0) {
+        const statusFilter = document.getElementById("filterStatus").value;
+        let url = `${API_URL}?page=${page}&size=${PAGE_SIZE}`;
+        if (statusFilter) url = `${API_URL}/status/${statusFilter}?page=${page}&size=${PAGE_SIZE}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const table = document.getElementById("reportTable");
+        table.innerHTML = "";
+
+        const reports = data.reports || [];
+        if (reports.length === 0) {
+            table.innerHTML = `<tr><td colspan="8">Không có báo cáo nào</td></tr>`;
+            return;
+        }
+
+        reports.forEach(r => {
+            const statusClass =
+                r.status === "approved" ? "status-approved"
+                    : r.status === "rejected" ? "status-rejected"
+                        : "status-pending";
+
+            const row = `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.reporterUsername || "?"}</td>
+          <td>${r.reportedUsername || "?"}</td>
+          <td>${r.reportReason || ""}</td>
+          <td>${r.description || ""}</td>
+          <td><span class="status ${statusClass}">${r.status}</span></td>
+          <td>${r.createdAt ? r.createdAt.replace("T", " ").split(".")[0] : ""}</td>
+          <td>
+            ${r.status === "pending" ? `
+              <textarea id="note-${r.id}" placeholder="Ghi chú..."></textarea><br/>
+              <button class="btn-approve" onclick="approveReport(${r.id})">✅ Duyệt</button>
+              <button class="btn-reject" onclick="rejectReport(${r.id})">❌ Từ chối</button>
+            ` : "—"}
+          </td>
+        </tr>`;
+            table.innerHTML += row;
+        });
+
+        currentPage = data.currentPage || 0;
+        totalPages = data.totalPages || 1;
+    }
+
+    async function approveReport(id) {
+        const note = document.getElementById(`note-${id}`).value;
+        if (!confirm("Xác nhận duyệt và khóa người dùng vi phạm?")) return;
+        await fetch(`${API_URL}/${id}/approve`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ adminNotes: note })
+        });
+        alert("✅ Đã duyệt báo cáo và ban user vi phạm!");
+        loadReports(currentPage);
+    }
+
+    async function rejectReport(id) {
+        const note = document.getElementById(`note-${id}`).value;
+        if (!confirm("Xác nhận từ chối báo cáo này?")) return;
+        await fetch(`${API_URL}/${id}/reject`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ adminNotes: note })
+        });
+        alert("🚫 Báo cáo đã bị từ chối!");
+        loadReports(currentPage);
+    }
+
+    async function logout() {
+        if (confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+            await fetch("/auth/admin/logout", { method: "GET" });
+            window.location.href = "/home/homepage";
+        }
+    }
+
+    window.onload = () => loadReports();
+</script>
+</body>
+</html>
