@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 @Service
 public class LicenseService {
@@ -88,4 +89,19 @@ public class LicenseService {
         public String getProductName() { return productName; }
     }
 
+    public List<LicenseKey> getAllLicense(){
+        return repo.findAll();
+    }
+
+    public LicenseKey getLicenseById(int id) {
+        return repo.findById(id).get();
+    }
+
+    public void save(LicenseKey lk) {
+        repo.save(lk);
+    }
+
+    public void  delete(LicenseKey lk) {
+        repo.delete(lk);
+    }
 }

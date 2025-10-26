@@ -37,7 +37,7 @@ public class ManageOrderController {
         }
         Stream<Order> stream = orderService.findAll().stream();
         if(orderCode != null && !orderCode.trim().isEmpty()) {
-            stream = stream.filter(o -> o.getCode().contains(orderCode));
+            stream = stream.filter(o -> o.getCode().toLowerCase().contains(orderCode.toLowerCase().trim()));
         }
         if(status != null && !status.trim().isEmpty()) {
             stream = stream.filter(o -> o.getStatus().equals(status));

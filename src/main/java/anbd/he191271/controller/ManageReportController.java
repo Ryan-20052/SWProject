@@ -47,7 +47,7 @@ public class ManageReportController {
             model.addAttribute("status", status);
         }
         if (customerName != null && !customerName.trim().isEmpty()) {
-            stream = stream.filter(r -> r.getName().toLowerCase().contains(customerName.toLowerCase()));
+            stream = stream.filter(r -> r.getName().toLowerCase().trim().contains(customerName.toLowerCase()));
         }
         if (title != null && !title.trim().isEmpty()) {
             stream = stream.filter(r -> r.getTitle().equalsIgnoreCase(title));

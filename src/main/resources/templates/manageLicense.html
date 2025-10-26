@@ -1,10 +1,597 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669;
+            --gray-light: #f8f9fa;
+            --gray-border: #e5e7eb;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: var(--gray-light);
+            color: #111;
+            line-height: 1.5;
+        }
+
+        header {
+            background: #2563eb;
+            color: #28a745;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        nav {
+            background: #1e3a8a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-inner {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+        }
+
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-inner a:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard h2 {
+            margin-bottom: 24px;
+            font-size: 24px;
+            color: #1f2937;
+        }
+
+        .actions {
+            margin-bottom: 20px;
+        }
+
+        .actions button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: var(--green);
+            color: white;
+            font-weight: 500;
+        }
+
+        .actions button:hover {
+            background: #047857;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--gray-border);
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-del {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-del:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .header-inner div {
+            margin-left: 20px;
+        }
+
+        .btn-log {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .btn-log:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* Cải tiến form lọc */
+        .filter-form {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-border);
+            margin-bottom: 24px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9em;
+            color: #4b5563;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--gray-border);
+        }
+
+        .filter-actions button {
+            padding: 10px 24px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .filter-actions button:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .filter-actions a {
+            padding: 10px 20px;
+            background: #6b7280;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .filter-actions a:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .avatar, .avatar-fallback {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-fallback {
+            background: #fff;
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+            border: 1px solid #ccc;
+        }
+
+        .avatar:hover, .avatar-fallback:hover {
+            opacity: 0.85;
+        }
+
+        /* Cải tiến bảng với cuộn */
+        .table-container {
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid var(--gray-border);
+        }
+
+        .table-scroll {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .table-header {
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 18px;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-banned {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-expired {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Custom scrollbar cho bảng */
+        .table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .action-cell form {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
+<header>
+    <div class="header-inner">
+        <h1 style="margin:0; font-size:22px; color:white;">Manager Dashboard</h1>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:16px; color:white;"
+                 th:text="|Xin chào, ${manager.username}|">
+            </div>
+            <div th:if="${manager.avatar != null}" class="avatar"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}"
+                     alt="Avatar">
+            </div>
+            <div th:if="${manager.avatar == null}" class="avatar-fallback"
+                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
+                 onclick="window.location.href='/manager/profile'">
+            </div>
+            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                               border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
 
+<nav>
+    <div class="nav-inner">
+        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
+        <a th:href="@{/manage/category}">Danh mục</a>
+        <a th:href="@{/manageOrder/viewOrder}">Đơn hàng</a>
+        <a th:href="@{/manageLicense/viewLicense}">Quản lý license</a>
+        <a th:href="@{/revenue/dashboard}">Báo cáo tài chính</a>
+        <a th:href="@{/manageReport/viewPendingReport}">Báo cáo khách hàng</a>
+    </div>
+</nav>
+
+<div id="messagePopup" th:if="${msg}"
+     style="position:fixed; top:20px; right:20px; background:#28a745; color:#fff;
+            padding:12px 20px; border-radius:6px; z-index:1000; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+    <span th:text="${msg}"></span>
+</div>
+
+<script>
+    setTimeout(() => {
+        const popup = document.getElementById("messagePopup");
+        if (popup) popup.style.display = "none";
+    }, 3000);
+</script>
+
+<div class="dashboard">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2>Quản lý license key</h2>
+    </div>
+
+    <form th:action="@{/manageLicense/viewLicense}" method="get" class="filter-form">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label for="customerName">Tên khách hàng:</label>
+                <input type="text" name="customerName" id="customerName" placeholder="Tìm theo tên tài khoản khách hàng"
+                       th:value="${customerName}">
+            </div>
+
+            <div class="filter-group">
+                <label for="status">Trạng thái license:</label>
+                <select name="status" id="status">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option th:each="s : ${statusList}"
+                            th:value="${s}"
+                            th:text="${s}"
+                            th:selected="${status == s}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="productName">Tên sản phẩm:</label>
+                <select name="productName" id="productName">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option th:each="p : ${productList}"
+                            th:value="${p.name}"
+                            th:text="${p.name}"
+                            th:selected="${productName == p.name}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="variantName">Tên biến thể:</label>
+                <input type="text" name="variantName" id="variantName" placeholder="Tìm theo biến thể"
+                       th:value="${variantName}">
+            </div>
+
+            <div class="filter-group">
+                <label for="startDate">Từ ngày</label>
+                <input type="date" id="startDate" name="startDate" th:value="${startDate}">
+            </div>
+
+            <div class="filter-group">
+                <label for="endDate">Đến ngày</label>
+                <input type="date" id="endDate" name="endDate" th:value="${endDate}">
+            </div>
+
+            <div class="filter-group">
+                <label for="sort">Sắp xếp theo</label>
+                <select name="sort" id="sort">
+                    <option value="">-- Mặc định --</option>
+                    <option value="date_asc" th:selected="${sort == 'date_asc'}">Ngày kích hoạt (Cũ nhất)</option>
+                    <option value="date_desc" th:selected="${sort == 'date_desc'}">Ngày kích hoạt (Mới nhất)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit">Lọc</button>
+            <a th:href="@{/manageLicense/viewLicense}">Đặt lại</a>
+        </div>
+    </form>
+
+    <div class="table-container">
+        <div class="table-scroll">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 60px;">STT</th>
+                    <th style="min-width: 150px;">Tên khách hàng</th>
+                    <th style="min-width: 180px;">Sản phẩm</th>
+                    <th style="min-width: 120px;">Gói</th>
+                    <th style="width: 120px;">Trạng thái</th>
+                    <th style="width: 130px;">Ngày kích hoạt</th>
+                    <th style="width: 150px;">Hành động</th>
+                </tr>
+                </thead>
+                <tbody th:each="l, iterStat : ${licenseList}">
+                <tr>
+                    <td th:text="${iterStat.count}"></td>
+                    <td th:text="${l.orderDetail.order.customer.name}"></td>
+                    <td th:text="${l.orderDetail.variant.product.name}"></td>
+                    <td th:text="${l.orderDetail.variant.name}"></td>
+                    <td th:text="${l.status}"></td>
+                    <td th:text="${#dates.format(l.activatedAt, 'dd-MM-yyyy')}"></td>
+
+                    <td class="action-cell">
+                    <td class="action-cell">
+                        <!-- Nút BAN/UNBAN -->
+                        <form th:if="${l.status == 'ACTIVATE'}"
+                              th:action="@{/manageLicense/statusLicense}"
+                              method="post"
+                              style="display:inline;">
+                            <input th:value="${l.id}" type="hidden" name="id">
+                            <button type="submit" class="btn btn-warning">
+                                BAN
+                            </button>
+                        </form>
+
+                        <form th:if="${l.status == 'BANNED'}"
+                              th:action="@{/manageLicense/statusLicense}"
+                              method="post"
+                              style="display:inline;">
+                            <input th:value="${l.id}" type="hidden" name="id">
+                            <button type="submit" class="btn btn-success">
+                                UNBAN
+                            </button>
+                        </form>
+
+                        <!-- Nút Xóa -->
+                        <form th:if="${l.status == 'BANNED'}"
+                              th:action="@{/manageLicense/deleteLicense}"
+                              method="post"
+                              style="display:inline;">
+                            <input th:value="${l.id}" type="hidden" name="id">
+                            <button type="submit" class="btn btn-del">
+                                Xóa
+                            </button>
+                        </form>
+                    </td>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </body>
 </html>

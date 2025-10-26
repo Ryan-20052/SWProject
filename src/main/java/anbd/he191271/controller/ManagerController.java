@@ -48,7 +48,7 @@ public class ManagerController {
         }
         Stream<Product> stream=productService.getAllProduct().stream();
         if(productName!=null&&!productName.isEmpty()){
-            stream=stream.filter(p -> p.getName().toLowerCase().contains(productName.toLowerCase()));
+            stream=stream.filter(p -> p.getName().toLowerCase().contains(productName.toLowerCase().trim()));
             model.addAttribute("productName",productName);
         }
         if(categoryId!=null&&!categoryId.isEmpty()){
@@ -219,10 +219,10 @@ public class ManagerController {
         Stream<ManagerLog> stream = managerLogService.findAll().stream();
 
         if(managerName!= null && !managerName.trim().isEmpty()) {
-            stream = stream.filter(l -> l.getManagerName().contains(managerName));
+            stream = stream.filter(l -> l.getManagerName().toLowerCase().contains(managerName.toLowerCase().trim()));
         }
         if(action != null && !action.trim().isEmpty()) {
-            stream = stream.filter(l -> l.getAction().contains(action));
+            stream = stream.filter(l -> l.getAction().toLowerCase().trim().contains(action.toLowerCase().trim()));
         }
         if (startDate != null && !startDate.trim().isEmpty()) {
             LocalDate start = LocalDate.parse(startDate);
@@ -257,7 +257,7 @@ public class ManagerController {
         }
         Stream<Categories> stream = categoryService.getAllCategories().stream();
         if(categoryName != null &&  !categoryName.isEmpty()){
-            stream = stream.filter( c -> c.getName().toLowerCase().contains(categoryName.toLowerCase()));
+            stream = stream.filter( c -> c.getName().toLowerCase().contains(categoryName.toLowerCase().trim()));
             model.addAttribute("categoryName", categoryName);
         }
         if(status!=null&&!status.isEmpty()){
