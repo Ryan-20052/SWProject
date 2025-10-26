@@ -20,8 +20,7 @@
         .container { padding: 30px; }
         h2 { color: #333; margin-bottom: 20px; }
 
-        table {
-            width: 100%; border-collapse: collapse; background: #fff;
+        table { width: 100%; border-collapse: collapse; background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
@@ -42,31 +41,24 @@
         .btn-reject { background: #e53935; }
         .btn-reject:hover { background: #c62828; }
 
-        .status {
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-        .status-pending {
-            color: #ff9800;
-            background: #fff3e0;
-        }
-        .status-approved {
-            color: #2e7d32;
-            background: #c8e6c9;
-        }
-        .status-rejected {
-            color: #c62828;
-            background: #ffcdd2;
-        }
+        .status { font-weight: bold; padding: 4px 8px; border-radius: 4px; }
+        .status-pending { color: #ff9800; background: #fff3e0; }
+        .status-approved { color: #2e7d32; background: #c8e6c9; }
+        .status-rejected { color: #c62828; background: #ffcdd2; }
 
         textarea {
-            width: 95%;
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+            width: 95%; padding: 6px; border-radius: 4px; border: 1px solid #ccc;
             resize: vertical;
         }
+
+        .filter-box {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+        }
+        .filter-box input, .filter-box select, .filter-box button {
+            padding: 8px; border-radius: 4px; border: 1px solid #ccc;
+        }
+        .filter-box button { background: #1976d2; color: white; border: none; }
+        .filter-box button:hover { background: #1259a6; }
     </style>
 </head>
 <body>
@@ -84,14 +76,25 @@
 
 <div class="container">
     <h2>Quản lý Báo cáo Review</h2>
-    <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
-        <select id="filterStatus" style="padding:8px;">
-            <option value="">-- Tất cả trạng thái --</option>
-            <option value="PENDING">Chờ xử lý</option>
-            <option value="APPROVED">Đã duyệt</option>
-            <option value="REJECTED">Đã từ chối</option>
+
+    <!-- 🔍 Bộ lọc tìm kiếm -->
+    <div class="filter-box">
+        <input id="reporter" type="text" placeholder="Người báo cáo...">
+        <input id="reported" type="text" placeholder="Người bị báo cáo...">
+        <input id="reason" type="text" placeholder="Lý do...">
+        <label for="fromDate">Từ:</label>
+        <input id="fromDate" type="date">
+        <label for="toDate">Đến:</label>
+        <input id="toDate" type="date">
+        <select id="sortBy">
+            <option value="id">Sắp xếp theo ID</option>
+            <option value="createdAt">Sắp xếp theo thời gian</option>
         </select>
-        <button onclick="loadReports(0)" style="padding:8px 16px; background:#1976d2;color:white;border:none;border-radius:4px;">🔍 Lọc</button>
+        <select id="order">
+            <option value="desc">Giảm dần</option>
+            <option value="asc">Tăng dần</option>
+        </select>
+        <button onclick="loadReports(0)">🔍 Tìm kiếm</button>
     </div>
 
     <table>
@@ -109,28 +112,34 @@
         </thead>
         <tbody id="reportTable"></tbody>
     </table>
+
+    <div id="pagination" style="margin-top:20px; text-align:center;"></div>
 </div>
 
 <script>
-    const API_URL = "http://localhost:8080/api/admin/reports";
+    const API_URL = "http://localhost:8080/api/admin/reports/search";
     const PAGE_SIZE = 10;
     let currentPage = 0;
-    let totalPages = 0;
 
     async function loadReports(page = 0) {
-        const statusFilter = document.getElementById("filterStatus").value;
-        let url = `${API_URL}?page=${page}&size=${PAGE_SIZE}`;
-        if (statusFilter) url = `${API_URL}/status/${statusFilter}?page=${page}&size=${PAGE_SIZE}`;
+        const reporter = document.getElementById("reporter").value;
+        const reported = document.getElementById("reported").value;
+        const reason = document.getElementById("reason").value;
+        const fromDate = document.getElementById("fromDate").value;
+        const toDate = document.getElementById("toDate").value;
+        const sortBy = document.getElementById("sortBy").value;
+        const order = document.getElementById("order").value;
+
+        const url = `${API_URL}?page=${page}&size=${PAGE_SIZE}&reporter=${reporter}&reported=${reported}&reason=${reason}&start=${fromDate}&end=${toDate}&sortBy=${sortBy}&order=${order}`;
 
         const res = await fetch(url);
         const data = await res.json();
-
+        const reports = data.reports || [];
         const table = document.getElementById("reportTable");
         table.innerHTML = "";
 
-        const reports = data.reports || [];
         if (reports.length === 0) {
-            table.innerHTML = `<tr><td colspan="8">Không có báo cáo nào</td></tr>`;
+            table.innerHTML = `<tr><td colspan="8">Không có báo cáo nào phù hợp</td></tr>`;
             return;
         }
 
@@ -140,46 +149,56 @@
                     : r.status === "rejected" ? "status-rejected"
                         : "status-pending";
 
-            const row = `
-        <tr>
-          <td>${r.id}</td>
-          <td>${r.reporterUsername || "?"}</td>
-          <td>${r.reportedUsername || "?"}</td>
-          <td>${r.reportReason || ""}</td>
-          <td>${r.description || ""}</td>
-          <td><span class="status ${statusClass}">${r.status}</span></td>
-          <td>${r.createdAt ? r.createdAt.replace("T", " ").split(".")[0] : ""}</td>
-          <td>
-            ${r.status === "pending" ? `
-              <textarea id="note-${r.id}" placeholder="Ghi chú..."></textarea><br/>
-              <button class="btn-approve" onclick="approveReport(${r.id})">✅ Duyệt</button>
-              <button class="btn-reject" onclick="rejectReport(${r.id})">❌ Từ chối</button>
-            ` : "—"}
-          </td>
-        </tr>`;
-            table.innerHTML += row;
+            table.innerHTML += `
+            <tr>
+                <td>${r.id}</td>
+                <td>${r.reporterUsername || "?"}</td>
+                <td>${r.reportedUsername || "?"}</td>
+                <td>${r.reportReason || ""}</td>
+                <td>${r.description || ""}</td>
+                <td><span class="status ${statusClass}">${r.status}</span></td>
+                <td>${r.createdAt ? r.createdAt.replace("T", " ").split(".")[0] : ""}</td>
+                <td>
+                    ${r.status === "pending" ? `
+                        <textarea id="note-${r.id}" placeholder="Ghi chú..."></textarea><br/>
+                        <button class="btn-approve" onclick="approveReport(${r.id})">✅ Duyệt</button>
+                        <button class="btn-reject" onclick="rejectReport(${r.id})">❌ Từ chối</button>
+                    ` : "—"}
+                </td>
+            </tr>`;
         });
 
-        currentPage = data.currentPage || 0;
-        totalPages = data.totalPages || 1;
+        renderPagination(data);
+    }
+
+    function renderPagination(data) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+        for (let i = 0; i < data.totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i + 1;
+            if (i === data.currentPage) btn.style.background = "#1976d2", btn.style.color = "#fff";
+            btn.onclick = () => loadReports(i);
+            pagination.appendChild(btn);
+        }
     }
 
     async function approveReport(id) {
         const note = document.getElementById(`note-${id}`).value;
         if (!confirm("Xác nhận duyệt và khóa người dùng vi phạm?")) return;
-        await fetch(`${API_URL}/${id}/approve`, {
+        await fetch(`${API_URL.replace("/search", "")}/${id}/approve`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ adminNotes: note })
         });
-        alert("✅ Đã duyệt báo cáo và ban user vi phạm!");
+        alert("✅ Đã duyệt báo cáo!");
         loadReports(currentPage);
     }
 
     async function rejectReport(id) {
         const note = document.getElementById(`note-${id}`).value;
         if (!confirm("Xác nhận từ chối báo cáo này?")) return;
-        await fetch(`${API_URL}/${id}/reject`, {
+        await fetch(`${API_URL.replace("/search", "")}/${id}/reject`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ adminNotes: note })

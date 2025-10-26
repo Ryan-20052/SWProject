@@ -1,12 +1,16 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.dto.AdminReportDTO;
 import anbd.he191271.entity.ProductReviewReport;
 import anbd.he191271.service.AdminLogService;
 import anbd.he191271.service.ProductReviewReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +134,30 @@ public class AdminReportController {
         response.put("totalItems", pageResult.getTotalElements());
         response.put("totalPages", pageResult.getTotalPages());
         response.put("stats", reportService.getReportStats());
+
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchReports(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String reporter,
+            @RequestParam(required = false) String reported,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String order
+    ) {
+        Page<AdminReportDTO> result = reportService.searchReportsDTO(
+                reporter, reported, reason, start, end, page, size, sortBy, order
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("reports", result.getContent());
+        response.put("currentPage", result.getNumber());
+        response.put("totalItems", result.getTotalElements());
+        response.put("totalPages", result.getTotalPages());
 
         return ResponseEntity.ok(response);
     }

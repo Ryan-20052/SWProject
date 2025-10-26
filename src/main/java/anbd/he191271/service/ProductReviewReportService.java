@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -162,5 +164,36 @@ public class ProductReviewReportService {
     public java.util.List<AdminReportDTO> getPendingReportsDTO() {
         var list = reportRepository.findByStatus(ProductReviewReport.ReportStatus.PENDING);
         return list.stream().map(this::toAdminReportDTO).toList();
+    }
+    public Page<AdminReportDTO> searchReportsDTO(
+            String reporter,
+            String reported,
+            String reason,
+            LocalDate start,
+            LocalDate end,
+            int page,
+            int size,
+            String sortBy,
+            String order
+    ) {
+        Sort.Direction direction = order.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        LocalDateTime startTime = start != null ? start.atStartOfDay() : null;
+        LocalDateTime endTime = end != null ? end.plusDays(1).atStartOfDay() : null;
+
+        return reportRepository.searchReportsDTO(
+                isBlank(reporter) ? null : reporter,
+                isBlank(reported) ? null : reported,
+                isBlank(reason) ? null : reason,
+                startTime, endTime, pageable
+        );
+    }
+
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 }

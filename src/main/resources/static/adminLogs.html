@@ -2,30 +2,106 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Logs - Admin</title>
+    <title>Admin Logs</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
         .navbar {
-            background: #1976d2; display: flex; justify-content: space-between;
-            align-items: center; padding: 0 20px;
+            background: #1976d2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
         }
-        .navbar h1 { color: white; font-size: 20px; margin: 0; }
+        .navbar h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+        }
         .navbar a, .logout-btn {
-            color: white; text-decoration: none; padding: 14px 20px;
-            display: inline-block; transition: background 0.3s; border: none;
-            background: transparent; cursor: pointer; font-size: 14px;
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            display: inline-block;
+            transition: background 0.3s;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
         }
-        .navbar a:hover, .logout-btn:hover { background: #1259a6; }
-        .navbar-menu { display: flex; gap: 10px; }
-        .container { padding: 30px; }
-        h2 { color: #333; margin-bottom: 20px; }
+        .navbar a:hover, .logout-btn:hover {
+            background: #1259a6;
+        }
+        .navbar-menu {
+            display: flex;
+            gap: 10px;
+        }
+        .container {
+            padding: 30px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
         table {
-            width: 100%; border-collapse: collapse; background: #fff;
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background: #1976d2; color: white; }
-        tr:nth-child(even) { background: #f9f9f9; }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: #1976d2;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Bộ lọc */
+        .filter-box {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-box input, .filter-box select, .filter-box button {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .filter-box button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .filter-box button:hover {
+            background: #1259a6;
+        }
+
+        /* Phân trang */
+        #pagination button {
+            margin: 0 4px;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #pagination button.active {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
     </style>
 </head>
 <body>
@@ -35,24 +111,57 @@
         <a href="adminDashboard.html">🏠 Dashboard</a>
         <a href="adminCustomerController.html">👤 Quản lý Customer</a>
         <a href="adminManagerController.html">👨‍💼 Quản lý Manager</a>
-        <a href="adminLogs.html">📜 Logs</a>
-        <a href="adminReportController.html" style="background:#1259a6;">📝 Báo cáo Review</a>
+        <a href="adminLogs.html" style="background:#1259a6;">📜 Logs</a>
+        <a href="adminReportController.html">📝 Báo cáo Review</a>
         <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
 </div>
 
 <div class="container">
     <h2>Lịch sử hoạt động (Logs)</h2>
+
+    <!-- 🔍 Bộ lọc tìm kiếm -->
+    <div class="filter-box">
+        <input id="searchAction" type="text" placeholder="Tìm theo hành động...">
+        <input id="searchTable" type="text" placeholder="Tìm theo bảng...">
+
+        <label for="fromDate">Từ ngày:</label>
+        <input id="fromDate" type="date">
+        <label for="toDate">Đến ngày:</label>
+        <input id="toDate" type="date">
+
+        <select id="sortBy">
+            <option value="id">Sắp xếp theo ID</option>
+            <option value="time">Sắp xếp theo thời gian</option>
+        </select>
+        <select id="order">
+            <option value="desc">Giảm dần</option>
+            <option value="asc">Tăng dần</option>
+        </select>
+        <button onclick="loadLogs()">Tìm kiếm</button>
+    </div>
+
+    <!-- 📋 Bảng Logs -->
     <table>
         <thead>
-        <tr><th>ID</th><th>Hành động</th><th>Người thực hiện</th><th>Thời gian</th></tr>
+        <tr>
+            <th>ID</th>
+            <th>Hành động</th>
+            <th>Bảng bị ảnh hưởng</th>
+            <th>Thời gian</th>
+        </tr>
         </thead>
         <tbody id="logTable"></tbody>
     </table>
+
+    <!-- 🔢 Phân trang -->
+    <div id="pagination" style="margin-top: 15px; text-align:center;"></div>
 </div>
 
 <script>
     const API_URL = "http://localhost:8080/api/admin/logs";
+    let currentPage = 0;
+    let pageSize = 10;
 
     async function checkSession() {
         const res = await fetch("/auth/admin/check");
@@ -66,23 +175,72 @@
         }
     }
 
-    function goLogin() { window.location.href = "login.html"; }
+    function goLogin() {
+        window.location.href = "login.html";
+    }
 
-    async function loadLogs() {
+    async function loadLogs(page = 0) {
+        currentPage = page;
+
+        const action = document.getElementById("searchAction").value;
+        const table = document.getElementById("searchTable").value;
+        const fromDate = document.getElementById("fromDate").value;
+        const toDate = document.getElementById("toDate").value;
+        const sortBy = document.getElementById("sortBy").value;
+        const order = document.getElementById("order").value;
+
+        const params = new URLSearchParams({
+            page,
+            size: pageSize,
+            action,
+            table,
+            startTime: fromDate,
+            endTime: toDate,
+            sortBy,
+            order
+        });
+
+        const url = `${API_URL}?${params.toString()}`;
+
         try {
-            const res = await fetch(API_URL);
+            const res = await fetch(url);
             const data = await res.json();
-            const table = document.getElementById("logTable");
-            table.innerHTML = "";
-            data.forEach(log => {
-                table.innerHTML += `<tr>
-                    <td>${log.id}</td>
+
+            const tableEl = document.getElementById("logTable");
+            tableEl.innerHTML = "";
+
+            if (!data.content || data.content.length === 0) {
+                tableEl.innerHTML = `<tr><td colspan="4">Không có dữ liệu phù hợp</td></tr>`;
+                document.getElementById("pagination").innerHTML = "";
+                return;
+            }
+
+            data.content.forEach(log => {
+                tableEl.innerHTML += `
+                    <tr>
+                        <td>${log.id}</td>
                         <td>${log.action}</td>
                         <td>${log.table_affected}</td>
                         <td>${log.time ? log.time.replace("T", " ") : ""}</td>
-                </tr>`;
+                    </tr>`;
             });
-        } catch (err) { console.error("Lỗi khi load logs:", err); }
+
+            renderPagination(data);
+        } catch (err) {
+            console.error("❌ Lỗi khi load logs:", err);
+        }
+    }
+
+    function renderPagination(data) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+        for (let i = 0; i < data.totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i + 1;
+            if (i === data.number) btn.classList.add("active");
+            btn.onclick = () => loadLogs(i);
+            pagination.appendChild(btn);
+        }
     }
 
     async function logout() {
@@ -92,7 +250,10 @@
         }
     }
 
-    window.onload = () => { checkSession(); loadLogs(); }
+    window.onload = () => {
+        checkSession();
+        loadLogs();
+    }
 </script>
 </body>
 </html>
