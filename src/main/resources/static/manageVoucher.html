@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Voucher - Manager</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #111;
+        }
+
+        header {
+            background: var(--blue);
+            color: #28a745;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+            color: white;
+        }
+
+        nav {
+            background: #1e3a8a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-inner {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+        }
+
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-inner a:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #2563eb;
+            margin-bottom: 16px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: white;
+        }
+
+        .btn-add { background: var(--green); }
+        .btn-add:hover { background: #047857; }
+        .btn-edit { background: var(--blue); }
+        .btn-edit:hover { background: var(--blue-dark); }
+        .btn-del { background: var(--red); }
+        .btn-del:hover { background: #b91c1c; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th { background: #f3f4f6; }
+
+        tr:hover { background: #f9fafb; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-expired { background: #fee2e2; color: #991b1b; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 450px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 8px 10px;
+            margin: 8px 0 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Manager Dashboard</h1>
+
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:16px; color:white;">Xin chào, Manager</div>
+            <div class="avatar-fallback"
+                 style="width:40px;height:40px;border-radius:50%;background:#555;color:white;
+                  display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;"
+                 onclick="window.location.href='/manager/profile'">M</div>
+            <form action="/auth/manager/logout" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                       border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<nav>
+    <div class="nav-inner">
+        <a href="/manage/manageHome">Quản lý sản phẩm</a>
+        <a href="/manage/category">Danh mục</a>
+        <a href="/manageOrder/viewOrder">Đơn hàng</a>
+        <a href="/manageLicense/viewLicense">License</a>
+        <a href="/revenue/dashboard">Báo cáo</a>
+        <a href="/manageReport/viewPendingReport">Báo cáo khách hàng</a>
+        <a href="/manage/manageVoucher.html" style="background:#2563eb;">Voucher</a>
+    </div>
+</nav>
+
+<div class="dashboard">
+    <div class="actions">
+        <h2>Quản lý Voucher</h2>
+        <button class="btn btn-add" onclick="openModal()">+ Thêm Voucher</button>
+    </div>
+
+    <table id="voucherTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Mã</th>
+            <th>Giá trị</th>
+            <th>Loại</th>
+            <th>Giới hạn</th>
+            <th>Đã dùng</th>
+            <th>Bắt đầu</th>
+            <th>Kết thúc</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- MODAL -->
+<div id="voucherModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Thêm Voucher</h3>
+        <input type="hidden" id="voucherId">
+        <label>Mã voucher</label>
+        <input id="code" placeholder="VD: SALE10">
+        <label>Giá trị giảm</label>
+        <input id="discountValue" type="number" placeholder="VD: 10">
+        <label>Loại giảm</label>
+        <select id="percent">
+            <option value="true">Phần trăm (%)</option>
+            <option value="false">VNĐ</option>
+        </select>
+        <label>Giới hạn sử dụng</label>
+        <input id="usageLimit" type="number" placeholder="VD: 100">
+        <label>Ngày bắt đầu</label>
+        <input id="startDate" type="datetime-local">
+        <label>Ngày kết thúc</label>
+        <input id="endDate" type="datetime-local">
+        <div class="modal-footer">
+            <button class="btn btn-add" onclick="saveVoucher()">Lưu</button>
+            <button class="btn btn-del" onclick="closeModal()">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/vouchers";
+    const tableBody = document.querySelector("#voucherTable tbody");
+    const modal = document.getElementById("voucherModal");
+
+    async function loadVouchers() {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        tableBody.innerHTML = "";
+
+        data.forEach(v => {
+            const now = new Date();
+            const expired = new Date(v.endDate) < now;
+            const badge = expired
+                ? `<span class='status-badge status-expired'>Hết hạn</span>`
+                : `<span class='status-badge status-active'>Hoạt động</span>`;
+
+            tableBody.innerHTML += `
+        <tr>
+          <td>${v.id}</td>
+          <td>${v.code}</td>
+          <td>${v.discountValue}</td>
+          <td>${v.percent ? "%" : "VNĐ"}</td>
+          <td>${v.usageLimit}</td>
+          <td>${v.usedCount}</td>
+          <td>${v.startDate.replace("T"," ").split(".")[0]}</td>
+          <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
+          <td>${badge}</td>
+          <td>
+            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
+            <button class='btn btn-del' onclick='deleteVoucher(${v.id})'>Xóa</button>
+          </td>
+        </tr>`;
+        });
+    }
+
+    function openModal() {
+        document.getElementById("voucherId").value = "";
+        document.getElementById("modalTitle").textContent = "Thêm Voucher";
+        modal.style.display = "flex";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    async function saveVoucher() {
+        const id = document.getElementById("voucherId").value;
+        const voucher = {
+            code: document.getElementById("code").value,
+            discountValue: parseFloat(document.getElementById("discountValue").value),
+            percent: document.getElementById("percent").value === "true",
+            usageLimit: parseInt(document.getElementById("usageLimit").value),
+            startDate: document.getElementById("startDate").value,
+            endDate: document.getElementById("endDate").value,
+            active: true
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `${API_URL}/${id}` : API_URL;
+
+        await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(voucher)
+        });
+
+        closeModal();
+        loadVouchers();
+    }
+
+    function editVoucher(v) {
+        document.getElementById("voucherId").value = v.id;
+        document.getElementById("code").value = v.code;
+        document.getElementById("discountValue").value = v.discountValue;
+        document.getElementById("percent").value = v.percent;
+        document.getElementById("usageLimit").value = v.usageLimit;
+        document.getElementById("startDate").value = v.startDate.slice(0, 16);
+        document.getElementById("endDate").value = v.endDate.slice(0, 16);
+        document.getElementById("modalTitle").textContent = "Sửa Voucher";
+        modal.style.display = "flex";
+    }
+
+    async function deleteVoucher(id) {
+        if (!confirm("Bạn có chắc muốn xóa voucher này không?")) return;
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadVouchers();
+    }
+
+    window.onload = loadVouchers;
+</script>
+</body>
+</html>
