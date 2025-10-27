@@ -23,6 +23,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       width: 400px;
+      position: relative;
     }
     .card-title {
       text-align: center;
@@ -124,12 +125,69 @@
     .btn.cancel:hover, .btn.ghost:hover, .link-edit:hover {
       background: #ddd;
     }
+
+    /* Toast notification styles */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      padding: 12px 20px;
+      border-radius: 6px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 300px;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .toast.success {
+      background-color: #28a745;
+    }
+    .toast.error {
+      background-color: #dc3545;
+    }
+    .toast .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
 <main class="page">
   <section class="profile-card">
     <h2 class="card-title">Thông tin cá nhân</h2>
+
+    <!-- Toast notifications container -->
+    <div class="toast-container" id="toastContainer">
+      <!-- Success toast -->
+      <div th:if="${param.success != null}" class="toast success">
+        <span>Cập nhật thông tin thành công!</span>
+        <button class="close-btn">&times;</button>
+      </div>
+
+      <!-- Error toasts -->
+      <div th:each="error : ${errors}" class="toast error">
+        <span th:text="${error}">Error message</span>
+        <button class="close-btn">&times;</button>
+      </div>
+    </div>
 
     <!-- Avatar -->
     <div class="avatar-wrap" id="avatarDisplay"
@@ -198,6 +256,7 @@
     const avatarForm = document.getElementById("avatarForm");
     const saveButton = document.getElementById('saveButton');
     const editForm = document.getElementById('editForm');
+    const toastContainer = document.getElementById('toastContainer');
 
     // Kiểm tra xem có đang ở edit mode không
     const isEditMode = avatarDisplay.classList.contains('disabled');
@@ -269,6 +328,43 @@
         }
       });
     }
+
+    // Xử lý toast notifications
+    function initToasts() {
+      const toasts = document.querySelectorAll('.toast');
+
+      // Hiển thị toast với hiệu ứng
+      toasts.forEach(toast => {
+        setTimeout(() => {
+          toast.classList.add('show');
+        }, 100);
+
+        // Tự động ẩn sau 5 giây
+        setTimeout(() => {
+          hideToast(toast);
+        }, 5000);
+
+        // Thêm sự kiện click cho nút đóng
+        const closeBtn = toast.querySelector('.close-btn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            hideToast(toast);
+          });
+        }
+      });
+    }
+
+    function hideToast(toast) {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }
+
+    // Khởi tạo toast notifications
+    initToasts();
   });
 </script>
 
