@@ -16,7 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -55,20 +58,69 @@ public class ProfileController {
                 return "redirect:/login.html";
             }
 
-            if (name != null && !name.isEmpty()) customer.setName(name);
+            // Danh sách lỗi
+            List<String> errors = new ArrayList<>();
 
+            // Validate tên
+            if (name == null || name.trim().isEmpty()) {
+                errors.add("Tên không được để trống");
+            } else {
+                name = name.trim();
+                // Có thể thêm các validate khác cho tên nếu cần
+                if (name.length() < 2) {
+                    errors.add("Tên phải có ít nhất 2 ký tự");
+                }
+                if (name.length() > 100) {
+                    errors.add("Tên không được vượt quá 100 ký tự");
+                }
+            }
+
+            // Validate ngày sinh
+            LocalDate dobDate = null;
             if (dob != null && !dob.isEmpty()) {
                 try {
-                    customer.setDob(LocalDate.parse(dob));
+                    dobDate = LocalDate.parse(dob);
+
+                    // Tính tuổi
+                    LocalDate today = LocalDate.now();
+                    int age = Period.between(dobDate, today).getYears();
+
+                    // Kiểm tra độ tuổi từ 12 đến 100
+                    if (age < 12) {
+                        errors.add("Bạn phải từ 12 tuổi trở lên");
+                    } else if (age > 100) {
+                        errors.add("Ngày sinh không hợp lệ");
+                    }
+
+                    // Kiểm tra ngày sinh không ở tương lai
+                    if (dobDate.isAfter(today)) {
+                        errors.add("Ngày sinh không thể ở tương lai");
+                    }
+
                 } catch (DateTimeParseException dtpe) {
-                    logger.warn("Invalid dob format: {}", dob);
+                    errors.add("Định dạng ngày sinh không hợp lệ");
                 }
+            }
+
+            // Nếu có lỗi, trả về trang profile với thông báo lỗi
+            if (!errors.isEmpty()) {
+                model.addAttribute("customer", customer);
+                model.addAttribute("editMode", true);
+                model.addAttribute("errors", errors);
+                return "profile";
+            }
+
+            // Cập nhật thông tin nếu không có lỗi
+            customer.setName(name);
+            if (dobDate != null) {
+                customer.setDob(dobDate);
             }
 
             customerRepository.save(customer);
             session.setAttribute("customer", customer);
 
-            return "redirect:/customer/profile";
+            return "redirect:/customer/profile?success=true";
+
         } catch (Exception ex) {
             logger.error("Unexpected error in POST /customer/profile/update", ex);
             model.addAttribute("errorMessage", "Có lỗi: " + ex.getMessage());
@@ -88,12 +140,30 @@ public class ProfileController {
             }
 
             if (avatarFile != null && !avatarFile.isEmpty()) {
+                // Validate file type
+                String contentType = avatarFile.getContentType();
+                if (!contentType.startsWith("image/")) {
+                    model.addAttribute("customer", customer);
+                    model.addAttribute("editMode", true);
+                    model.addAttribute("errors", List.of("Chỉ được upload file ảnh"));
+                    return "profile";
+                }
+
+                // Validate file size (ví dụ: max 5MB)
+                if (avatarFile.getSize() > 5 * 1024 * 1024) {
+                    model.addAttribute("customer", customer);
+                    model.addAttribute("editMode", true);
+                    model.addAttribute("errors", List.of("Kích thước ảnh không được vượt quá 5MB"));
+                    return "profile";
+                }
+
                 customer.setAvatar(avatarFile.getBytes());
                 customerRepository.save(customer);
                 session.setAttribute("customer", customer);
             }
 
-            return "redirect:/customer/profile";
+            return "redirect:/customer/profile?success=true";
+
         } catch (IOException ioe) {
             logger.error("IO error when saving avatar", ioe);
             model.addAttribute("errorMessage", "Lỗi khi lưu avatar: " + ioe.getMessage());
