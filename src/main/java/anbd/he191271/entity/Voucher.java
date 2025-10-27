@@ -22,10 +22,10 @@ public class Voucher {
     private boolean percent; // true = giảm theo %, false = giảm theo số tiền
 
     @Column(nullable = false)
-    private int usageLimit; // Số lần được sử dụng
+    private Integer usageLimit; // Số lần được sử dụng
 
     @Column(nullable = false)
-    private int usedCount = 0; // Đã dùng bao nhiêu lần
+    private Integer usedCount = 0; // Đã dùng bao nhiêu lần
 
     @Column(nullable = false)
     private LocalDateTime startDate; // Ngày bắt đầu
@@ -36,33 +36,77 @@ public class Voucher {
     @Column(nullable = false)
     private boolean active = true; // Đang hoạt động?
 
-    // ===== GETTERS & SETTERS =====
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getCode() {
+        return code;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    public Double getDiscountValue() { return discountValue; }
-    public void setDiscountValue(Double discountValue) { this.discountValue = discountValue; }
+    public Long getId() {
+        return id;
+    }
 
-    public boolean isPercent() { return percent; }
-    public void setPercent(boolean percent) { this.percent = percent; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public int getUsageLimit() { return usageLimit; }
-    public void setUsageLimit(int usageLimit) { this.usageLimit = usageLimit; }
+    public Double getDiscountValue() {
+        return discountValue;
+    }
 
-    public int getUsedCount() { return usedCount; }
-    public void setUsedCount(int usedCount) { this.usedCount = usedCount; }
+    public void setDiscountValue(Double discountValue) {
+        this.discountValue = discountValue;
+    }
 
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
+    public boolean isPercent() {
+        return percent;
+    }
 
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public void setPercent(boolean percent) {
+        this.percent = percent;
+    }
 
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
+    public Integer getUsageLimit() {
+        return usageLimit;
+    }
+
+    public void setUsageLimit(Integer usageLimit) {
+        this.usageLimit = usageLimit;
+    }
+
+    public Integer getUsedCount() {
+        return usedCount;
+    }
+
+    public void setUsedCount(Integer usedCount) {
+        this.usedCount = usedCount;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public boolean isValidNow() {
         LocalDateTime now = LocalDateTime.now();

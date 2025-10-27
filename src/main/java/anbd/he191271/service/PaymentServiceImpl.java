@@ -33,6 +33,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final CustomerRepository customerRepo;
 
     @Autowired
+    private VoucherService voucherService;
+
+    @Autowired
     private VNPAYConfig vnpConfig;
 
     @Override
@@ -60,7 +63,7 @@ public class PaymentServiceImpl implements PaymentService {
         for (PaymentRequestDTO.Item it : requestDTO.getItems()) {
             Variant v = variantRepo.findById(it.getVariantId())
                     .orElseThrow(() -> new IllegalArgumentException("Variant not found: " + it.getVariantId()));
-            int qty = it.getQuantity();
+            int qty = it.getQuantity() != null ? it.getQuantity() : 1;
             total += v.getPrice() * qty;
 
             OrderDetail od = new OrderDetail();
@@ -69,19 +72,36 @@ public class PaymentServiceImpl implements PaymentService {
             od.setAmount(qty);
             orderDetailRepo.save(od);
         }
-        order.setTotalAmount(total);
+
+        // 3️⃣ Áp dụng voucher (nếu có)
+        double finalTotal = total;
+        long discountAmount = 0L;
+        if (requestDTO.getVoucherCode() != null && !requestDTO.getVoucherCode().isEmpty()) {
+            try {
+                double newTotal = voucherService.applyVoucher(requestDTO.getVoucherCode(), total);
+                discountAmount = total - Math.round(newTotal);
+                finalTotal = newTotal;
+                order.setVoucherCode(requestDTO.getVoucherCode());
+                order.setDiscountAmount(discountAmount);
+            } catch (Exception e) {
+                System.err.println("⚠️ Voucher không hợp lệ: " + e.getMessage());
+            }
+        }
+
+        order.setTotalAmount(Math.round(finalTotal));
         orderRepo.save(order);
 
-        // 3) Build tham số VNPAY
+        // 4️⃣ Build tham số VNPAY
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");
         vnp_Params.put("vnp_TmnCode", vnpConfig.getTmnCode());
-        vnp_Params.put("vnp_Amount", String.valueOf(order.getTotalAmount() * 100));
+        vnp_Params.put("vnp_Amount", String.valueOf(order.getTotalAmount() * 100)); // dùng tổng sau giảm
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_TxnRef", order.getCode());
         vnp_Params.put("vnp_OrderInfo", requestDTO.getOrderInfo() != null
-                ? requestDTO.getOrderInfo() : ("Thanh toan don #" + order.getCode()));
+                ? requestDTO.getOrderInfo()
+                : ("Thanh toan don #" + order.getCode()));
         vnp_Params.put("vnp_OrderType", requestDTO.getOrderType() != null ? requestDTO.getOrderType() : "other");
         vnp_Params.put("vnp_Locale", requestDTO.getLocale() != null ? requestDTO.getLocale() : "vn");
         vnp_Params.put("vnp_ReturnUrl", vnpConfig.getReturnUrl());
@@ -112,6 +132,22 @@ public class PaymentServiceImpl implements PaymentService {
         if (order == null) return new PaymentResponseDTO("01", "Order not found", null, null, null, null, null, null);
 
         if ("00".equals(rsp)) {
+            // ✅ Thanh toán thành công
+            if (!"PAID".equals(order.getStatus())) {
+                order.setStatus("PAID");
+                orderRepo.save(order);
+
+                // ✅ Gọi giảm lượt sử dụng voucher nếu có
+                if (order.getVoucherCode() != null && !order.getVoucherCode().isBlank()) {
+                    try {
+                        voucherService.decreaseUsage(order.getVoucherCode());
+                        System.out.println("🎟️ Voucher " + order.getVoucherCode() + " đã được trừ 1 lượt (handleReturn)");
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Lỗi khi trừ voucher: " + e.getMessage());
+                    }
+                }
+            }
+
             return new PaymentResponseDTO("00", "Thanh toán thành công", null,
                     order.getId(), order.getCode(), order.getTotalAmount(),
                     order.getCustomer().getUsername(),
@@ -151,6 +187,15 @@ public class PaymentServiceImpl implements PaymentService {
             if (!"PAID".equals(order.getStatus())) {
                 order.setStatus("PAID");
                 orderRepo.save(order);
+                // ✅ Nếu đơn có dùng voucher thì trừ lượt sử dụng
+                if (order.getVoucherCode() != null && !order.getVoucherCode().isBlank()) {
+                    try {
+                        voucherService.decreaseUsage(order.getVoucherCode());
+                        System.out.println("🎟️ Voucher " + order.getVoucherCode() + " đã được trừ 1 lượt sau thanh toán.");
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Không thể trừ lượt voucher: " + e.getMessage());
+                    }
+                }
             }
             return new PaymentResponseDTO("00", "Confirm Success", null,
                     order.getId(), order.getCode(), order.getTotalAmount(),

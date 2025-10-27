@@ -218,6 +218,17 @@
                               style="margin-left:10px;color:red;font-weight:bold;"></span>
                     </div>
 
+                    <div class="voucher-wrapper" style="margin-bottom: 12px;">
+                        <label for="voucherCode">Mã giảm giá:</label>
+                        <input type="text" id="voucherCode" name="voucherCode" placeholder="Nhập mã voucher..."
+                               style="padding:6px; border:1px solid #ccc; border-radius:6px; width:160px;">
+                        <button type="button" id="applyVoucherBtn"
+                                style="padding:6px 10px; background:#f59e0b; border:none; border-radius:6px; color:white; cursor:pointer;">
+                            Áp dụng
+                        </button>
+                        <span id="voucherMessage" style="margin-left:10px;font-weight:bold;"></span>
+                    </div>
+
                     <div class="action-buttons">
                         <button type="submit" class="cart" id="addToCartBtn"
                                 th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
@@ -327,6 +338,6 @@
     /*]]>*/
 
 </script>
-
+<script th:src="@{/product.js}"></script>
 </body>
 </html>

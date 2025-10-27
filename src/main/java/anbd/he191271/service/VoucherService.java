@@ -5,6 +5,9 @@ import anbd.he191271.repository.VoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,11 +49,14 @@ public class VoucherService {
 
     // ========== CUSTOMER FUNCTIONS ==========
 
+    /**
+     * ✅ Áp dụng voucher để tính thử giảm giá (KHÔNG trừ lượt sử dụng)
+     */
     public double applyVoucher(String code, double orderTotal) {
         Voucher v = voucherRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
 
-        if (!v.isValidNow()) {
+        if (!isVoucherUsable(v)) {
             throw new RuntimeException("Voucher đã hết hạn hoặc không còn hiệu lực!");
         }
 
@@ -58,10 +64,44 @@ public class VoucherService {
                 ? orderTotal * (v.getDiscountValue() / 100)
                 : v.getDiscountValue();
 
+        return Math.max(0, orderTotal - discountAmount);
+    }
+
+    /**
+     * ✅ Giảm 1 lượt sử dụng sau khi thanh toán thành công
+     */
+    @Transactional
+    public void decreaseUsage(String code) {
+        Voucher v = voucherRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new RuntimeException("Voucher không tồn tại: " + code));
+
+        if (!isVoucherUsable(v)) {
+            throw new RuntimeException("Voucher đã hết hạn hoặc không còn hiệu lực!");
+        }
+
+        if (v.getUsageLimit() != null && v.getUsedCount() >= v.getUsageLimit()) {
+            throw new RuntimeException("Voucher đã hết lượt sử dụng!");
+        }
+
         v.setUsedCount(v.getUsedCount() + 1);
         voucherRepository.save(v);
 
-        return Math.max(0, orderTotal - discountAmount);
+        System.out.println("✅ Voucher " + v.getCode() + " đã được dùng " +
+                v.getUsedCount() + "/" + v.getUsageLimit() + " lần.");
+    }
+
+    /**
+     * ✅ Kiểm tra tính hợp lệ của voucher (active, ngày, lượt dùng)
+     */
+    private boolean isVoucherUsable(Voucher v) {
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean withinDate = (v.getStartDate() == null || !now.isBefore(v.getStartDate())) &&
+                (v.getEndDate() == null || !now.isAfter(v.getEndDate()));
+        boolean withinUsage = (v.getUsageLimit() == null || v.getUsedCount() < v.getUsageLimit());
+        boolean active = v.isActive();
+
+        return withinDate && withinUsage && active;
     }
 
     public Optional<Voucher> findByCode(String code) {

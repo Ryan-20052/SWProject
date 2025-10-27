@@ -12,6 +12,28 @@ public class PaymentRequestDTO {
     private String locale;    // optional (vn/en)
     private Integer customerId;
 
+    // ✅ Thêm mới để hỗ trợ voucher
+    private String voucherCode;        // Mã giảm giá (nếu có)
+    private Double totalAfterDiscount; // Tổng sau khi đã giảm (nếu có)
+
+
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public Double getTotalAfterDiscount() {
+        return totalAfterDiscount;
+    }
+
+    public void setTotalAfterDiscount(Double totalAfterDiscount) {
+        this.totalAfterDiscount = totalAfterDiscount;
+    }
+
     public Integer getCustomerId() {
         return customerId;
     }

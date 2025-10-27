@@ -40,7 +40,7 @@ public class VoucherController {
     }
 
     // ========== CUSTOMER ==========
-    @PostMapping("/apply")
+    @GetMapping("/apply")
     public ResponseEntity<Map<String, Object>> applyVoucher(
             @RequestParam String code,
             @RequestParam double total
