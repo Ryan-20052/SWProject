@@ -508,6 +508,14 @@
                                 <!-- Nếu là review của chính mình -->
                                 <div th:if="${r.customer.id == session.customer.id}" class="text-muted">
                                     <small><i class="fas fa-info-circle"></i> Đánh giá của bạn</small>
+                                    <form th:action="@{/review/delete}" method="post" style="display: inline;">
+                                        <input type="hidden" name="id" th:value="${r.id}">
+                                        <input type="hidden" name="productId" th:value="${productId}"> <!-- THÊM DÒNG NÀY -->
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
 

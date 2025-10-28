@@ -7,7 +7,7 @@
         body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
         header { background: #2d89ef; color: white; padding: 15px 30px; }
         .header-inner { display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 30px; max-width: 950px; margin: auto; background: white; margin-top: 20px;
+        .container { padding: 30px; max-width: 1100px; margin: auto; background: white; margin-top: 20px;
             border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #2d89ef; text-align: center; }
         input, select, button { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
@@ -19,7 +19,43 @@
         tr:nth-child(even) { background: #f4f4f4; }
         a.page-link { margin: 0 4px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 5px; text-decoration: none; color: #333; }
         a.active-page { background: #2d89ef; color: white; font-weight: bold; }
-        .filters { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; align-items: center; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-expired { color: #dc3545; font-weight: bold; }
+        .error-message { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; }
+        .sort-section { margin: 15px 0; text-align: center; }
+        .sort-btn {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 6px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .sort-btn.active {
+            background: #2d89ef;
+            color: white;
+            border-color: #2d89ef;
+        }
+        .sort-btn:hover {
+            background: #e9ecef;
+            text-decoration: none;
+            color: #495057;
+        }
+        .sort-btn.active:hover {
+            background: #1b63b8;
+            color: white;
+        }
+        .disabled-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -34,9 +70,12 @@
 <div class="container">
     <h2>License đã mua</h2>
 
+    <!-- Hiển thị lỗi -->
+    <div th:if="${error != null}" class="error-message" th:text="${error}"></div>
+
     <!-- Bộ lọc tổng hợp -->
     <form id="filterForm" method="get" action="/purchasedlicenses" class="filters">
-        <input type="text" name="search" th:value="${search}" placeholder="🔍 Tìm theo tên sản phẩm">
+        <input type="text" name="search" th:value="${search}" placeholder="🔍 Tìm theo tên sản phẩm" maxlength="100">
 
         <select name="category" onchange="submitFilterForm()">
             <option value="">-- Tất cả danh mục --</option>
@@ -47,14 +86,37 @@
         </select>
 
         <div>
-            Từ: <input type="date" name="from" th:value="${from}">
+            Từ: <input type="date" name="from" th:value="${from}" id="fromDate">
         </div>
         <div>
-            Đến: <input type="date" name="to" th:value="${to}">
+            Đến: <input type="date" name="to" th:value="${to}" id="toDate">
         </div>
 
+        <input type="hidden" name="sort" th:value="${sort}" id="sortInput">
+
         <button type="submit">Áp dụng</button>
+        <button type="button" onclick="clearFilters()">Xóa lọc</button>
     </form>
+
+    <!-- Sắp xếp -->
+    <div class="sort-section">
+        <strong>Sắp xếp theo: </strong>
+        <a th:href="@{/purchasedlicenses(search=${search}, category=${category}, from=${from}, to=${to}, sort='newest', page=1)}"
+           class="sort-btn"
+           th:classappend="${sort == 'newest'} ? 'active' : ''">Mới nhất</a>
+
+        <a th:href="@{/purchasedlicenses(search=${search}, category=${category}, from=${from}, to=${to}, sort='oldest', page=1)}"
+           class="sort-btn"
+           th:classappend="${sort == 'oldest'} ? 'active' : ''">Cũ nhất</a>
+
+        <a th:href="@{/purchasedlicenses(search=${search}, category=${category}, from=${from}, to=${to}, sort='name_asc', page=1)}"
+           class="sort-btn"
+           th:classappend="${sort == 'name_asc'} ? 'active' : ''">A-Z</a>
+
+        <a th:href="@{/purchasedlicenses(search=${search}, category=${category}, from=${from}, to=${to}, sort='name_desc', page=1)}"
+           class="sort-btn"
+           th:classappend="${sort == 'name_desc'} ? 'active' : ''">Z-A</a>
+    </div>
 
     <table th:if="${!#lists.isEmpty(purchasedLicenses)}">
         <thead>
@@ -62,6 +124,8 @@
             <th>Tên sản phẩm</th>
             <th>Gói/Dung lượng</th>
             <th>Ngày mua</th>
+            <th>Ngày hết hạn</th>
+            <th>Trạng thái</th>
             <th>Đánh giá</th>
         </tr>
         </thead>
@@ -74,11 +138,19 @@
             </td>
             <td th:text="${license.orderDetail.variant.name}"></td>
             <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}"></td>
+            <td th:text="${#dates.format(license.expiredAt, 'dd/MM/yyyy')}"></td>
             <td>
-                <button style="background:#ffc107;border:none;color:#333;padding:6px 10px;border-radius:5px;cursor:pointer;"
+                <span th:if="${license.status == 'ACTIVATE'}" class="status-active">ACTIVATE</span>
+                <span th:if="${license.status == 'EXPIRED'}" class="status-expired">EXPIRED</span>
+                <span th:if="${license.status == 'BANNED'}" class="status-expired">BANNED</span>
+            </td>
+            <td>
+                <button
+                        style="background:#ffc107;border:none;color:#333;padding:6px 10px;border-radius:5px;cursor:pointer;"
                         th:onclick="'window.location.href=\'/review/' + ${license.orderDetail.variant.product.id} + '\''">
                     ★ Đánh giá
                 </button>
+
             </td>
         </tr>
         </tbody>
@@ -89,21 +161,21 @@
     <!-- Phân trang kiểu << < 1 2 3 ... > >> -->
     <div style="text-align:center; margin-top:20px;" th:if="${totalPages > 1}">
         <a class="page-link" th:if="${currentPage > 1}"
-           th:href="@{/purchasedlicenses(page=1, search=${search}, category=${category}, from=${from}, to=${to})}">&laquo;&laquo;</a>
+           th:href="@{/purchasedlicenses(page=1, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}">&laquo;&laquo;</a>
         <a class="page-link" th:if="${currentPage > 1}"
-           th:href="@{/purchasedlicenses(page=${currentPage - 1}, search=${search}, category=${category}, from=${from}, to=${to})}">&lt;</a>
+           th:href="@{/purchasedlicenses(page=${currentPage - 1}, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}">&lt;</a>
 
         <a class="page-link"
            th:each="p : ${#numbers.sequence(1, totalPages)}"
            th:if="${p >= currentPage - 2 and p <= currentPage + 2}"
            th:text="${p}"
            th:classappend="${p == currentPage ? 'active-page' : ''}"
-           th:href="@{/purchasedlicenses(page=${p}, search=${search}, category=${category}, from=${from}, to=${to})}"></a>
+           th:href="@{/purchasedlicenses(page=${p}, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}"></a>
 
         <a class="page-link" th:if="${currentPage < totalPages}"
-           th:href="@{/purchasedlicenses(page=${currentPage + 1}, search=${search}, category=${category}, from=${from}, to=${to})}">&gt;</a>
+           th:href="@{/purchasedlicenses(page=${currentPage + 1}, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}">&gt;</a>
         <a class="page-link" th:if="${currentPage < totalPages}"
-           th:href="@{/purchasedlicenses(page=${totalPages}, search=${search}, category=${category}, from=${from}, to=${to})}">&raquo;&raquo;</a>
+           th:href="@{/purchasedlicenses(page=${totalPages}, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}">&raquo;&raquo;</a>
     </div>
 </div>
 
@@ -112,6 +184,42 @@
     function submitFilterForm() {
         document.getElementById("filterForm").submit();
     }
+
+    // Xóa tất cả bộ lọc
+    function clearFilters() {
+        window.location.href = '/purchasedlicenses';
+    }
+
+    // Validate date range on client side
+    document.addEventListener('DOMContentLoaded', function() {
+        const fromDate = document.getElementById('fromDate');
+        const toDate = document.getElementById('toDate');
+        const form = document.getElementById('filterForm');
+
+        function validateDates() {
+            if (fromDate.value && toDate.value && fromDate.value > toDate.value) {
+                alert('Ngày bắt đầu không thể sau ngày kết thúc!');
+                fromDate.value = '';
+                toDate.value = '';
+                return false;
+            }
+            return true;
+        }
+
+        if (fromDate && toDate) {
+            fromDate.addEventListener('change', validateDates);
+            toDate.addEventListener('change', validateDates);
+        }
+
+        // Validate form submission
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!validateDates()) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
 </script>
 
 </body>

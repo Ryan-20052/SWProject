@@ -4,11 +4,13 @@ import anbd.he191271.entity.LicenseKey;
 import anbd.he191271.repository.LicenseKeyRepository;
 import anbd.he191271.util.HashUtil;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled; // THÊM IMPORT
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.util.Date; // THÊM IMPORT
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class LicenseService {
 
@@ -30,6 +32,11 @@ public class LicenseService {
 
         LicenseKey lk = opt.get();
 
+        // THÊM KIỂM TRA TRẠNG THÁI EXPIRED
+        if ("EXPIRED".equalsIgnoreCase(lk.getStatus())) {
+            return VerificationResult.invalid("Key đã hết hạn");
+        }
+
         if (!"ACTIVATE".equalsIgnoreCase(lk.getStatus())) {
             return VerificationResult.invalid("Key chưa active hoặc không hợp lệ");
         }
@@ -39,6 +46,9 @@ public class LicenseService {
             return VerificationResult.invalid("Key không có ngày hết hạn");
         }
         if (new Date().after(expired)) {
+            // TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI KHI PHÁT HIỆN HẾT HẠN
+            lk.setStatus("EXPIRED");
+            repo.save(lk);
             return VerificationResult.invalid("Key đã hết hạn");
         }
 
@@ -54,11 +64,34 @@ public class LicenseService {
         }
 
         String customerName = lk.getOrderDetail().getOrder().getCustomer().getName();
-        String productName = lk.getOrderDetail().getVariant().getName(); // hoặc lk.getProductName() tùy entity
+        String productName = lk.getOrderDetail().getVariant().getName();
         return VerificationResult.ok(expired, customerName, productName);
     }
 
+    /**
+     * Cập nhật trạng thái license hết hạn - THÊM METHOD NÀY
+     */
+    @Transactional
+    public void updateExpiredLicenses() {
+        List<LicenseKey> expiredLicenses = repo.findByStatusAndExpiredAtBefore("ACTIVATE", new Date());
 
+        for (LicenseKey license : expiredLicenses) {
+            license.setStatus("EXPIRED");
+        }
+
+        repo.saveAll(expiredLicenses);
+    }
+
+    /**
+     * Tự động chạy mỗi ngày lúc 00:00 để cập nhật license hết hạn - THÊM METHOD NÀY
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void scheduledUpdateExpiredLicenses() {
+        updateExpiredLicenses();
+    }
+
+    // CÁC METHOD CŨ GIỮ NGUYÊN
     public static class VerificationResult {
         private final boolean ok;
         private final String message;

@@ -133,6 +133,18 @@ public class ReviewController {
         return "redirect:/review/" + productId;
     }
 
+    @PostMapping("/review/delete")
+    public String deleteReview(@RequestParam Long id,@RequestParam int productId,  HttpSession session) {
+        Customer customer = (Customer) session.getAttribute("customer");
+        if (customer == null) return "redirect:/login.html";
+        try {
+            reviewRepository.deleteById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "redirect:/review/list?productId=" + productId;
+    }
+
     @GetMapping("/review/image/{id}")
     @ResponseBody
     public ResponseEntity<byte[]> getReviewImage(@PathVariable Long id) {
