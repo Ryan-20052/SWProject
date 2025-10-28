@@ -3,14 +3,15 @@ package anbd.he191271.service;
 import anbd.he191271.entity.Voucher;
 import anbd.he191271.repository.VoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class VoucherService {
@@ -20,8 +21,17 @@ public class VoucherService {
 
     // ========== MANAGER FUNCTIONS ==========
 
-    public List<Voucher> getAllVouchers() {
-        return voucherRepository.findAll();
+    @Transactional
+    public Map<String, Object> getAllVouchersPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Voucher> voucherPage = voucherRepository.findAll(pageable);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("vouchers", voucherPage.getContent());
+        result.put("currentPage", voucherPage.getNumber());
+        result.put("totalItems", voucherPage.getTotalElements());
+        result.put("totalPages", voucherPage.getTotalPages());
+        return result;
     }
 
     public Voucher createVoucher(Voucher voucher) {

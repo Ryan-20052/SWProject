@@ -301,6 +301,18 @@
                 Tổng cộng: <span th:text="${totalPrice + ' đ'}">0 đ</span>
             </div>
 
+            <!-- ✅ VOUCHER INPUT -->
+            <div class="voucher-section" style="margin-bottom: 20px; text-align: right;">
+                <label for="voucherCode" style="font-weight: 600; margin-right: 10px;">Mã giảm giá:</label>
+                <input type="text" id="voucherCode" placeholder="Nhập mã voucher"
+                       style="padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; width: 200px;">
+                <button type="button" id="btnApplyVoucher"
+                        style="background: #22c55e; color: #fff; border: none; padding: 9px 15px;
+                   border-radius: 6px; font-weight: 600; cursor: pointer; margin-left: 5px;">
+                    Áp dụng
+                </button>
+            </div>
+
             <div class="cart-actions">
                 <button type="submit" class="btn-continue" formaction="/cart/update">Cập nhật giỏ hàng</button>
                 <button type="button" id="btnCheckout" class="btn-checkout">Thanh toán sản phẩm đã chọn</button>
@@ -372,8 +384,10 @@
             orderInfo: "Thanh toán giỏ hàng License Shop",
             locale: "vn",
             orderType: "cart",
-            items: items
+            items: items,
+            voucherCode: appliedVoucher // ✅ Gửi mã voucher kèm theo nếu có
         };
+
 
         try {
             const response = await fetch('/api/payment/create', {
@@ -397,6 +411,46 @@
         } catch (error) {
             console.error(error);
             alert("Đã xảy ra lỗi khi tạo thanh toán!");
+        }
+    });
+
+    let appliedVoucher = null; // ✅ Lưu voucher đang dùng
+
+    document.getElementById('btnApplyVoucher').addEventListener('click', async () => {
+        const code = document.getElementById('voucherCode').value.trim();
+        if (!code) {
+            alert("Vui lòng nhập mã voucher!");
+            return;
+        }
+
+        // Tính tổng hiện tại (đã chọn)
+        let total = 0;
+        const checkedItems = Array.from(document.querySelectorAll('input[name="selectedItems"]:checked'));
+        checkedItems.forEach(cb => {
+            const subtotalCell = cb.closest('tr').querySelector('.subtotal');
+            total += parseFloat(subtotalCell.dataset.subtotal || 0);
+        });
+
+        if (total === 0) {
+            alert("Hãy chọn sản phẩm trước khi áp dụng mã giảm giá!");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/vouchers/apply?code=${code}&total=${total}`);
+            if (!res.ok) throw new Error('Không thể kiểm tra voucher');
+            const data = await res.json();
+
+            const newTotal = data.discountedTotal;
+            const discount = data.discountAmount;
+
+            document.querySelector('.total span').textContent = newTotal.toLocaleString('vi-VN') + ' đ';
+            appliedVoucher = code;
+
+            alert(`🎉 Mã ${code} đã áp dụng thành công! Giảm ${discount.toLocaleString('vi-VN')} đ`);
+        } catch (err) {
+            console.error(err);
+            alert("❌ Mã voucher không hợp lệ hoặc đã hết hạn!");
         }
     });
 

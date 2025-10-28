@@ -241,6 +241,12 @@
         </thead>
         <tbody></tbody>
     </table>
+    <div id="pagination" style="margin-top: 20px; text-align: center;">
+        <button id="prevPage" class="btn btn-edit" disabled>⬅ Trước</button>
+        <span id="pageInfo" style="margin: 0 10px; font-weight: 600;">Trang 1 / 1</span>
+        <button id="nextPage" class="btn btn-edit" disabled>Tiếp ➡</button>
+    </div>
+
 </div>
 
 <!-- MODAL -->
@@ -274,16 +280,35 @@
     const API_URL = "http://localhost:8080/api/vouchers";
     const tableBody = document.querySelector("#voucherTable tbody");
     const modal = document.getElementById("voucherModal");
+    let currentPage = 0;
+    let totalPages = 1;
+    let pageSize = 10; // bạn có thể đổi 5/20 tùy ý
 
-    async function loadVouchers() {
-        const res = await fetch(API_URL);
+    async function loadVouchers(page = 0) {
+        // Nếu backend chưa sửa để trả về dạng phân trang, vẫn gọi API cũ không tham số
+        const url = (typeof page === 'number') ? `${API_URL}?page=${page}&size=${pageSize}` : API_URL;
+
+        const res = await fetch(url);
         const data = await res.json();
+
+        // Hỗ trợ cả 2 dạng dữ liệu:
+        // 1) Dạng cũ: [ ...voucher ]
+        // 2) Dạng mới có phân trang: { vouchers: [...], currentPage, totalPages, ... }
+        const list = Array.isArray(data) ? data : (data.vouchers || []);
+
+        // Nếu có phân trang từ server thì cập nhật thông tin trang
+        if (!Array.isArray(data)) {
+            currentPage = data.currentPage ?? 0;
+            totalPages = data.totalPages ?? 1;
+            updatePagination && updatePagination();
+        }
+
+        // === GIỮ NGUYÊN CÁCH RENDER CỦA BẠN ===
         tableBody.innerHTML = "";
+        const now = new Date();
 
-        data.forEach(v => {
-            const now = new Date();
+        list.forEach(v => {
             let badge = "";
-
             if (!v.active) {
                 badge = `<span class='status-badge status-expired'>Đã khóa</span>`;
             } else if (new Date(v.endDate) < now) {
@@ -291,6 +316,7 @@
             } else {
                 badge = `<span class='status-badge status-active'>Hoạt động</span>`;
             }
+
             tableBody.innerHTML += `
         <tr>
           <td>${v.id}</td>
@@ -303,15 +329,17 @@
           <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
           <td>${badge}</td>
           <td>
-  <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
-  ${
+            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
+            ${
                 v.active
                     ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
                     : `<button class='btn btn-add' onclick='toggleVoucher(${v.id}, true)'>Mở khóa</button>`
             }
-</td>`;
+          </td>
+        </tr>`;
         });
     }
+
 
     function openModal() {
         document.getElementById("voucherId").value = "";
@@ -360,13 +388,7 @@
         modal.style.display = "flex";
     }
 
-    async function deleteVoucher(id) {
-        if (!confirm("Bạn có chắc muốn KHÓA voucher này không?")) return;
 
-        await fetch(`${API_URL}/${id}/deactivate`, { method: "PUT" });
-        alert("Voucher đã bị khóa, không thể sử dụng nữa!");
-        loadVouchers();
-    }
 
     window.onload = loadVouchers;
     async function toggleVoucher(id, newState) {
@@ -427,6 +449,23 @@
         </tr>`;
         });
     }
+    function updatePagination() {
+        document.getElementById("pageInfo").textContent = `Trang ${currentPage + 1} / ${totalPages}`;
+
+        const prevBtn = document.getElementById("prevPage");
+        const nextBtn = document.getElementById("nextPage");
+
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = currentPage >= totalPages - 1;
+
+        prevBtn.onclick = () => {
+            if (currentPage > 0) loadVouchers(currentPage - 1);
+        };
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages - 1) loadVouchers(currentPage + 1);
+        };
+    }
+
 </script>
 </body>
 </html>

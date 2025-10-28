@@ -19,9 +19,13 @@ public class VoucherController {
 
     // ========== MANAGER ==========
     @GetMapping
-    public ResponseEntity<List<Voucher>> getAllVouchers() {
-        return ResponseEntity.ok(voucherService.getAllVouchers());
+    public ResponseEntity<Map<String, Object>> getAllVouchers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(voucherService.getAllVouchersPaged(page, size));
     }
+
 
     @PostMapping
     public ResponseEntity<Voucher> createVoucher(@RequestBody Voucher voucher) {
