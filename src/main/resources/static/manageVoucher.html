@@ -207,6 +207,23 @@
         <button class="btn btn-add" onclick="openModal()">+ Thêm Voucher</button>
     </div>
 
+    <div style="display:flex; gap:10px; align-items:center;">
+        <input id="searchCode" placeholder="Tìm theo mã..." style="padding:6px; border-radius:6px; border:1px solid #ccc;">
+        <select id="searchPercent">
+            <option value="">Loại</option>
+            <option value="true">%</option>
+            <option value="false">VNĐ</option>
+        </select>
+        <select id="searchStatus">
+            <option value="">Trạng thái</option>
+            <option value="true">Hoạt động</option>
+            <option value="false">Đã khóa</option>
+        </select>
+
+
+        <button class="btn btn-edit" onclick="searchVouchers()">Tìm kiếm</button>
+    </div>
+
     <table id="voucherTable">
         <thead>
         <tr>
@@ -265,11 +282,15 @@
 
         data.forEach(v => {
             const now = new Date();
-            const expired = new Date(v.endDate) < now;
-            const badge = expired
-                ? `<span class='status-badge status-expired'>Hết hạn</span>`
-                : `<span class='status-badge status-active'>Hoạt động</span>`;
+            let badge = "";
 
+            if (!v.active) {
+                badge = `<span class='status-badge status-expired'>Đã khóa</span>`;
+            } else if (new Date(v.endDate) < now) {
+                badge = `<span class='status-badge status-expired'>Hết hạn</span>`;
+            } else {
+                badge = `<span class='status-badge status-active'>Hoạt động</span>`;
+            }
             tableBody.innerHTML += `
         <tr>
           <td>${v.id}</td>
@@ -282,10 +303,13 @@
           <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
           <td>${badge}</td>
           <td>
-            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
-            <button class='btn btn-del' onclick='deleteVoucher(${v.id})'>Xóa</button>
-          </td>
-        </tr>`;
+  <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
+  ${
+                v.active
+                    ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
+                    : `<button class='btn btn-add' onclick='toggleVoucher(${v.id}, true)'>Mở khóa</button>`
+            }
+</td>`;
         });
     }
 
@@ -337,12 +361,72 @@
     }
 
     async function deleteVoucher(id) {
-        if (!confirm("Bạn có chắc muốn xóa voucher này không?")) return;
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        if (!confirm("Bạn có chắc muốn KHÓA voucher này không?")) return;
+
+        await fetch(`${API_URL}/${id}/deactivate`, { method: "PUT" });
+        alert("Voucher đã bị khóa, không thể sử dụng nữa!");
         loadVouchers();
     }
 
     window.onload = loadVouchers;
+    async function toggleVoucher(id, newState) {
+        const actionText = newState ? "mở khóa" : "khóa";
+        if (!confirm(`Bạn có chắc muốn ${actionText} voucher này không?`)) return;
+
+        const endpoint = newState ? "activate" : "deactivate";
+        await fetch(`${API_URL}/${id}/${endpoint}`, { method: "PUT" });
+
+        alert(`Voucher đã được ${actionText}!`);
+        loadVouchers();
+    }
+    async function searchVouchers() {
+        const code = document.getElementById("searchCode").value;
+        const percent = document.getElementById("searchPercent").value;
+        const status = document.getElementById("searchStatus").value;
+
+        const params = new URLSearchParams();
+        if (code) params.append("code", code);
+        if (percent) params.append("percent", percent);
+        if (status) params.append("active", status);
+
+
+        const res = await fetch(`${API_URL}/search?${params.toString()}`);
+        const data = await res.json();
+
+        renderVoucherTable(data);
+    }
+
+    function renderVoucherTable(data) {
+        const tableBody = document.querySelector("#voucherTable tbody");
+        tableBody.innerHTML = "";
+        const now = new Date();
+
+        data.forEach(v => {
+            let badge = "";
+            if (!v.active) badge = `<span class='status-badge status-expired'>Đã khóa</span>`;
+            else if (new Date(v.endDate) < now) badge = `<span class='status-badge status-expired'>Hết hạn</span>`;
+            else badge = `<span class='status-badge status-active'>Hoạt động</span>`;
+
+            tableBody.innerHTML += `
+        <tr>
+          <td>${v.id}</td>
+          <td>${v.code}</td>
+          <td>${v.discountValue}</td>
+          <td>${v.percent ? "%" : "VNĐ"}</td>
+          <td>${v.usageLimit}</td>
+          <td>${v.usedCount}</td>
+          <td>${v.startDate.replace("T"," ").split(".")[0]}</td>
+          <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
+          <td>${badge}</td>
+          <td>
+            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
+            ${v.active
+                ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
+                : `<button class='btn btn-add' onclick='toggleVoucher(${v.id}, true)'>Mở khóa</button>`}
+          </td>
+        </tr>`;
+        });
+    }
 </script>
 </body>
 </html>

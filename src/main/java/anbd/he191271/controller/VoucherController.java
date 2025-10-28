@@ -33,10 +33,24 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.updateVoucher(id, voucher));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVoucher(@PathVariable Long id) {
-        voucherService.deleteVoucher(id);
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<Void> deactivateVoucher(@PathVariable Long id) {
+        voucherService.deactivateVoucher(id);
         return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/{id}/activate")
+    public ResponseEntity<Void> activateVoucher(@PathVariable Long id) {
+        voucherService.activateVoucher(id);
+        return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Voucher>> searchVouchers(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) Boolean percent,
+            @RequestParam(required = false) Boolean active
+    ) {
+        List<Voucher> results = voucherService.searchVouchers(code, percent, active);
+        return ResponseEntity.ok(results);
     }
 
     // ========== CUSTOMER ==========

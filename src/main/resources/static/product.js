@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const amountInput = document.getElementById('amountInput');
 
     let discountedTotal = null; // 💰 Tổng sau giảm
+    let originalPrice = null; // 💰 Giá gốc của variant được chọn
 
     // ----------------- Đồng bộ variant được chọn -----------------
     function syncVariantFromRadio() {
@@ -37,6 +38,14 @@ document.addEventListener('DOMContentLoaded', function () {
             variantIdInput.value = checked.value;
             buyNowBtn.disabled = false;
             addToCartBtn.disabled = false;
+
+            // ✅ Cập nhật giá hiển thị + lưu giá gốc
+            const priceEl = document.querySelector('.price');
+            const priceText = checked.nextElementSibling.querySelector('span:nth-child(2)')?.innerText;
+            if (priceEl && priceText) {
+                priceEl.innerText = priceText;
+                originalPrice = parseFloat(priceText.replace(/[^\d]/g, '')) || 0; // Lưu giá gốc thật
+            }
         } else if (!variantIdInput.value) {
             buyNowBtn.disabled = true;
             addToCartBtn.disabled = true;
@@ -55,9 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Lấy giá gốc từ text và nhân với số lượng
-        const priceText = document.querySelector('.price')?.innerText.replace(/[^\d]/g, '');
         const quantity = parseInt(amountInput.value || '1', 10);
-        const total = parseFloat(priceText || '0') * quantity;
+        const total = (originalPrice || 0) * quantity; // ✅ Dùng giá gốc, không dùng .price đã giảm
 
         if (!total || total <= 0) {
             voucherMessage.textContent = '❌ Không thể áp dụng vì không xác định được giá sản phẩm!';
@@ -74,7 +82,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             voucherMessage.textContent =
                 `✅ Giảm ${data.discountAmount.toLocaleString()}đ! Tổng mới: ${data.discountedTotal.toLocaleString()}đ`;
-            voucherMessage.style.color = 'green';
+            document.querySelector('.price').innerText = data.discountedTotal.toLocaleString() + ' đ';
+            // 🔧 Cập nhật giá hiển thị trên giao diện
+            const priceEl = document.querySelector('.price');
+            if (priceEl) {
+                priceEl.innerText = data.discountedTotal.toLocaleString() + ' đ';
+            }
         } catch (err) {
             console.error('❌ Voucher error:', err);
             voucherMessage.textContent = '❌ Mã không hợp lệ hoặc đã hết hạn!';

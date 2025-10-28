@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,8 +44,14 @@ public class VoucherService {
         return voucherRepository.save(v);
     }
 
-    public void deleteVoucher(Long id) {
-        voucherRepository.deleteById(id);
+    @Transactional
+    public void deactivateVoucher(Long id) {
+        Voucher v = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        v.setActive(false); // 🔒 Khóa voucher
+        voucherRepository.save(v);
+
+        System.out.println("🚫 Voucher " + v.getCode() + " đã bị khóa, không thể sử dụng nữa.");
     }
 
     // ========== CUSTOMER FUNCTIONS ==========
@@ -103,7 +110,26 @@ public class VoucherService {
 
         return withinDate && withinUsage && active;
     }
+    public List<Voucher> searchVouchers(String code, Boolean percent, Boolean active) {
+        List<Voucher> all = voucherRepository.findAll();
 
+        return all.stream()
+                .filter(v -> code == null || v.getCode().toLowerCase().contains(code.toLowerCase()))
+                .filter(v -> percent == null || v.isPercent() == percent)
+                .filter(v -> active == null || v.isActive() == active)
+                .sorted(Comparator.comparingLong(Voucher::getId))
+                .toList();
+    }
+
+    @Transactional
+    public void activateVoucher(Long id) {
+        Voucher v = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        v.setActive(true); // 🔓 Mở khóa voucher
+        voucherRepository.save(v);
+
+        System.out.println("✅ Voucher " + v.getCode() + " đã được mở khóa.");
+    }
     public Optional<Voucher> findByCode(String code) {
         return voucherRepository.findByCodeIgnoreCase(code);
     }
