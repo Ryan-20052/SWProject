@@ -32,14 +32,18 @@ public class LicenseService {
 
         LicenseKey lk = opt.get();
 
-        // THÊM KIỂM TRA TRẠNG THÁI EXPIRED
         if ("EXPIRED".equalsIgnoreCase(lk.getStatus())) {
             return VerificationResult.invalid("Key đã hết hạn");
+        }
+
+        if ("BANNED".equalsIgnoreCase(lk.getStatus())) {
+            return VerificationResult.invalid("Key đã bị chặn bởi quản lý");
         }
 
         if (!"ACTIVATE".equalsIgnoreCase(lk.getStatus())) {
             return VerificationResult.invalid("Key chưa active hoặc không hợp lệ");
         }
+
 
         Date expired = lk.getExpiredAt();
         if (expired == null) {
