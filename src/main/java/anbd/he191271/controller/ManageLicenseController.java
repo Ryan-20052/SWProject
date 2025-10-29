@@ -1,28 +1,24 @@
 package anbd.he191271.controller;
 
 import anbd.he191271.entity.*;
-import anbd.he191271.repository.LicenseKeyRepository;
 import anbd.he191271.service.LicenseService;
 import anbd.he191271.service.ManagerLogService;
 import anbd.he191271.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/manageLicense")
-public class ManageLicense {
+public class ManageLicenseController {
 
     @Autowired
     private LicenseService licenseService;
@@ -66,14 +62,14 @@ public class ManageLicense {
         if (startDate != null && !startDate.trim().isEmpty()) {
             LocalDate start = LocalDate.parse(startDate);
             stream = stream.filter(l ->
-                    !l.getActivatedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(start)
+                    !l.getActivatedAt().toLocalDate().isBefore(start)
             );
             model.addAttribute("startDate", startDate);
         }
         if (endDate != null && !endDate.trim().isEmpty()) {
             LocalDate end = LocalDate.parse(endDate);
             stream = stream.filter(l ->
-                    !l.getActivatedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isAfter(end)
+                    !l.getActivatedAt().toLocalDate().isAfter(end)
             );
             model.addAttribute("endDate", endDate);
         }

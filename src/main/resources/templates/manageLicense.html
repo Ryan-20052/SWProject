@@ -551,7 +551,7 @@
                     <td th:text="${l.orderDetail.variant.product.name}"></td>
                     <td th:text="${l.orderDetail.variant.name}"></td>
                     <td th:text="${l.status}"></td>
-                    <td th:text="${#dates.format(l.activatedAt, 'dd-MM-yyyy')}"></td>
+                    <td th:text="${#temporals.format(l.activatedAt, 'dd-MM-yyyy')}"></td>
 
                     <td class="action-cell">
                     <td class="action-cell">
