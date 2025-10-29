@@ -2,6 +2,7 @@ package anbd.he191271.controller;
 
 import anbd.he191271.entity.Customer;
 import anbd.he191271.entity.LicenseKey;
+import anbd.he191271.repository.CategoryRepository;
 import anbd.he191271.repository.LicenseKeyRepository;
 import anbd.he191271.service.LicenseService; // THAY ĐỔI IMPORT
 import jakarta.servlet.http.HttpSession;
@@ -23,6 +24,8 @@ public class PurchasedLicenseController {
 
     @Autowired
     private LicenseService licenseService; // THAY ĐỔI THÀNH LicenseService
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @GetMapping("/purchasedlicenses")
     public String showPurchasedLicenses(
@@ -51,10 +54,8 @@ public class PurchasedLicenseController {
             allLicenses = allLicenses.stream()
                     .filter(l -> {
                         if (l.getActivatedAt() == null) return false;
-                        LocalDate activatedDate = l.getActivatedAt()
-                                .toInstant()
-                                .atZone(java.time.ZoneId.systemDefault())
-                                .toLocalDate();
+                        // Sửa phần convert LocalDateTime sang LocalDate
+                        LocalDate activatedDate = l.getActivatedAt().toLocalDate();
                         return !activatedDate.isBefore(from) && !activatedDate.isAfter(to);
                     })
                     .toList();
@@ -101,7 +102,7 @@ public class PurchasedLicenseController {
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         model.addAttribute("sort", sort); // THÊM SORT VÀO MODEL
-
+        model.addAttribute("categories", categoryRepository.findAll());
         return "purchasedlicenses";
     }
 

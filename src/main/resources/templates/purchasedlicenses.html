@@ -48,14 +48,6 @@
             background: #1b63b8;
             color: white;
         }
-        .disabled-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 5px;
-            cursor: not-allowed;
-        }
     </style>
 </head>
 <body>
@@ -77,9 +69,9 @@
     <form id="filterForm" method="get" action="/purchasedlicenses" class="filters">
         <input type="text" name="search" th:value="${search}" placeholder="🔍 Tìm theo tên sản phẩm" maxlength="100">
 
-        <select name="category" onchange="submitFilterForm()">
+        <select name="category">
             <option value="">-- Tất cả danh mục --</option>
-            <option th:each="c : ${@categoryRepository.findAll()}"
+            <option th:each="c : ${categories}"
                     th:value="${c.name}"
                     th:text="${c.name}"
                     th:selected="${c.name == category}"></option>
@@ -137,8 +129,9 @@
                    th:text="${license.orderDetail.variant.product.name}"></a>
             </td>
             <td th:text="${license.orderDetail.variant.name}"></td>
-            <td th:text="${#dates.format(license.activatedAt, 'dd/MM/yyyy')}"></td>
-            <td th:text="${#dates.format(license.expiredAt, 'dd/MM/yyyy')}"></td>
+            <!-- SỬA: #temporals.format thay vì #dates.format -->
+            <td th:text="${#temporals.format(license.activatedAt, 'dd/MM/yyyy')}"></td>
+            <td th:text="${#temporals.format(license.expiredAt, 'dd/MM/yyyy')}"></td>
             <td>
                 <span th:if="${license.status == 'ACTIVATE'}" class="status-active">ACTIVATE</span>
                 <span th:if="${license.status == 'EXPIRED'}" class="status-expired">EXPIRED</span>
@@ -150,7 +143,6 @@
                         th:onclick="'window.location.href=\'/review/' + ${license.orderDetail.variant.product.id} + '\''">
                     ★ Đánh giá
                 </button>
-
             </td>
         </tr>
         </tbody>
@@ -158,7 +150,7 @@
 
     <p th:if="${#lists.isEmpty(purchasedLicenses)}">Bạn chưa mua license nào.</p>
 
-    <!-- Phân trang kiểu << < 1 2 3 ... > >> -->
+    <!-- Phân trang -->
     <div style="text-align:center; margin-top:20px;" th:if="${totalPages > 1}">
         <a class="page-link" th:if="${currentPage > 1}"
            th:href="@{/purchasedlicenses(page=1, search=${search}, category=${category}, from=${from}, to=${to}, sort=${sort})}">&laquo;&laquo;</a>
@@ -180,17 +172,11 @@
 </div>
 
 <script>
-    // Khi đổi category hoặc ngày => submit toàn bộ form
-    function submitFilterForm() {
-        document.getElementById("filterForm").submit();
-    }
-
-    // Xóa tất cả bộ lọc
     function clearFilters() {
         window.location.href = '/purchasedlicenses';
     }
 
-    // Validate date range on client side
+    // Validate date range
     document.addEventListener('DOMContentLoaded', function() {
         const fromDate = document.getElementById('fromDate');
         const toDate = document.getElementById('toDate');
@@ -211,7 +197,6 @@
             toDate.addEventListener('change', validateDates);
         }
 
-        // Validate form submission
         if (form) {
             form.addEventListener('submit', function(e) {
                 if (!validateDates()) {

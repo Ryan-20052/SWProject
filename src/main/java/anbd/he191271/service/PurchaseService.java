@@ -32,7 +32,7 @@ public class PurchaseService {
     private EmailService mailService;
 
     @Autowired
-    private ShoppingCartRepository cartRepo; // 👈 inject repo, đặt tên biến khác tên class
+    private ShoppingCartRepository cartRepo;
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -49,29 +49,27 @@ public class PurchaseService {
         return key.toString();
     }
 
-    private Date calculateExpiredDate(String duration, Date startDate) {
+    private LocalDateTime calculateExpiredDate(String duration, LocalDateTime startDate) {
         if (duration == null || duration.isEmpty()) {
-            return new Date(startDate.getTime() + (24L * 60 * 60 * 1000));
+            return startDate.plusDays(1);
         }
+
         String lower = duration.toLowerCase().trim();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
 
         try {
             int value = Integer.parseInt(lower.replaceAll("[^0-9]", ""));
             if (lower.contains("day") || lower.contains("ngày")) {
-                cal.add(Calendar.DAY_OF_MONTH, value);
+                return startDate.plusDays(value);
             } else if (lower.contains("month") || lower.contains("tháng")) {
-                cal.add(Calendar.MONTH, value);
+                return startDate.plusMonths(value);
             } else if (lower.contains("year") || lower.contains("năm")) {
-                cal.add(Calendar.YEAR, value);
+                return startDate.plusYears(value);
             } else {
-                cal.add(Calendar.DAY_OF_MONTH, 1);
+                return startDate.plusDays(1);
             }
         } catch (Exception e) {
-            cal.add(Calendar.DAY_OF_MONTH, 1);
+            return startDate.plusDays(1);
         }
-        return cal.getTime();
     }
 
     @Transactional
@@ -113,11 +111,11 @@ public class PurchaseService {
 
         for (OrderDetail detail : order.getOrderDetails()) {
             Variant variant = detail.getVariant();
-            Date activatedAt = new Date();
+            LocalDateTime activatedAt = LocalDateTime.now();
 
             for (int i = 0; i < detail.getAmount(); i++) {
                 String rawKey = generateKey(16);
-                Date expiredAt = calculateExpiredDate(variant.getDuration(), activatedAt);
+                LocalDateTime expiredAt = calculateExpiredDate(variant.getDuration(), activatedAt);
 
                 // Lưu key (hash vào DB)
                 LicenseKey key = new LicenseKey();
@@ -144,7 +142,7 @@ public class PurchaseService {
                 ));
             }
 
-            // ✅ Xóa item khỏi giỏ hàngg
+            // ✅ Xóa item khỏi giỏ hàng
             cartRepo.deleteByCustomerIdAndVariant_Id(
                     Long.valueOf(order.getCustomer().getId()),
                     Long.valueOf(variant.getId())
@@ -188,8 +186,6 @@ public class PurchaseService {
                 emailContent
         );
     }
-
-
 
     private String hashSHA256(String input) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");

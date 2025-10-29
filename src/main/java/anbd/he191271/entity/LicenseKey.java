@@ -1,6 +1,8 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -16,11 +18,11 @@ public class LicenseKey {
 
     @Column(name = "activated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date activatedAt;
+    private LocalDateTime activatedAt;
 
     @Column(name = "expired_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date expiredAt;
+    private LocalDateTime expiredAt;
 
     @Column(name = "status", nullable = false)
     private String status = "INACTIVE";
@@ -54,19 +56,19 @@ public class LicenseKey {
         this.key = key;
     }
 
-    public Date getActivatedAt() {
+    public LocalDateTime getActivatedAt() {
         return activatedAt;
     }
 
-    public void setActivatedAt(Date activatedAt) {
+    public void setActivatedAt(LocalDateTime activatedAt) {
         this.activatedAt = activatedAt;
     }
 
-    public Date getExpiredAt() {
+    public LocalDateTime getExpiredAt() {
         return expiredAt;
     }
 
-    public void setExpiredAt(Date expiredAt) {
+    public void setExpiredAt(LocalDateTime expiredAt) {
         this.expiredAt = expiredAt;
     }
 
