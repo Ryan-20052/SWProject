@@ -4,10 +4,10 @@ import anbd.he191271.entity.LicenseKey;
 import anbd.he191271.repository.LicenseKeyRepository;
 import anbd.he191271.util.HashUtil;
 import jakarta.transaction.Transactional;
-import org.springframework.scheduling.annotation.Scheduled; // THÊM IMPORT
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.Date; // THÊM IMPORT
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ public class LicenseService {
 
         LicenseKey lk = opt.get();
 
-        // THÊM KIỂM TRA TRẠNG THÁI EXPIRED
+        // KIỂM TRA TRẠNG THÁI EXPIRED
         if ("EXPIRED".equalsIgnoreCase(lk.getStatus())) {
             return VerificationResult.invalid("Key đã hết hạn");
         }
@@ -41,11 +41,13 @@ public class LicenseService {
             return VerificationResult.invalid("Key chưa active hoặc không hợp lệ");
         }
 
-        Date expired = lk.getExpiredAt();
+        LocalDateTime expired = lk.getExpiredAt();
         if (expired == null) {
             return VerificationResult.invalid("Key không có ngày hết hạn");
         }
-        if (new Date().after(expired)) {
+
+        // SỬA: So sánh LocalDateTime với LocalDateTime.now()
+        if (LocalDateTime.now().isAfter(expired)) {
             // TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI KHI PHÁT HIỆN HẾT HẠN
             lk.setStatus("EXPIRED");
             repo.save(lk);
@@ -65,15 +67,17 @@ public class LicenseService {
 
         String customerName = lk.getOrderDetail().getOrder().getCustomer().getName();
         String productName = lk.getOrderDetail().getVariant().getName();
+        // SỬA: Truyền LocalDateTime thay vì Date
         return VerificationResult.ok(expired, customerName, productName);
     }
 
     /**
-     * Cập nhật trạng thái license hết hạn - THÊM METHOD NÀY
+     * Cập nhật trạng thái license hết hạn
      */
     @Transactional
     public void updateExpiredLicenses() {
-        List<LicenseKey> expiredLicenses = repo.findByStatusAndExpiredAtBefore("ACTIVATE", new Date());
+        // SỬA: Sử dụng LocalDateTime.now() thay vì new LocalDateTime()
+        List<LicenseKey> expiredLicenses = repo.findByStatusAndExpiredAtBefore("ACTIVATE", LocalDateTime.now());
 
         for (LicenseKey license : expiredLicenses) {
             license.setStatus("EXPIRED");
@@ -83,7 +87,7 @@ public class LicenseService {
     }
 
     /**
-     * Tự động chạy mỗi ngày lúc 00:00 để cập nhật license hết hạn - THÊM METHOD NÀY
+     * Tự động chạy mỗi ngày lúc 00:00 để cập nhật license hết hạn
      */
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
@@ -91,15 +95,16 @@ public class LicenseService {
         updateExpiredLicenses();
     }
 
-    // CÁC METHOD CŨ GIỮ NGUYÊN
+    // SỬA: VerificationResult sử dụng LocalDateTime thay vì Date
     public static class VerificationResult {
         private final boolean ok;
         private final String message;
-        private final Date expiredAt;
+        private final LocalDateTime expiredAt; // SỬA: LocalDateTime thay vì Date
         private final String customerName;
         private final String productName;
 
-        private VerificationResult(boolean ok, String message, Date expiredAt, String customerName, String productName) {
+        // SỬA: Constructor sử dụng LocalDateTime
+        private VerificationResult(boolean ok, String message, LocalDateTime expiredAt, String customerName, String productName) {
             this.ok = ok;
             this.message = message;
             this.expiredAt = expiredAt;
@@ -107,7 +112,8 @@ public class LicenseService {
             this.productName = productName;
         }
 
-        public static VerificationResult ok(Date expiredAt, String customerName, String productName) {
+        // SỬA: Method ok sử dụng LocalDateTime
+        public static VerificationResult ok(LocalDateTime expiredAt, String customerName, String productName) {
             return new VerificationResult(true, "OK", expiredAt, customerName, productName);
         }
 
@@ -117,7 +123,7 @@ public class LicenseService {
 
         public boolean isOk() { return ok; }
         public String getMessage() { return message; }
-        public Date getExpiredAt() { return expiredAt; }
+        public LocalDateTime getExpiredAt() { return expiredAt; } // SỬA: Trả về LocalDateTime
         public String getCustomerName() { return customerName; }
         public String getProductName() { return productName; }
     }
@@ -134,7 +140,7 @@ public class LicenseService {
         repo.save(lk);
     }
 
-    public void  delete(LicenseKey lk) {
+    public void delete(LicenseKey lk) {
         repo.delete(lk);
     }
 }
