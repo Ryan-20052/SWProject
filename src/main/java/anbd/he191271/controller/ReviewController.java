@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,9 +49,9 @@ public class ReviewController {
             Model model
     ) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date start = (startDate != null && !startDate.isEmpty()) ? sdf.parse(startDate) : null;
-            Date end = (endDate != null && !endDate.isEmpty()) ? sdf.parse(endDate) : null;
+            // SỬA: Sử dụng LocalDate thay vì Date
+            LocalDate start = (startDate != null && !startDate.isEmpty()) ? LocalDate.parse(startDate) : null;
+            LocalDate end = (endDate != null && !endDate.isEmpty()) ? LocalDate.parse(endDate) : null;
 
             // Lấy danh sách reviews (phân trang)
             Page<Review> reviews = reviewService.getFilteredReviews(productId, rating, hasImage, start, end, page, size);
@@ -81,7 +82,6 @@ public class ReviewController {
         return "viewReview";
     }
 
-
     // ✅ Hiển thị form review
     @GetMapping("/review/{productId}")
     public String showReviewForm(@PathVariable int productId, HttpSession session, Model model) {
@@ -100,7 +100,7 @@ public class ReviewController {
         return "review";
     }
 
-    // ✅ Lưu review
+    // ✅ Lưu review - ĐÃ SỬA
     @PostMapping("/review/save")
     public String saveReview(@ModelAttribute Review review,
                              @RequestParam("productId") int productId,
@@ -122,27 +122,38 @@ public class ReviewController {
             r.setProduct(product);
             r.setRating(review.getRating());
             r.setComment(review.getComment());
-            r.setCreatedAt(new Date());
-            if (imageBytes != null) r.setReviewImage(imageBytes);
+            r.setCreatedAt(LocalDateTime.now());
+
+            // SỬA QUAN TRỌNG: Xử lý ảnh đúng cách
+            if (imageBytes != null) {
+                r.setReviewImage(imageBytes);
+                r.setHasImage(true); // QUAN TRỌNG: Phải set hasImage = true
+            } else {
+                // Nếu không có ảnh mới upload, nhưng đang edit review có ảnh cũ
+                if (existingReview.isPresent() && existingReview.get().getHasImage()) {
+                    // Giữ ảnh cũ
+                    r.setReviewImage(existingReview.get().getReviewImage());
+                    r.setHasImage(true);
+                } else {
+                    // Không có ảnh
+                    r.setReviewImage(null);
+                    r.setHasImage(false);
+                }
+            }
+
+            // THÊM DEBUG
+            System.out.println("🟡 Saving review - Rating: " + r.getRating() + ", HasImage: " + r.getHasImage());
+
             reviewRepository.save(r);
+
+            System.out.println("✅ Review saved successfully! ID: " + r.getId());
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("❌ Error saving review: " + e.getMessage());
         }
 
         return "redirect:/review/" + productId;
-    }
-
-    @PostMapping("/review/delete")
-    public String deleteReview(@RequestParam Long id,@RequestParam int productId,  HttpSession session) {
-        Customer customer = (Customer) session.getAttribute("customer");
-        if (customer == null) return "redirect:/login.html";
-        try {
-            reviewRepository.deleteById(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "redirect:/review/list?productId=" + productId;
     }
 
     @GetMapping("/review/image/{id}")

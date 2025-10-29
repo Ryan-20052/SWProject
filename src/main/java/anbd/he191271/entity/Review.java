@@ -1,7 +1,9 @@
 package anbd.he191271.entity;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "review")
@@ -33,9 +35,8 @@ public class Review {
     @Column(name = "comment", length = 1000)
     private String comment;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", updatable = false)
-    private Date createdAt;
+    private LocalDateTime createdAt; // SỬA: LocalDateTime thay vì LocalDate
 
     @Lob
     @Column(name = "review_image")
@@ -46,13 +47,13 @@ public class Review {
 
     // ===== Constructors =====
     public Review() {
-        this.createdAt = new Date();
+        this.createdAt = LocalDateTime.now(); // SỬA: LocalDateTime.now()
     }
 
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
-            createdAt = new Date();
+            createdAt = LocalDateTime.now(); // SỬA: LocalDateTime.now()
         }
     }
 
@@ -84,8 +85,9 @@ public class Review {
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    // SỬA: Getter và Setter cho LocalDateTime
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public byte[] getReviewImage() { return reviewImage; }
 

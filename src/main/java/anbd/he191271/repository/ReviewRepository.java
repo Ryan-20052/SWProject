@@ -2,19 +2,20 @@ package anbd.he191271.repository;
 
 import anbd.he191271.entity.Review;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable; // ✅ sửa import đúng
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
+    // SỬA: Sử dụng int thay vì Long và Integer
     Optional<Review> findByCustomer_IdAndProduct_Id(int customerId, int productId);
 
     List<Review> findByProduct_Id(int productId);
@@ -28,7 +29,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     """)
     List<Object[]> findTopRatedProducts();
 
-    // ✅ Truy vấn động cho lọc theo sao, ngày, có ảnh hay không
+    // SỬA: Sử dụng int thay vì Integer cho productId
     @Query("""
         SELECT r FROM Review r
         WHERE r.product.id = :productId
@@ -39,11 +40,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         ORDER BY r.createdAt DESC
     """)
     Page<Review> findFilteredReviews(
-            @Param("productId") int productId,
+            @Param("productId") int productId,  // SỬA: int thay vì Integer
             @Param("rating") Integer rating,
             @Param("hasImage") Boolean hasImage,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
 }

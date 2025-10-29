@@ -6,10 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,26 +19,40 @@ public class ReviewService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
     public Review getReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review không tồn tại"));
     }
+
+    // SỬA: Sử dụng LocalDate thay vì Date
     public Page<Review> getFilteredReviews(int productId,
                                            Integer rating,
                                            Boolean hasImage,
-                                           Date startDate,
-                                           Date endDate,
+                                           LocalDate startDate,
+                                           LocalDate endDate,
                                            int page,
                                            int size) {
-        return reviewRepository.findFilteredReviews(productId, rating, hasImage, startDate, endDate, PageRequest.of(page, size));
+        // Chuyển đổi LocalDate sang LocalDateTime để query
+        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+
+        return reviewRepository.findFilteredReviews(
+                productId, rating, hasImage, startDateTime, endDateTime, PageRequest.of(page, size));
     }
 
-    // Thêm method tính toán thống kê
-    public Map<String, Object> getReviewStats(int productId, Integer rating, Boolean hasImage, Date startDate, Date endDate) {
+    // SỬA: Sử dụng LocalDate thay vì Date
+    public Map<String, Object> getReviewStats(int productId, Integer rating, Boolean hasImage,
+                                              LocalDate startDate, LocalDate endDate) {
         Map<String, Object> stats = new HashMap<>();
 
+        // Chuyển đổi LocalDate sang LocalDateTime để query
+        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+
         // Lấy tất cả reviews (không phân trang) để tính toán
-        Page<Review> allReviews = reviewRepository.findFilteredReviews(productId, rating, hasImage, startDate, endDate, Pageable.unpaged());
+        Page<Review> allReviews = reviewRepository.findFilteredReviews(
+                productId, rating, hasImage, startDateTime, endDateTime, Pageable.unpaged());
 
         long totalReviews = allReviews.getTotalElements();
         double averageRating = 0.0;
