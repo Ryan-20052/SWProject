@@ -461,14 +461,7 @@
     <section class="products">
         <div class="section-inner">
             <div class="content-inner">
-                <form th:action="@{/home/homepage}" method="get" style="margin-bottom: 20px;">
-                    <label for="sort">Sắp xếp theo giá: </label>
-                    <select id="sort" name="sort" onchange="this.form.submit()">
-                        <option th:value="default" th:selected="${currentSort == 'default'}">Mặc định</option>
-                        <option th:value="priceAsc" th:selected="${currentSort == 'priceAsc'}">Giá tăng dần</option>
-                        <option th:value="priceDesc" th:selected="${currentSort == 'priceDesc'}">Giá giảm dần</option>
-                    </select>
-                </form>
+
 
                 <h2>Tất cả sản phẩm</h2>
                 <div class="sub">Danh sách đầy đủ sản phẩm</div>
