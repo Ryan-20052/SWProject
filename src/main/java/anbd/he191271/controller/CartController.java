@@ -118,39 +118,45 @@ public class CartController {
         return "redirect:/cart/view";
     }
 
+    // SỬA METHOD VIEWCART - ĐỔI TÊN PARAMETERS
     @GetMapping("/view")
-    public String viewCart(Model model, HttpSession session) {
+    public String viewCart(@RequestParam(required = false) String category,
+                           @RequestParam(required = false) Integer minSubtotal,  // ĐỔI TÊN
+                           @RequestParam(required = false) Integer maxSubtotal,  // ĐỔI TÊN
+                           @RequestParam(required = false) String duration,
+                           Model model, HttpSession session) {
+
         Customer customer = (Customer) session.getAttribute("customer");
         if (customer == null) {
             return "redirect:/login.html";
         }
-        List<CartItemDTO> items = cartService.getCartItemsByCustomer(customer.getId());
+
+        // Lấy items với filter
+        List<CartItemDTO> items = cartService.getFilteredCartItems(
+                customer.getId(), category, minSubtotal, maxSubtotal, duration);
+
+        // Tính tổng tiền
+        long totalPrice = cartService.computeTotal(items);
+
+        // Lấy danh sách filter options
+        List<String> categories = cartService.getAvailableCategories(customer.getId());
+        List<String> durations = cartService.getAvailableDurations(customer.getId());
+
+        // Kiểm tra có filter active không
+        boolean hasFilters = cartService.hasActiveFilters(category, minSubtotal, maxSubtotal, duration);
+
+        // Add attributes to model
         model.addAttribute("cartItems", items);
-        return "shoppingCart"; // → file cart.html
-    }
-    @PostMapping("/checkout")
-    public String checkout(@RequestParam(value = "selectedItems", required = false) List<Long> selectedItems,
-                           HttpSession session,
-                           RedirectAttributes redirectAttributes) {
-        Customer customer = (Customer) session.getAttribute("customer");
-        if (customer == null) {
-            return "redirect:/login.html";
-        }
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("categories", categories);
+        model.addAttribute("durations", durations);
+        model.addAttribute("hasFilters", hasFilters);
+        model.addAttribute("category", category);
+        model.addAttribute("minSubtotal", minSubtotal);  // ĐỔI TÊN
+        model.addAttribute("maxSubtotal", maxSubtotal);  // ĐỔI TÊN
+        model.addAttribute("duration", duration);
 
-        if (selectedItems == null || selectedItems.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
-            return "redirect:/cart/view";
-        }
-
-        // Lấy danh sách sản phẩm theo ID được chọn
-        List<ShoppingCart> items = shoppingCartRepository.findAllById(selectedItems);
-
-        // 👉 TODO: Xử lý thanh toán / tạo đơn hàng ở đây (sẽ thêm ở bước sau)
-        // Sau khi thanh toán thành công:
-        shoppingCartRepository.deleteAll(items);
-
-        redirectAttributes.addFlashAttribute("message", "Thanh toán thành công! Các sản phẩm đã được xoá khỏi giỏ hàng.");
-        return "redirect:/cart/view";
+        return "shoppingCart";
     }
 
 }

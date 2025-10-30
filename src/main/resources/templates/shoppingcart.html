@@ -246,7 +246,78 @@
         </div>
     </div>
 </header>
+<!-- BỘ LỌC ĐƠN GIẢN -->
+<div style="width: 100%; max-width: 1000px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h3 style="margin: 0 0 15px 0; color: #333;">🔍 Lọc sản phẩm</h3>
 
+    <form method="get" action="/cart/view">
+        <div style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+
+            <!-- Lọc theo Category -->
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Danh mục</label>
+                <select name="category" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 150px;">
+                    <option value="">Tất cả danh mục</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat}"
+                            th:text="${cat}"
+                            th:selected="${category == cat}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Lọc theo Duration -->
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Thời hạn</label>
+                <select name="duration" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 150px;">
+                    <option value="">Tất cả thời hạn</option>
+                    <option th:each="dur : ${durations}"
+                            th:value="${dur}"
+                            th:text="${dur}"
+                            th:selected="${duration == dur}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Lọc theo SUBTOTAL (Tổng tiền = giá × số lượng) -->
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px;">Khoảng tổng tiền</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="number" name="minSubtotal" th:value="${minSubtotal}"
+                           placeholder="Tổng thấp nhất" min="0"
+                           style="padding: 8px; width: 120px; border: 1px solid #ddd; border-radius: 6px;">
+                    <span>-</span>
+                    <input type="number" name="maxSubtotal" th:value="${maxSubtotal}"
+                           placeholder="Tổng cao nhất" min="0"
+                           style="padding: 8px; width: 120px; border: 1px solid #ddd; border-radius: 6px;">
+                </div>
+            </div>
+
+            <!-- Nút -->
+            <div>
+                <button type="submit"
+                        style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Lọc
+                </button>
+                <a th:href="@{/cart/view}"
+                   style="padding: 8px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 6px; display: inline-block; margin-left: 10px;">
+                    Xóa lọc
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Hiển thị filter đang active -->
+    <div th:if="${hasFilters}" style="margin-top: 15px;">
+        <p style="margin: 0; font-size: 14px; color: #666;">
+            Đang lọc:
+            <span th:if="${category}">Danh mục: <strong th:text="${category}"></strong> </span>
+            <span th:if="${duration}">Thời hạn: <strong th:text="${duration}"></strong> </span>
+            <span th:if="${minSubtotal != null}">Tổng tiền từ: <strong th:text="${#numbers.formatDecimal(minSubtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong> </span>
+            <span th:if="${maxSubtotal != null}">Tổng tiền đến: <strong th:text="${#numbers.formatDecimal(maxSubtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong> </span>
+        </p>
+    </div>
+</div>
 <main>
     <div th:if="${#lists.isEmpty(cartItems)}" class="empty-cart">
         <p>Giỏ hàng trống. <a href="/home/homepage">Tiếp tục mua sắm</a></p>
