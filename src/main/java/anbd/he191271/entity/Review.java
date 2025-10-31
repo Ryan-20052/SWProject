@@ -3,7 +3,6 @@ package anbd.he191271.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "review")
@@ -36,7 +35,7 @@ public class Review {
     private String comment;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // SỬA: LocalDateTime thay vì LocalDate
+    private LocalDateTime createdAt;
 
     @Lob
     @Column(name = "review_image")
@@ -45,15 +44,23 @@ public class Review {
     @Column(name = "has_image")
     private Boolean hasImage = false;
 
+    // SỬA: Dùng String thay vì enum
+    @Column(name = "status", nullable = false, length = 20)
+    private String status = "ACTIVE";
+
     // ===== Constructors =====
     public Review() {
-        this.createdAt = LocalDateTime.now(); // SỬA: LocalDateTime.now()
+        this.createdAt = LocalDateTime.now();
+        this.status = "ACTIVE";
     }
 
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
-            createdAt = LocalDateTime.now(); // SỬA: LocalDateTime.now()
+            createdAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = "ACTIVE";
         }
     }
 
@@ -85,7 +92,6 @@ public class Review {
     public String getComment() { return comment; }
     public void setComment(String comment) { this.comment = comment; }
 
-    // SỬA: Getter và Setter cho LocalDateTime
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -101,9 +107,20 @@ public class Review {
         this.hasImage = hasImage != null ? hasImage : false;
     }
 
+    // Getter và Setter cho status
+    public String getStatus() { return status; }
+    public void setStatus(String status) {
+        this.status = (status != null && !status.trim().isEmpty()) ? status : "ACTIVE";
+    }
+
     // ===== Utility Methods =====
     public boolean hasImage() {
         return Boolean.TRUE.equals(hasImage);
+    }
+
+    // Kiểm tra review có active không
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
     }
 
     @Override
@@ -114,6 +131,7 @@ public class Review {
                 ", product=" + (product != null ? product.getId() : "null") +
                 ", rating=" + rating +
                 ", hasImage=" + hasImage +
+                ", status=" + status +
                 '}';
     }
 }

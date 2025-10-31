@@ -342,6 +342,30 @@
             margin-top: 5px;
         }
 
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .text-success {
+            color: var(--success);
+        }
+
+        .text-muted {
+            color: var(--secondary);
+        }
+
         @media (max-width: 768px) {
             .filter-form {
                 grid-template-columns: 1fr;
@@ -407,7 +431,6 @@
 
     <!-- BỘ LỌC -->
     <div class="card">
-
         <div class="card-body">
             <form class="filter-form" th:action="@{/review/list}" method="get">
                 <input type="hidden" name="productId" th:value="${productId}"/>
@@ -458,6 +481,7 @@
         </div>
         <div class="card-body" style="padding: 0;">
             <div th:if="${reviews != null and reviews.totalElements > 0}">
+                <!-- TỰ ĐỘNG CHỈ HIỂN THỊ REVIEW ACTIVE (ĐÃ ĐƯỢC LỌC TRONG SERVICE) -->
                 <div th:each="r : ${reviews.content}" class="review-item">
                     <div class="review-avatar">
                         <img th:if="${r.customer != null and r.customer.avatar != null and r.customer.avatar.length > 0}"
@@ -473,10 +497,10 @@
                         </div>
 
                         <div class="review-stars">
-                                <span th:each="i : ${#numbers.sequence(1, 5)}"
-                                      th:class="${i <= r.rating} ? 'star filled' : 'star'">
-                                    <i class="fas fa-star"></i>
-                                </span>
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:class="${i <= r.rating} ? 'star filled' : 'star'">
+                                <i class="fas fa-star"></i>
+                            </span>
                         </div>
 
                         <div class="review-comment" th:text="${r.comment}">Sản phẩm rất tốt, tôi rất hài lòng với chất lượng và dịch vụ hỗ trợ.</div>
@@ -485,40 +509,25 @@
                              th:src="@{/review/image/{id}(id=${r.id})}"
                              class="review-img" alt="Ảnh review">
 
-                        <!-- NÚT BÁO VI PHẠM - ĐÃ THÊM ĐIỀU KIỆN THÔNG MINH -->
+                        <!-- NÚT BÁO VI PHẠM CHO USER -->
                         <div class="review-actions" style="margin-top: 12px;">
-                            <!-- Kiểm tra đã đăng nhập chưa -->
                             <div th:if="${session.customer != null}">
-                                <!-- Kiểm tra không phải review của chính mình -->
                                 <div th:if="${r.customer.id != session.customer.id}">
-                                    <!-- Nút báo cáo sẽ được xử lý bằng JavaScript -->
                                     <a th:href="@{/report/review/form/{reviewId}(reviewId=${r.id})}"
                                        class="btn btn-outline-danger btn-sm report-btn"
                                        th:attr="data-review-id=${r.id}"
                                        style="display: none;">
                                         <i class="fas fa-flag"></i> Báo vi phạm
                                     </a>
-                                    <!-- Thông báo đã báo cáo -->
                                     <div class="already-reported" th:attr="data-review-id=${r.id}" style="display: none;">
                                         <small class="text-muted">
                                             <i class="fas fa-check-circle text-success"></i> Đã báo cáo
                                         </small>
                                     </div>
                                 </div>
-                                <!-- Nếu là review của chính mình -->
                                 <div th:if="${r.customer.id == session.customer.id}" class="text-muted">
                                     <small><i class="fas fa-info-circle"></i> Đánh giá của bạn</small>
-                                    <form th:action="@{/review/delete}" method="post" style="display: inline;">
-                                        <input type="hidden" name="id" th:value="${r.id}">
-                                        <input type="hidden" name="productId" th:value="${productId}"> <!-- THÊM DÒNG NÀY -->
-
-                                    </form>
                                 </div>
-                            </div>
-
-                            <!-- Nếu chưa đăng nhập -->
-                            <!-- Nếu chưa đăng nhập - ẨN HOÀN TOÀN -->
-                            <div th:if="${session.customer == null}" style="display: none;">
                             </div>
                         </div>
                     </div>
@@ -528,7 +537,6 @@
             <div th:if="${reviews == null or reviews.totalElements == 0}" class="no-reviews">
                 <i class="far fa-comment-dots"></i>
                 <h3>Chưa có đánh giá nào</h3>
-
             </div>
         </div>
     </div>
@@ -572,11 +580,9 @@
         const reportButtons = document.querySelectorAll('.report-btn');
 
         if (reportButtons.length > 0) {
-            // Kiểm tra từng review
             reportButtons.forEach(button => {
                 const reviewId = button.getAttribute('data-review-id');
 
-                // Gọi API kiểm tra xem đã report chưa
                 fetch('/report/review/check/' + reviewId)
                     .then(response => {
                         if (!response.ok) {
@@ -589,18 +595,15 @@
                         const alreadyReportedDiv = document.querySelector('.already-reported[data-review-id="' + reviewId + '"]');
 
                         if (data.hasReported) {
-                            // Đã report rồi -> ẩn nút, hiển thị thông báo
                             if (reportBtn) reportBtn.style.display = 'none';
                             if (alreadyReportedDiv) alreadyReportedDiv.style.display = 'block';
                         } else {
-                            // Chưa report -> hiển thị nút
                             if (reportBtn) reportBtn.style.display = 'inline-block';
                             if (alreadyReportedDiv) alreadyReportedDiv.style.display = 'none';
                         }
                     })
                     .catch(error => {
                         console.error('Error checking report status:', error);
-                        // Nếu có lỗi, vẫn hiển thị nút báo cáo
                         const reportBtn = document.querySelector('.report-btn[data-review-id="' + reviewId + '"]');
                         if (reportBtn) reportBtn.style.display = 'inline-block';
                     });

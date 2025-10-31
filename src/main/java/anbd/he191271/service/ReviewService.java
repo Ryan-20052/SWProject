@@ -25,7 +25,6 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review không tồn tại"));
     }
 
-    // SỬA: Sử dụng LocalDate thay vì Date
     public Page<Review> getFilteredReviews(int productId,
                                            Integer rating,
                                            Boolean hasImage,
@@ -33,7 +32,6 @@ public class ReviewService {
                                            LocalDate endDate,
                                            int page,
                                            int size) {
-        // Chuyển đổi LocalDate sang LocalDateTime để query
         LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
 
@@ -41,16 +39,13 @@ public class ReviewService {
                 productId, rating, hasImage, startDateTime, endDateTime, PageRequest.of(page, size));
     }
 
-    // SỬA: Sử dụng LocalDate thay vì Date
     public Map<String, Object> getReviewStats(int productId, Integer rating, Boolean hasImage,
                                               LocalDate startDate, LocalDate endDate) {
         Map<String, Object> stats = new HashMap<>();
 
-        // Chuyển đổi LocalDate sang LocalDateTime để query
         LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
 
-        // Lấy tất cả reviews (không phân trang) để tính toán
         Page<Review> allReviews = reviewRepository.findFilteredReviews(
                 productId, rating, hasImage, startDateTime, endDateTime, Pageable.unpaged());
 
