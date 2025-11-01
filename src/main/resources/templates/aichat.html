@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trợ lý ảo</title>
+    <title>Trợ lý ảo LicenseShop</title>
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
@@ -65,10 +65,10 @@
 
         .msg {
             max-width: 75%;
-            padding: 10px 14px;
+            padding: 12px 16px;
             margin: 8px 0;
             border-radius: 8px;
-            line-height: 1.4;
+            line-height: 1.5;
             white-space: pre-wrap;
             animation: fadeIn 0.25s ease;
         }
@@ -102,9 +102,14 @@
             flex: 1;
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             outline: none;
             font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .input-area input:focus {
+            border-color: #2563eb;
         }
 
         .input-area button {
@@ -112,50 +117,82 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 10px 16px;
+            padding: 12px 20px;
             margin-left: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            min-width: 80px;
         }
 
         .input-area button:hover {
             background: #1d4ed8;
         }
 
-        .loading {
-            display: inline-block;
+        .input-area button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            border-bottom-left-radius: 2px;
+            max-width: fit-content;
+            margin: 8px 0;
+        }
+
+        .typing-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #555;
-            margin: 0 2px;
-            animation: blink 1s infinite alternate;
+            background: #6b7280;
+            animation: typing-bounce 1.4s infinite ease-in-out;
         }
 
-        .loading:nth-child(2) { animation-delay: .2s; }
-        .loading:nth-child(3) { animation-delay: .4s; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
-        @keyframes blink {
-            from { opacity: 0.2; }
-            to { opacity: 1; }
+        @keyframes typing-bounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
         }
 
         @media (max-width: 700px) {
-            .chat-container { margin: 0; border-radius: 0; height: 100vh; }
+            .chat-container {
+                margin: 0;
+                border-radius: 0;
+                height: 100vh;
+            }
+            .msg {
+                max-width: 85%;
+            }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <span>🤖 Trợ lý ảo</span>
+    <span>🤖 Trợ lý ảo LicenseShop</span>
     <button class="back-btn" onclick="window.location.href='/home/homepage'">⬅ Trang chủ</button>
 </header>
 
 <div class="chat-container">
     <div class="messages" id="messages">
-        <div class="msg ai">Xin chào 👋! Tôi có thể giúp bạn tìm sản phẩm, xem sản phẩm bán chạy hoặc gợi ý phù hợp với nhu cầu của bạn.</div>
+        <div class="msg ai">👋 Xin chào! Chào mừng đến với LicenseShop!
+
+            Tôi là Mia - trợ lý AI của LicenseShop. Tôi có thể giúp bạn:
+
+            🔎 Tìm license phù hợp với nhu cầu
+            💰 So sánh giá cả các phiên bản
+            ⭐ Tư vấn sản phẩm bán chạy
+            🆘 Hỗ trợ thông tin cửa hàng
+
+            💡 Hãy cho tôi biết bạn cần gì!</div>
     </div>
 
     <div class="input-area">
@@ -169,19 +206,38 @@
     const sendBtn = document.getElementById("sendBtn");
     const messages = document.getElementById("messages");
 
+    // Auto focus khi trang load
+    input.focus();
+
     function addMessage(role, text) {
         const msg = document.createElement("div");
         msg.className = "msg " + role;
-        msg.textContent = text;
+
+        // Format text từ AI response
+        if (role === "ai") {
+            const formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+            msg.innerHTML = formattedText;
+        } else {
+            msg.textContent = text;
+        }
+
         messages.appendChild(msg);
         messages.scrollTop = messages.scrollHeight;
     }
 
     function addLoading() {
         const wrap = document.createElement("div");
-        wrap.className = "msg ai";
+        wrap.className = "typing-indicator";
         wrap.id = "loadingMsg";
-        wrap.innerHTML = '<span class="loading"></span><span class="loading"></span><span class="loading"></span>';
+        wrap.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <span style="margin-left: 8px; color: #6b7280; font-size: 14px;">AI đang trả lời...</span>
+        `;
         messages.appendChild(wrap);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -194,23 +250,40 @@
     async function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
+
         addMessage("user", text);
         input.value = "";
+        input.disabled = true;
+        sendBtn.disabled = true;
+        sendBtn.textContent = "Đang gửi...";
+
         addLoading();
 
         try {
             const res = await fetch("/chat/api", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({
+                    message: text,
+                    sessionId: "user-session-" + Date.now()
+                })
             });
 
             const data = await res.json();
             removeLoading();
-            addMessage("ai", data.reply || "Xin lỗi, tôi chưa có câu trả lời phù hợp.");
+
+            // Sử dụng data.message thay vì data.reply
+            addMessage("ai", data.message || "Xin lỗi, tôi chưa có câu trả lời phù hợp.");
+
         } catch (err) {
             removeLoading();
-            addMessage("ai", "Lỗi khi gửi tin nhắn: " + err.message);
+            addMessage("ai", "❌ Lỗi kết nối. Vui lòng thử lại hoặc gọi 1900 636 969");
+        } finally {
+            // Re-enable input và button
+            input.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Gửi";
+            input.focus();
         }
     }
 
