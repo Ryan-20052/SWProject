@@ -366,6 +366,64 @@
             color: var(--secondary);
         }
 
+        /* Thêm style cho sort options và error message */
+        .sort-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         @media (max-width: 768px) {
             .filter-form {
                 grid-template-columns: 1fr;
@@ -400,6 +458,11 @@
                 top: 0;
                 margin-bottom: 15px;
             }
+
+            .sort-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -411,6 +474,12 @@
         </a>
         <h1>Đánh giá sản phẩm</h1>
         <p th:text="${product != null ? product.name : 'Sản phẩm'}">Microsoft Office 365</p>
+    </div>
+
+    <!-- Hiển thị thông báo lỗi -->
+    <div th:if="${errorMessage}" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
     </div>
 
     <!-- Thống kê -->
@@ -429,15 +498,30 @@
         </div>
     </div>
 
-    <!-- BỘ LỌC -->
+    <!-- BỘ LỌC VÀ SẮP XẾP -->
     <div class="card">
         <div class="card-body">
-            <form class="filter-form" th:action="@{/review/list}" method="get">
+            <!-- Section sắp xếp -->
+            <div class="sort-section">
+                <div class="sort-options">
+                    <label for="sort"><strong>Sắp xếp:</strong></label>
+                    <select id="sort" name="sort" class="sort-select" onchange="updateSort()">
+                        <option value="newest" th:selected="${selectedSort == 'newest'}">Mới nhất</option>
+                        <option value="oldest" th:selected="${selectedSort == 'oldest'}">Cũ nhất</option>
+                    </select>
+                </div>
+                <div class="total-results" th:if="${reviews != null}">
+                    <span class="text-muted">Hiển thị <strong th:text="${reviews.numberOfElements}">0</strong> trong tổng số <strong th:text="${reviews.totalElements}">0</strong> đánh giá</span>
+                </div>
+            </div>
+
+            <form class="filter-form" th:action="@{/review/list}" method="get" id="filterForm">
                 <input type="hidden" name="productId" th:value="${productId}"/>
+                <input type="hidden" name="sort" th:value="${selectedSort}" id="sortHidden"/>
 
                 <div class="form-group">
                     <label for="startDate"><i class="far fa-calendar-alt"></i> Từ ngày</label>
-                    <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control">
+                    <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control" onchange="updateEndDateMin()">
                 </div>
 
                 <div class="form-group">
@@ -467,7 +551,7 @@
 
                 <div class="form-group" style="grid-column: 1 / -1;">
                     <button type="submit" class="btn btn-block">
-                        <i class="fas fa-search"></i> Áp dụng
+                        <i class="fas fa-search"></i> Áp dụng bộ lọc
                     </button>
                 </div>
             </form>
@@ -477,11 +561,13 @@
     <!-- DANH SÁCH REVIEW -->
     <div class="card">
         <div class="card-header">
-            <h2><i class="fas fa-comments"></i> Đánh giá từ khách hàng</h2>
+            <h2><i class="fas fa-comments"></i> Đánh giá từ khách hàng
+                <span th:if="${selectedSort == 'newest'}" class="text-muted" style="font-size: 14px;">(Mới nhất)</span>
+                <span th:if="${selectedSort == 'oldest'}" class="text-muted" style="font-size: 14px;">(Cũ nhất)</span>
+            </h2>
         </div>
         <div class="card-body" style="padding: 0;">
             <div th:if="${reviews != null and reviews.totalElements > 0}">
-                <!-- TỰ ĐỘNG CHỈ HIỂN THỊ REVIEW ACTIVE (ĐÃ ĐƯỢC LỌC TRONG SERVICE) -->
                 <div th:each="r : ${reviews.content}" class="review-item">
                     <div class="review-avatar">
                         <img th:if="${r.customer != null and r.customer.avatar != null and r.customer.avatar.length > 0}"
@@ -537,6 +623,7 @@
             <div th:if="${reviews == null or reviews.totalElements == 0}" class="no-reviews">
                 <i class="far fa-comment-dots"></i>
                 <h3>Chưa có đánh giá nào</h3>
+                <p class="text-muted">Hãy là người đầu tiên đánh giá sản phẩm này</p>
             </div>
         </div>
     </div>
@@ -544,7 +631,7 @@
     <!-- PHÂN TRANG -->
     <div class="pagination" th:if="${reviews != null and reviews.totalPages > 1}">
         <a th:each="pageNum : ${#numbers.sequence(1, reviews.totalPages)}"
-           th:href="@{/review/list(productId=${productId}, page=${pageNum - 1}, size=3, startDate=${startDate}, endDate=${endDate}, rating=${selectedRating}, hasImage=${hasImage})}"
+           th:href="@{/review/list(productId=${productId}, page=${pageNum - 1}, size=${param.size != null ? param.size : 3}, startDate=${startDate}, endDate=${endDate}, rating=${selectedRating}, hasImage=${hasImage}, sort=${selectedSort})}"
            th:text="${pageNum}"
            th:classappend="${pageNum == (reviews.number + 1)} ? 'active page-link' : 'page-link'">
         </a>
@@ -575,6 +662,9 @@
                 this.style.transform = 'translateY(0)';
             });
         });
+
+        // Cập nhật min date cho endDate khi trang load
+        updateEndDateMin();
 
         // ========== KIỂM TRA REPORT STATUS ==========
         const reportButtons = document.querySelectorAll('.report-btn');
@@ -610,6 +700,33 @@
             });
         }
     });
+
+    // ========== CẬP NHẬT MIN DATE CHO END DATE ==========
+    function updateEndDateMin() {
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+
+        if (startDate.value) {
+            // Set min attribute cho endDate = startDate value
+            endDate.min = startDate.value;
+
+            // Nếu endDate hiện tại nhỏ hơn startDate, reset endDate
+            if (endDate.value && endDate.value < startDate.value) {
+                endDate.value = startDate.value;
+            }
+        } else {
+            // Nếu không có startDate, remove min attribute
+            endDate.removeAttribute('min');
+        }
+    }
+
+    function updateSort() {
+        const sort = document.getElementById('sort').value;
+        document.getElementById('sortHidden').value = sort;
+
+        // Submit form
+        document.getElementById('filterForm').submit();
+    }
 </script>
 </body>
 </html>

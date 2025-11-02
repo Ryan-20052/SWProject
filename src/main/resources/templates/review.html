@@ -324,13 +324,29 @@
 <body>
 <div class="container">
   <div class="header">
+    <<a th:href="@{/purchasedlicenses}" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Trở về danh sách
+  </a>
+
 
     <h2>Đánh giá sản phẩm</h2>
     <p th:text="${product.name}">Tên sản phẩm</p>
   </div>
 
   <div class="form-content">
-    <form th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
+    <!-- ✅ Thông báo lỗi & cảnh báo -->
+    <div th:if="${errorMessage}"
+         style="background:#fee2e2; color:#b91c1c; padding:12px; border-radius:10px; text-align:center; font-weight:600; margin-bottom:20px;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div th:if="${warningMessage}"
+         style="background:#fef3c7; color:#92400e; padding:12px; border-radius:10px; text-align:center; font-weight:600; margin-bottom:20px;">
+      <i class="fas fa-info-circle"></i>
+      <span th:text="${warningMessage}"></span>
+    </div>
+    <form id="reviewForm" th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="productId" th:value="${product.id}" />
 
       <!-- Rating Section -->
@@ -437,6 +453,17 @@
     });
   });
 
+  // Reset hover effect khi rời khỏi container sao
+  document.getElementById('starContainer').addEventListener('mouseleave', () => {
+    let currentRating = parseInt(ratingInput.value);
+    if (currentRating && currentRating > 0) {
+      highlightStars(currentRating);
+    } else {
+      stars.forEach(s => s.classList.remove("selected"));
+      ratingText.textContent = "Vui lòng chọn số sao";
+    }
+  });
+
   // Khi load lại trang, highlight sao theo rating đã lưu
   document.addEventListener("DOMContentLoaded", () => {
     let currentRating = parseInt(ratingInput.value);
@@ -459,41 +486,39 @@
   // Xem trước ảnh upload
   function previewImage(event) {
     const file = event.target.files[0];
-
     if (file) {
       const reader = new FileReader();
       reader.onload = e => {
         previewImg.src = e.target.result;
         previewImg.style.display = "block";
         fileLabelText.textContent = "Đã chọn: " + file.name;
-
-        // Ẩn ảnh hiện tại nếu có
-        if (existingImg) {
-          existingImg.style.display = "none";
-        }
+        if (existingImg) existingImg.style.display = "none";
       };
       reader.readAsDataURL(file);
     } else {
       previewImg.style.display = "none";
       fileLabelText.textContent = "Chọn ảnh từ máy tính";
-
-      // Hiện lại ảnh hiện tại nếu có
-      if (existingImg) {
-        existingImg.style.display = "block";
-      }
+      if (existingImg) existingImg.style.display = "block";
     }
   }
 
-  // Reset hover effect khi rời khỏi container sao
-  document.getElementById('starContainer').addEventListener('mouseleave', () => {
-    let currentRating = parseInt(ratingInput.value);
-    if (currentRating && currentRating > 0) {
-      highlightStars(currentRating);
-    } else {
-      stars.forEach(s => s.classList.remove("selected"));
-      ratingText.textContent = "Vui lòng chọn số sao";
+  // ✅ Chặn submit nếu chưa chọn sao hoặc comment trống
+  document.getElementById("reviewForm").addEventListener("submit", function (e) {
+    const ratingValue = parseInt(ratingInput.value);
+    if (!ratingValue || ratingValue < 1 || ratingValue > 5) {
+      e.preventDefault();
+      alert("⚠️ Vui lòng chọn số sao hợp lệ (1–5) trước khi gửi đánh giá!");
+      return;
+    }
+
+    const comment = document.getElementById("comment").value.trim();
+    if (comment === "") {
+      if (!confirm("🟡 Bạn chưa nhập nhận xét. Bạn có chắc muốn gửi đánh giá chỉ có số sao không?")) {
+        e.preventDefault();
+      }
     }
   });
 </script>
+
 </body>
 </html>

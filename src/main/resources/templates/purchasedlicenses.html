@@ -68,7 +68,6 @@
     <!-- Bộ lọc tổng hợp -->
     <form id="filterForm" method="get" action="/purchasedlicenses" class="filters">
         <input type="text" name="search" th:value="${search}" placeholder="🔍 Tìm theo tên sản phẩm" maxlength="100">
-
         <select name="category">
             <option value="">-- Tất cả danh mục --</option>
             <option th:each="c : ${categories}"

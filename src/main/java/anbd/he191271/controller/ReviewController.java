@@ -36,7 +36,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    // ✅ Hiển thị danh sách review có lọc và phân trang
+    // ✅ Hiển thị danh sách review có lọc, phân trang và sắp xếp
     @GetMapping("/review/list")
     public String viewReviews(
             @RequestParam("productId") int productId,
@@ -46,15 +46,29 @@ public class ReviewController {
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size,
+            @RequestParam(defaultValue = "newest") String sort, // Thêm tham số sắp xếp
             Model model
     ) {
         try {
+            // ✅ VALIDATE DATE RANGE
+            if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                LocalDate start = LocalDate.parse(startDate);
+                LocalDate end = LocalDate.parse(endDate);
+
+                if (end.isBefore(start)) {
+                    model.addAttribute("errorMessage", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu!");
+                    // Vẫn tiếp tục xử lý nhưng không áp dụng filter date
+                    startDate = null;
+                    endDate = null;
+                }
+            }
+
             // SỬA: Sử dụng LocalDate thay vì Date
             LocalDate start = (startDate != null && !startDate.isEmpty()) ? LocalDate.parse(startDate) : null;
             LocalDate end = (endDate != null && !endDate.isEmpty()) ? LocalDate.parse(endDate) : null;
 
-            // Lấy danh sách reviews (phân trang)
-            Page<Review> reviews = reviewService.getFilteredReviews(productId, rating, hasImage, start, end, page, size);
+            // Lấy danh sách reviews với sắp xếp
+            Page<Review> reviews = reviewService.getFilteredReviews(productId, rating, hasImage, start, end, page, size, sort);
 
             // Lấy thống kê từ service
             Map<String, Object> stats = reviewService.getReviewStats(productId, rating, hasImage, start, end);
@@ -74,9 +88,11 @@ public class ReviewController {
             model.addAttribute("hasImage", hasImage);
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
+            model.addAttribute("selectedSort", sort); // Thêm selectedSort
 
         } catch (Exception e) {
             e.printStackTrace();
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại!");
         }
 
         return "viewReview";
@@ -100,12 +116,13 @@ public class ReviewController {
         return "review";
     }
 
-    // ✅ Lưu review - ĐÃ SỬA
     @PostMapping("/review/save")
     public String saveReview(@ModelAttribute Review review,
                              @RequestParam("productId") int productId,
+                             @RequestParam(value = "rating", required = false) Integer rating,
                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-                             HttpSession session) {
+                             HttpSession session,
+                             Model model) {
         Customer customer = (Customer) session.getAttribute("customer");
         if (customer == null) return "redirect:/login.html";
 
@@ -114,6 +131,49 @@ public class ReviewController {
 
         Optional<Review> existingReview = reviewRepository.findByCustomer_IdAndProduct_Id(customer.getId(), productId);
 
+        // ===== VALIDATION BẮT BUỘC =====
+        String comment = review.getComment();
+        if (comment != null) {
+            comment = comment.trim(); // Xóa khoảng trắng đầu/cuối
+            // Nếu chỉ có khoảng trắng → coi như rỗng
+            if (comment.isEmpty()) comment = null;
+        }
+        review.setComment(comment);
+
+        // 🟡 VALIDATE RATING BẮT BUỘC
+        if (rating == null || rating < 1 || rating > 5) {
+            model.addAttribute("errorMessage", "Vui lòng chọn số sao đánh giá từ 1 đến 5!");
+            model.addAttribute("product", product);
+            model.addAttribute("review", review);
+            return "review";
+        }
+
+        // ✅ VALIDATE FILE SIZE VÀ TYPE
+        if (imageFile != null && !imageFile.isEmpty()) {
+            // Kiểm tra kích thước file (tối đa 5MB)
+            if (imageFile.getSize() > 5 * 1024 * 1024) {
+                model.addAttribute("errorMessage", "Kích thước ảnh không được vượt quá 5MB!");
+                model.addAttribute("product", product);
+                model.addAttribute("review", review);
+                return "review";
+            }
+
+            // Kiểm tra loại file
+            String contentType = imageFile.getContentType();
+            if (contentType == null ||
+                    (!contentType.equals("image/jpeg") &&
+                            !contentType.equals("image/png") &&
+                            !contentType.equals("image/jpg"))) {
+                model.addAttribute("errorMessage", "Chỉ chấp nhận file ảnh định dạng JPG, JPEG hoặc PNG!");
+                model.addAttribute("product", product);
+                model.addAttribute("review", review);
+                return "review";
+            }
+        }
+
+        // Gán rating hợp lệ
+        review.setRating(rating);
+
         try {
             byte[] imageBytes = (imageFile != null && !imageFile.isEmpty()) ? imageFile.getBytes() : null;
 
@@ -121,36 +181,33 @@ public class ReviewController {
             r.setCustomer(customer);
             r.setProduct(product);
             r.setRating(review.getRating());
-            r.setComment(review.getComment());
+            r.setComment(comment);
             r.setCreatedAt(LocalDateTime.now());
 
-            // SỬA QUAN TRỌNG: Xử lý ảnh đúng cách
+            // ✅ Xử lý ảnh
             if (imageBytes != null) {
                 r.setReviewImage(imageBytes);
-                r.setHasImage(true); // QUAN TRỌNG: Phải set hasImage = true
+                r.setHasImage(true);
             } else {
-                // Nếu không có ảnh mới upload, nhưng đang edit review có ảnh cũ
                 if (existingReview.isPresent() && existingReview.get().getHasImage()) {
-                    // Giữ ảnh cũ
                     r.setReviewImage(existingReview.get().getReviewImage());
                     r.setHasImage(true);
                 } else {
-                    // Không có ảnh
                     r.setReviewImage(null);
                     r.setHasImage(false);
                 }
             }
 
-            // THÊM DEBUG
             System.out.println("🟡 Saving review - Rating: " + r.getRating() + ", HasImage: " + r.getHasImage());
-
             reviewRepository.save(r);
-
             System.out.println("✅ Review saved successfully! ID: " + r.getId());
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("❌ Error saving review: " + e.getMessage());
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi lưu đánh giá. Vui lòng thử lại!");
+            model.addAttribute("product", product);
+            model.addAttribute("review", review);
+            return "review";
         }
 
         return "redirect:/review/" + productId;

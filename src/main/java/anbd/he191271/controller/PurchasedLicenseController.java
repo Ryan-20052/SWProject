@@ -4,7 +4,7 @@ import anbd.he191271.entity.Customer;
 import anbd.he191271.entity.LicenseKey;
 import anbd.he191271.repository.CategoryRepository;
 import anbd.he191271.repository.LicenseKeyRepository;
-import anbd.he191271.service.LicenseService; // THAY ĐỔI IMPORT
+import anbd.he191271.service.LicenseService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -103,6 +103,7 @@ public class PurchasedLicenseController {
         model.addAttribute("to", to);
         model.addAttribute("sort", sort); // THÊM SORT VÀO MODEL
         model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("session", session);
         return "purchasedlicenses";
     }
 
