@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ----------------- Biến chung -----------------
     const buyNowBtn = document.getElementById('buyNowBtn');
-    const addToCartBtn = document.getElementById('addToCartBtn');
     const applyBtn = document.getElementById('applyVoucherBtn');
     const voucherInput = document.getElementById('voucherCode');
     const voucherMessage = document.getElementById('voucherMessage');
@@ -37,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (checked) {
             variantIdInput.value = checked.value;
             buyNowBtn.disabled = false;
-            addToCartBtn.disabled = false;
 
             // ✅ Cập nhật giá hiển thị + lưu giá gốc
             const priceEl = document.querySelector('.price');
@@ -48,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } else if (!variantIdInput.value) {
             buyNowBtn.disabled = true;
-            addToCartBtn.disabled = true;
         }
     }
     variantRadios.forEach(radio => radio.addEventListener('change', syncVariantFromRadio));
