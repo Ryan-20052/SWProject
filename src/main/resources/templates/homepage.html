@@ -447,7 +447,7 @@
                                     class="buy action-btn"
                                     type="button"
                                     aria-label="Mua ngay"
-                                    th:onclick="|window.location.href='@{/product/{id}(id=${product.id})}'|">
+                                    th:onclick="|window.location.href='@{/buydetail/{id}(id=${product.id})}'|">
                                 Mua ngay
                             </button>
                         </div>
@@ -489,7 +489,7 @@
                             </button>
                             <button class="buy action-btn"
                                     type="button"
-                                    th:onclick="|window.location.href='/product/${product.id}'|"
+                                    th:onclick="|window.location.href='/buydetail/${product.id}'|"
                                     aria-label="Mua ngay">
                                 Mua ngay
                             </button>

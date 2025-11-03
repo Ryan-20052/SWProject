@@ -1,6 +1,7 @@
 package anbd.he191271.service;
 
 import anbd.he191271.entity.Product;
+import anbd.he191271.entity.Variant;
 import anbd.he191271.repository.OrderDetailRepository;
 import anbd.he191271.repository.ProductRepository;
 import anbd.he191271.repository.VariantRepository;
@@ -83,5 +84,9 @@ public class ProductService {
      */
     public Page<Product> getProductsByCategoryPage(Integer categoryId, int page, int size) {
         return productRepository.findByCategoryId(categoryId, PageRequest.of(page, size));
+    }
+
+    public Variant findVariantById(int variantId) {
+        return variantRepository.findById(variantId).get();
     }
 }

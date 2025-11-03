@@ -71,7 +71,7 @@ public class HomeController {
 
         Page<Product> productPage = productService.getAllProductByStatusPage("available", page, size);
 
-        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("products", productPage.getContent()); //getContent() — danh sách phần tử trên trang hiện tại (List<T>).
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("pageSize", size);
@@ -85,6 +85,7 @@ public class HomeController {
 
         return "homepage"; // file templates/homepage.html
     }
+
 
     /**
      * Lọc theo category có phân trang
