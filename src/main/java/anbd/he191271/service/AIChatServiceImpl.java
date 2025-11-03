@@ -243,42 +243,109 @@ public class AIChatServiceImpl implements AIChatService {
             return Collections.emptyList();
         }
 
-        List<String> queries = new ArrayList<>();
+        Set<String> queries = new LinkedHashSet<>();
 
-        // 🚨 PATTERN MỚI - LINH HOẠT HƠN
-        // Tách riêng từng từ khóa thay vì pattern phức tạp
-        String[] productKeywords = {
-                "microsoft office", "office 365", "office", "word", "excel", "powerpoint",
-                "windows 10", "windows 11", "windows",
-                "adobe photoshop", "photoshop", "adobe premiere", "premiere", "adobe illustrator", "illustrator", "adobe",
-                "steam wallet", "steam", "game",
-                "antivirus", "kaspersky", "norton", "bitdefender",
-                "matlab", "autocad", "visual studio",
-                "grammarly", "spotify", "netflix", "youtube premium",
-                "microsoft", "adobe", "license", "bản quyền", "phần mềm", "software"
+        // 🚨 DANH SÁCH TỪ KHÓA TỐI ƯU THEO SẢN PHẨM THỰC TẾ
+        String[][] productKeywordGroups = {
+                // Microsoft Office
+                {"microsoft office 365", "office 365", "microsoft office", "office"},
+
+                // Grammarly
+                {"grammarly premium", "grammarly"},
+
+                // Học tập
+                {"khan academy plus", "khan academy", "coursera pro", "coursera"},
+
+                // Streaming & Entertainment
+                {"spotify premium", "spotify", "netflix gift card", "netflix",
+                        "disney+ 1 năm", "disney+", "disney plus"},
+
+                // Game
+                {"steam wallet 100k", "steam wallet", "steam"},
+
+                // Công cụ làm việc
+                {"slack pro", "slack", "zoom business", "zoom",
+                        "notion plus", "notion", "trello premium", "trello"},
+
+                // Windows OS
+                {"windows 11 pro key", "windows 11 home key", "windows 11",
+                        "windows 10 pro key", "windows 10 home key", "windows 10", "windows"},
+
+                // VPN Services
+                {"nordvpn 1 năm", "nordvpn", "expressvpn 6 tháng", "expressvpn",
+                        "surfshark vpn", "surfshark", "cyberghost vpn", "cyberghost", "vpn"}
         };
 
-        // 🚨 KIỂM TRA TỪNG TỪ KHÓA
-        for (String keyword : productKeywords) {
-            if (normalized.contains(keyword)) {
-                queries.add(keyword);
-                log.info("✅ Found product keyword: '{}' in message: '{}'", keyword, normalized);
+        // 🚨 TỐI ƯU: Tìm từ khóa CỤ THỂ trước, rồi đến TỔNG QUÁT
+        boolean foundSpecificKeyword = false;
+
+        for (String[] keywordGroup : productKeywordGroups) {
+            for (String keyword : keywordGroup) {
+                if (normalized.contains(keyword)) {
+                    if (queries.add(keyword)) {
+                        log.info("✅ Found specific keyword: '{}'", keyword);
+                    }
+                    foundSpecificKeyword = true;
+                    break; // Chỉ lấy 1 từ khóa trong nhóm
+                }
             }
         }
 
-        // 🚨 THÊM TÌM KIẾM THEO TỪ ĐƠN GIẢN
+        // 🚨 Nếu không tìm thấy từ khóa cụ thể, dùng từ khóa tổng quát
+        if (!foundSpecificKeyword) {
+            String[] generalKeywords = {
+                    "premium", "pro", "plus", "business", "key", "gift card",
+                    "wallet", "vpn", "phần mềm", "license", "bản quyền"
+            };
+
+            for (String keyword : generalKeywords) {
+                if (normalized.contains(keyword) && queries.size() < 2) {
+                    queries.add(keyword);
+                    log.info("✅ Added general keyword: '{}'", keyword);
+                }
+            }
+        }
+
+        // 🚨 FALLBACK: Tách từ đơn từ tin nhắn
         if (queries.isEmpty()) {
-            String[] simpleKeywords = normalized.split("\\s+");
-            for (String word : simpleKeywords) {
-                if (word.length() > 2 && isProductWord(word)) {
+            String[] words = normalized.split("\\s+");
+            for (String word : words) {
+                if (word.length() > 3 && isEnhancedProductWord(word) && queries.size() < 3) {
                     queries.add(word);
                     log.info("✅ Found product word: '{}'", word);
                 }
             }
         }
 
-        log.info("🔍 Extracted {} product queries: {}", queries.size(), queries);
-        return queries;
+        log.info("🔍 Final extracted queries: {}", queries);
+        return new ArrayList<>(queries);
+    }
+    // 🚨 CẬP NHẬT: Method kiểm tra từ đơn với danh sách sản phẩm thực tế
+    private boolean isEnhancedProductWord(String word) {
+        if (word.length() < 3) return false;
+
+        String[] enhancedProductWords = {
+                // Brands
+                "microsoft", "office", "grammarly", "khan", "coursera", "spotify",
+                "netflix", "steam", "disney", "slack", "zoom", "notion", "trello",
+                "windows", "nordvpn", "expressvpn", "surfshark", "cyberghost",
+
+                // Product types
+                "premium", "pro", "plus", "business", "key", "wallet", "vpn",
+                "gift", "card", "license", "home", "pro", "year", "tháng",
+
+                // Categories
+                "academy", "streaming", "music", "video", "game", "tool", "security"
+        };
+
+        for (String productWord : enhancedProductWords) {
+            if (productWord.equalsIgnoreCase(word) ||
+                    word.contains(productWord) ||
+                    productWord.contains(word)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 🚨 METHOD MỚI: Kiểm tra từ đơn có phải là sản phẩm không
