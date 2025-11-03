@@ -1,10 +1,13 @@
 package anbd.he191271.service;
 
 import anbd.he191271.dto.CartItemDTO;
+import anbd.he191271.entity.Product;
 import anbd.he191271.entity.ShoppingCart;
+import anbd.he191271.entity.Variant;
 import anbd.he191271.repository.ShoppingCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +22,44 @@ public class CartService {
     /**
      * Lấy danh sách CartItemDTO cho customerId (JOIN FETCH đã được định nghĩa trong repository)
      */
+    @Transactional(readOnly = true)
     public List<CartItemDTO> getCartItemsForCustomer(Long customerId) {
         List<ShoppingCart> items = shoppingCartRepository.findByCustomerIdWithVariantAndProduct(customerId);
         List<CartItemDTO> dtos = new ArrayList<>();
+
         for (ShoppingCart sc : items) {
-            if (sc.getVariant() == null || sc.getVariant().getProduct() == null) continue;
-            long price = sc.getVariant().getPrice();
+            if (sc == null) continue;
+
+            Variant variant = sc.getVariant();
+            if (variant == null) continue;
+
+            Product product = variant.getProduct();
+            if (product == null) continue;
+
+            // Yêu cầu: cả variant và product đều phải có status = "available"
+            if (!"available".equalsIgnoreCase(variant.getStatus())
+                    || !"available".equalsIgnoreCase(product.getStatus())) {
+                continue; // nếu một trong hai không available thì bỏ qua
+            }
+
             int qty = sc.getAmount();
-            long subtotal = price * (long) qty;
-            dtos.add(new CartItemDTO(sc.getId(), sc.getVariant().getProduct(), sc.getVariant(), qty, subtotal));
+            if (qty <= 0) continue;
+
+            long price = variant.getPrice(); // vẫn dùng long như hiện tại
+            long subtotal;
+            try {
+                subtotal = Math.multiplyExact(price, (long) qty);
+            } catch (ArithmeticException ex) {
+                throw new IllegalStateException("Subtotal overflow for cart item " + sc.getId(), ex);
+            }
+
+            dtos.add(new CartItemDTO(sc.getId(), product, variant, qty, subtotal));
         }
+
         return dtos;
     }
+
+
 
     // THÊM METHOD LỌC ĐƠN GIẢN
     // THÊM METHOD LỌC THEO SUBTOTAL (giá × số lượng)
