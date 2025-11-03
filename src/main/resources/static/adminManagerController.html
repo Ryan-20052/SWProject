@@ -177,10 +177,34 @@
 
     async function addManager(event) {
         event.preventDefault();
+
         const username = document.getElementById("username").value.trim();
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
+        const message = document.getElementById("message") || document.createElement("p");
 
+        // 1️⃣ Kiểm tra định dạng email cơ bản bằng regex
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            alert("❌ Email không hợp lệ! Vui lòng nhập lại (ví dụ: example@gmail.com)");
+            return;
+        }
+
+        // 2️⃣ Kiểm tra domain email có tồn tại không (qua DNS Google)
+        try {
+            const domain = email.split("@")[1];
+            const dnsRes = await fetch(`https://dns.google/resolve?name=${domain}&type=MX`);
+            const dnsData = await dnsRes.json();
+            if (!dnsData.Answer || dnsData.Answer.length === 0) {
+                alert("⚠️ Domain email không tồn tại. Vui lòng kiểm tra lại!");
+                return;
+            }
+        } catch (e) {
+            console.warn("Không thể xác thực domain email:", e);
+            // Nếu mất mạng hoặc DNS bị chặn, bỏ qua kiểm tra domain
+        }
+
+        // 3️⃣ Gửi request tạo Manager
         try {
             const res = await fetch(API_URL, {
                 method: "POST",
@@ -188,8 +212,10 @@
                 body: JSON.stringify({ username, email, password })
             });
 
+            const text = await res.text();
+
             if (!res.ok) {
-                alert("❌ Không thể thêm Manager!");
+                alert("❌ Không thể thêm Manager! " + text);
                 return;
             }
 
@@ -202,6 +228,7 @@
             alert("⚠️ Lỗi khi thêm Manager: " + err.message);
         }
     }
+
 
     async function banManager(id) {
         if (confirm("Bạn có chắc muốn khóa tài khoản này không?")) {

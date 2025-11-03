@@ -11,6 +11,7 @@
         .field { margin-bottom:12px; }
         label{display:block;font-size:13px;color:#456;margin-bottom:6px;}
         input{width:100%;padding:10px;border:1px solid #d6dee9;border-radius:8px;font-size:14px;}
+        input.error { border-color: #e74c3c; background: #fdecea; }
         button{width:100%;padding:10px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:10px}
         button:active{transform:translateY(1px)}
         p#msg{margin-top:12px;font-weight:600;text-align:center}
@@ -23,7 +24,6 @@
 <div class="card">
     <h2>Register with OTP</h2>
 
-    <!-- Form Register -->
     <form id="registerForm">
         <div class="field">
             <label for="name">Full name</label>
@@ -43,13 +43,12 @@
         <div class="field">
             <label for="email">Email</label>
             <input id="email" name="email" type="email" required />
+            <small id="emailError" style="color:#c62828;font-size:12px;display:none;">Please enter a valid email address.</small>
         </div>
-
 
         <button type="submit">Send OTP</button>
     </form>
 
-    <!-- Form Verify OTP -->
     <div id="otpSection">
         <h3 style="font-size:16px;text-align:center;">Enter OTP</h3>
         <form id="verifyForm">
@@ -69,20 +68,67 @@
     const verifyForm = document.getElementById('verifyForm');
     const otpSection = document.getElementById('otpSection');
     const msg = document.getElementById('msg');
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
 
     let currentEmail = "";
 
-    // B1: Register → gửi OTP
+    // Hàm kiểm tra định dạng email cơ bản
+    function isValidEmailFormat(email) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    // Hàm kiểm tra domain email có tồn tại không (DNS lookup)
+    async function checkEmailDomainExists(email) {
+        const domain = email.split('@')[1];
+        if (!domain) return false;
+        try {
+            // Sử dụng API công khai (free)
+            const res = await fetch(`https://dns.google/resolve?name=${domain}&type=MX`);
+            const data = await res.json();
+            return data && data.Answer && data.Answer.length > 0;
+        } catch (err) {
+            console.warn('DNS check failed:', err);
+            // Nếu không thể kiểm tra, không chặn (trả về true để không gây false negative)
+            return true;
+        }
+    }
+
+    // Khi submit form đăng ký
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         msg.className = '';
         msg.textContent = '';
 
+        const email = emailInput.value.trim();
+
+        // 1️⃣ Kiểm tra định dạng email
+        if (!isValidEmailFormat(email)) {
+            emailError.textContent = 'Invalid email format.';
+            emailError.style.display = 'block';
+            emailInput.classList.add('error');
+            return;
+        }
+
+        // 2️⃣ Kiểm tra domain tồn tại
+        const domainValid = await checkEmailDomainExists(email);
+        if (!domainValid) {
+            emailError.textContent = 'This email domain does not exist.';
+            emailError.style.display = 'block';
+            emailInput.classList.add('error');
+            return;
+        }
+
+        // Nếu email hợp lệ
+        emailError.style.display = 'none';
+        emailInput.classList.remove('error');
+
         const payload = {
             name: document.getElementById('name').value.trim(),
             username: document.getElementById('username').value.trim(),
             password: document.getElementById('password').value,
-            email: document.getElementById('email').value.trim()
+            email
         };
 
         try {
@@ -97,7 +143,7 @@
                 msg.className = 'success';
                 msg.textContent = text;
                 currentEmail = payload.email;
-                otpSection.style.display = 'block'; // hiển thị form OTP
+                otpSection.style.display = 'block';
             } else {
                 msg.className = 'error';
                 msg.textContent = text || 'Register failed';
@@ -108,7 +154,7 @@
         }
     });
 
-    // B2: Verify OTP
+    // Xác minh OTP
     verifyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         msg.className = '';
@@ -130,11 +176,10 @@
                 msg.textContent = text;
                 registerForm.reset();
                 verifyForm.reset();
-                otpSection.style.display = 'none'; // ẩn form OTP sau khi thành công
-                // ✅ Thêm dòng này để chuyển hướng sau khi xác minh thành công
+                otpSection.style.display = 'none';
                 setTimeout(() => {
                     window.location.href = 'login.html';
-                }, 1500); // đợi 1.5s để hiển thị thông báo trước khi chuyển trang
+                }, 1500);
             } else {
                 msg.className = 'error';
                 msg.textContent = text || 'Verification failed';
@@ -143,6 +188,12 @@
             msg.className = 'error';
             msg.textContent = 'Network error: ' + err.message;
         }
+    });
+
+    // Xóa lỗi khi người dùng nhập lại
+    emailInput.addEventListener('input', () => {
+        emailError.style.display = 'none';
+        emailInput.classList.remove('error');
     });
 </script>
 </body>

@@ -5,6 +5,8 @@ import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.service.EmailService;
 import anbd.he191271.service.OtpService;
 import jakarta.mail.MessagingException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,14 +31,20 @@ public class ForgotPasswordController {
 
     // Bước 1: Nhập email
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam String email) throws MessagingException {
-        Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("❌ Email not found!"));
-
-        String otp = otpService.generateOtp(email);
-        emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
-
-        return "✅ OTP sent to your email. It will expire in 5 minutes.";
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
+        return customerRepository.findByEmail(email)
+                .map(customer -> {
+                    try {
+                        String otp = otpService.generateOtp(email);
+                        emailService.sendEmail(email, "Reset Password OTP", "Your OTP is: " + otp);
+                        return ResponseEntity.ok("✅ OTP sent to your email. It will expire in 5 minutes.");
+                    } catch (MessagingException e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("❌ Failed to send email: " + e.getMessage());
+                    }
+                })
+                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("❌ This email is not registered in our system!"));
     }
 
     // Bước 2: Verify OTP
