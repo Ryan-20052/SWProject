@@ -1,8 +1,11 @@
 package anbd.he191271.controller;
 
 import anbd.he191271.entity.Product;
+import anbd.he191271.entity.Review;
 import anbd.he191271.entity.Variant;
+import anbd.he191271.repository.ReviewRepository;
 import anbd.he191271.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,8 @@ import java.util.Map;
 @RequestMapping("/buydetail")
 @Controller
 public class BuydetailController {
+    @Autowired
+    private ReviewRepository reviewRepository;
     private final ProductService productService;
 
     public BuydetailController(ProductService productService) {
@@ -49,10 +54,16 @@ public class BuydetailController {
         if (selectedVariant == null && !variants.isEmpty()) {
             selectedVariant = variants.get(0);
         }
+        List<Review> reviews = reviewRepository.findByProduct_Id(id);
+        double averageRating = reviews.isEmpty()
+                ? 0
+                : reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
 
         model.addAttribute("product", product);
         model.addAttribute("variants", variants);
         model.addAttribute("selectedVariant", selectedVariant);
+        model.addAttribute("averageRating", String.format("%.1f", averageRating));
+        model.addAttribute("totalReviews", reviews.size());
 
         return "buydetail";
     }

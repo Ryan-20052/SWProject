@@ -7,6 +7,7 @@ import anbd.he191271.entity.Review;
 import anbd.he191271.entity.Product;
 import anbd.he191271.repository.CustomerRepository;
 import anbd.he191271.repository.ProductReviewReportRepository;
+import anbd.he191271.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,8 @@ import java.util.Optional;
 
 @Service
 public class ProductReviewReportService {
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private ProductReviewReportRepository reportRepository;
@@ -87,6 +90,8 @@ public class ProductReviewReportService {
             Review review = report.getReview();
             if (review != null && review.getCustomer() != null) {
                 Customer violator = review.getCustomer();
+                review.setStatus("DISABLE");
+                reviewRepository.save(review);
 
                 // Chỉ ban nếu chưa bị ban
                 if (!"BANNED".equalsIgnoreCase(violator.getStatus())) {
