@@ -69,7 +69,7 @@ public class ManagerController {
     }
 
     @PostMapping("/addProduct")
-    public String addProduct(@Valid @ModelAttribute("newProduct") ProductDTO request, BindingResult bindingResult,HttpSession session, Model model) {
+    public String addProduct(@Valid @ModelAttribute("newProduct") ProductDTO request, BindingResult bindingResult,HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
@@ -82,6 +82,10 @@ public class ManagerController {
             model.addAttribute("manager", manager);
             return "manageHome";
         }
+        if(isProductDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "Sản phẩm đã tồn tại");
+            return "redirect:/manage/manageHome";
+        }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add product "+ request.getName());
         managerLogService.save(log);
         Categories category = categoryService.getCategoryById(request.getCategoryId());
@@ -90,10 +94,64 @@ public class ManagerController {
         return "redirect:/manage/manageHome";
     }
 
+    public boolean isProductDup(ProductDTO product){
+        List<Product> productList =  productService.getAllProduct();
+        for(Product p : productList){
+            if(product.getProductId() == null){
+                if(p.getName().equalsIgnoreCase(product.getName())){
+                    return true;
+                }
+            }else{
+                if (p.getId() == product.getProductId()) {
+                    continue;
+                }
+                if(p.getName().equalsIgnoreCase(product.getName())){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isVariantDup(VariantDTO variant){
+        List<Variant> variantList =  variantService.getAllVariant();
+        for(Variant v : variantList){
+            if(variant.getId() == null){
+                if(v.getName().equalsIgnoreCase(variant.getName())){
+                    return true;
+                }
+                if(v.getDuration().equalsIgnoreCase(variant.getDuration()) && v.getProduct().getId() == variant.getProductId()){
+                    return true;
+                }
+            }else{
+                if (v.getId() == variant.getId()) {
+                    continue;
+                }
+                if(v.getName().equalsIgnoreCase(variant.getName())){
+                    return true;
+                }
+                if(v.getDuration().equalsIgnoreCase(variant.getDuration()) && v.getProduct().getId() == variant.getProductId()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @PostMapping("/updateProduct")
-    public String updateProduct(@ModelAttribute("request") ProductDTO request, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String updateProduct(@Valid @ModelAttribute("request") ProductDTO request, BindingResult bindingResult,  HttpSession session, RedirectAttributes redirectAttributes, Model model) {
         Product product = productService.findProductById(request.getProductId());
         Manager manager=(Manager)session.getAttribute("manager");
+        if(bindingResult.hasErrors()){
+            model.addAttribute("categories", categoryService.getAllCategories());
+            model.addAttribute("manager", manager);
+            model.addAttribute("request", request);
+            return "productUpdatePage";
+        }
+        if(isProductDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "sản phẩm đã tồn tại");
+            return "redirect:/manage/updateProduct/" + request.getProductId();
+        }
         product.setName(request.getName());
         product.setManager_id(manager.getId());
         product.setImg_url(request.getImgUrl());
@@ -121,7 +179,7 @@ public class ManagerController {
     }
 
     @PostMapping("/addVariant")
-    public String addVariant(@Valid @ModelAttribute("newVariant") VariantDTO request, BindingResult bindingResult, HttpSession session, Model  model) {
+    public String addVariant(@Valid @ModelAttribute("newVariant") VariantDTO request, BindingResult bindingResult, HttpSession session, Model  model,RedirectAttributes redirectAttributes) {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
@@ -133,6 +191,10 @@ public class ManagerController {
             model.addAttribute("categories", categoryService.getAllCategoriesByStatus("available"));
             model.addAttribute("manager", manager);
             return "manageHome";
+        }
+        if(isVariantDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "Gói sản phẩm đã tồn tại");
+            return "redirect:/manage/manageHome";
         }
         Product product = productService.findProductById(request.getProductId());
         Variant variant = new Variant(request.getName(),request.getDuration(),request.getPrice(), product);
@@ -156,9 +218,18 @@ public class ManagerController {
     }
 
     @PostMapping("updateVariant")
-    public String updateVariant(@ModelAttribute("request") VariantDTO request, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String updateVariant(@Valid @ModelAttribute("request") VariantDTO request, BindingResult bindingResult, HttpSession session, RedirectAttributes redirectAttributes, Model model) {
         Variant variant =  variantService.getVariantById(request.getId());
         Manager manager=(Manager)session.getAttribute("manager");
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("manager",manager);
+            model.addAttribute("productList", productService.getAllProduct());
+            return "variantUpdatePage";
+        }
+        if(isVariantDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "Gói sản phẩm đã tồn tại");
+            return "redirect:/manage/updateVariant/" + request.getId();
+        }
         variant.setName(request.getName());
         variant.setDuration(request.getDuration());
         variant.setPrice(request.getPrice());
@@ -168,7 +239,6 @@ public class ManagerController {
         managerLogService.save(log);
         return "redirect:/manage/manageHome";
     }
-
 
     @GetMapping("/statusProduct/{id}")
     public String updateStatusProduct(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {

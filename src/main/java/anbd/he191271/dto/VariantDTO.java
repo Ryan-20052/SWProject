@@ -8,7 +8,7 @@ public class VariantDTO {
     private String name;
     @NotBlank(message = "Thời hạn không được để trống")
     @Pattern(
-            regexp = "^\\d+\\s*(ngày|tháng|năm)$",
+            regexp = "^\\d+\\s(ngày|tháng|năm)$",
             message = "Thời hạn phải là số kèm đơn vị: ngày, tháng hoặc năm (VD: '30 ngày', '3 tháng', '1 năm')"
     )
     private String duration;

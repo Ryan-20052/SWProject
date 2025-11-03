@@ -82,6 +82,16 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        .notice{
+            margin: 0 0 12px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: #dc2626;    /* xanh nhạt */
+            border: 1px solid #10b981;
+            color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -94,18 +104,27 @@
 
 <div class="dashboard">
     <h2>Cập nhật sản phẩm</h2>
+
+    <div th:if="${msg}" class="notice" th:text="${msg}"></div>
+
     <form th:action="@{/manage/updateProduct}" th:object="${request}" method="post">
-        <!-- Hidden để gửi id -->
+
         <input type="hidden" th:field="*{productId}">
 
         <label for="name">Tên sản phẩm</label>
         <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên sản phẩm" required>
+        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
 
         <label for="imgUrl">Link ảnh</label>
         <input type="text" id="imgUrl" th:field="*{imgUrl}" placeholder="Nhập link ảnh">
+        <div th:if="${#fields.hasErrors('imgUrl')}" th:errors="*{imgUrl}"
+             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
 
         <label for="description">Mô tả</label>
         <input type="text" id="description" th:field="*{description}" placeholder="Nhập mô tả sản phẩm">
+        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+             style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
 
         <label for="category">Danh mục</label>
         <select id="category" th:field="*{categoryId}" required>
@@ -114,9 +133,9 @@
                     th:selected="${c.id} == ${request.categoryId}">
             </option>
         </select>
-
         <button type="submit">Cập nhật</button>
     </form>
+
 
     <a th:href="@{/manage/manageHome}" class="back-link">Quay lại danh sách sản phẩm</a>
 </div>

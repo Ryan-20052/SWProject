@@ -1,10 +1,12 @@
 package anbd.he191271.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class ProductDTO {
     private Integer productId;
     @NotBlank(message = "Không được để trống")
+    @Pattern(regexp = "^[A-Za-z0-9]+(\\s[A-Za-z0-9]+)*$", message = "Tên sản phẩm chỉ chứa chữ, số và cách nhau bởi một khoảng trắng")
     private String name;
     private Integer categoryId;
     @NotBlank(message = "Không được để trống")
