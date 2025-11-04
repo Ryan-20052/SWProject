@@ -426,7 +426,6 @@
     <table border="1">
         <thead>
         <tr>
-            <th>STT</th>
             <th>Ảnh</th>
             <th>Tên sản phẩm</th>
             <th>Gói sản phẩm</th>
@@ -436,8 +435,6 @@
         </thead>
         <tbody th:each="p, iterStat : ${productList}">
         <tr>
-            <!-- STT -->
-            <td th:text="${iterStat.count}"></td>
 
             <!-- Ảnh sản phẩm -->
             <td>

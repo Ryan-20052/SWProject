@@ -243,19 +243,23 @@ public class ManagerController {
     @GetMapping("/statusProduct/{id}")
     public String updateStatusProduct(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {
         Product product = productService.findProductById(id);
+        List<Variant> variantList = variantService.getVariantsByProduct(id);
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
         }
         if(product.getStatus().equals("available")) {
             product.setStatus("unavailable");
+            variantList.forEach(v -> v.setStatus("unavailable"));
             redirectAttributes.addFlashAttribute("msg", "Đã ẩn sản phẩm khỏi HomePage");
         }else{
             product.setStatus("available");
+            variantList.forEach(v -> v.setStatus("available"));
             redirectAttributes.addFlashAttribute("msg", "Đã bỏ ẩn sản phẩm");
         }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "change status of product "+ product.getName());
         managerLogService.save(log);
+        variantService.saveAll(variantList);
         productService.saveProduct(product);
         return "redirect:/manage/manageHome";
     }
@@ -357,19 +361,25 @@ public class ManagerController {
     @GetMapping("/statusCategory/{id}")
     public String updateStatusCategory(@PathVariable int id, RedirectAttributes redirectAttributes, HttpSession session) {
         Categories category = categoryService.getCategoryById(id);
+        Stream<Product> stream = productService.getAllProduct().stream();
+        stream = stream.filter(p -> p.getCategory().getId() == category.getId());
+        List<Product> productList =  stream.toList();
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
         }
         if(category.getStatus().equals("available")) {
             category.setStatus("unavailable");
+            productList.forEach(p -> p.setStatus("unavailable"));
             redirectAttributes.addFlashAttribute("msg", "Đã tắt khả năng thêm sản phẩm cho danh mục này");
         }else{
             category.setStatus("available");
+            productList.forEach(p -> p.setStatus("available"));
             redirectAttributes.addFlashAttribute("msg", "Đã bật khả năng thêm sản phẩm cho danh mục này");
         }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "change status of category "+ category.getName());
         managerLogService.save(log);
+        productService.saveAll(productList);
         categoryService.save(category);
         return "redirect:/manage/category";
     }

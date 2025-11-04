@@ -43,6 +43,10 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public void saveAll(List<Product> productList) {
+        productRepository.saveAll(productList);
+    }
+
     public List<Product> getAllProductByStatus(String status) {
         return productRepository.findByStatus(status, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
     }

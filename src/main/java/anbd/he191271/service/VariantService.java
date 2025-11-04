@@ -44,4 +44,7 @@ public class VariantService {
     public Variant create(Variant variant) {
         return variantRepository.save(variant);
     }
+    public void  saveAll(List<Variant> variants) {
+        variantRepository.saveAll(variants);
+    }
 }
