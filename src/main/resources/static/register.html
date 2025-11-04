@@ -2,76 +2,222 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Register with OTP</title>
+    <title>Register</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; background:#f0f4f8; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-        .card { background:#fff; padding:24px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.08); width:360px; }
-        h2 { margin:0 0 16px 0; font-size:20px; color:#223; text-align:center; }
-        .field { margin-bottom:12px; }
-        label{display:block;font-size:13px;color:#456;margin-bottom:6px;}
-        input{width:100%;padding:10px;border:1px solid #d6dee9;border-radius:8px;font-size:14px;}
-        input.error { border-color: #e74c3c; background: #fdecea; }
-        button{width:100%;padding:10px;background:#1976d2;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:10px}
-        button:active{transform:translateY(1px)}
-        p#msg{margin-top:12px;font-weight:600;text-align:center}
-        p#msg.success{color:green}
-        p#msg.error{color:#c62828}
-        #otpSection { display:none; margin-top:15px; border-top:1px solid #ddd; padding-top:15px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .register-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            width: 400px;
+            text-align: center;
+        }
+        .register-container h2 {
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #1976d2;
+            outline: none;
+        }
+        .form-group input.error {
+            border-color: #e53935;
+            background: #fdecea;
+        }
+        .error-message {
+            color: #e53935;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1259a6;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .login-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .login-link a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .otp-section {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .otp-section h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <h2>Register with OTP</h2>
+<div class="register-container">
+    <h2>📝 Create Account</h2>
 
+    <!-- Registration Form -->
     <form id="registerForm">
-        <div class="field">
-            <label for="name">Full name</label>
-            <input id="name" name="name" type="text" required />
+        <div class="form-group">
+            <label>Full Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required />
         </div>
 
-        <div class="field">
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" required />
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" name="username" placeholder="Choose a username" required />
         </div>
 
-        <div class="field">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" required />
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" name="password" placeholder="Create a password" required />
         </div>
 
-        <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required />
-            <small id="emailError" style="color:#c62828;font-size:12px;display:none;">Please enter a valid email address.</small>
+        <div class="form-group">
+            <label>Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required />
+            <div class="error-message" id="emailError">Please enter a valid email address.</div>
         </div>
 
-        <button type="submit">Send OTP</button>
+        <button type="submit">Send Verification Code</button>
     </form>
 
-    <div id="otpSection">
-        <h3 style="font-size:16px;text-align:center;">Enter OTP</h3>
+    <!-- OTP Verification Section -->
+    <div class="otp-section" id="otpSection">
+        <h3>Enter Verification Code</h3>
         <form id="verifyForm">
-            <div class="field">
-                <label for="otp">OTP code</label>
-                <input id="otp" name="otp" type="text" required />
+            <div class="form-group">
+                <label>Verification Code:</label>
+                <input type="text" id="otp" name="otp" placeholder="Enter 6-digit code" maxlength="6" required />
             </div>
             <button type="submit">Verify & Create Account</button>
         </form>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+            Didn't receive the code? <a href="javascript:void(0)" onclick="resendOtp()" style="color: #1976d2;">Resend</a>
+        </p>
     </div>
 
-    <p id="msg"></p>
+    <p id="message"></p>
+
+    <div class="login-link">
+        Already have an account? <a href="login.html">Login here</a>
+    </div>
 </div>
 
 <script>
     const registerForm = document.getElementById('registerForm');
     const verifyForm = document.getElementById('verifyForm');
     const otpSection = document.getElementById('otpSection');
-    const msg = document.getElementById('msg');
+    const msg = document.getElementById('message');
     const emailInput = document.getElementById('email');
     const emailError = document.getElementById('emailError');
 
     let currentEmail = "";
+    let isLoading = false;
+
+    function showMessage(text, type) {
+        msg.textContent = text;
+        msg.className = type;
+        msg.style.display = 'block';
+    }
+
+    function hideMessage() {
+        msg.style.display = 'none';
+    }
+
+    function showLoading(loading) {
+        const buttons = document.querySelectorAll('button[type="submit"]');
+        buttons.forEach(button => {
+            if (loading) {
+                button.disabled = true;
+                button.innerHTML = '⏳ Processing...';
+            } else {
+                button.disabled = false;
+                button.innerHTML = button === document.querySelector('#registerForm button') ?
+                    'Send Verification Code' : 'Verify & Create Account';
+            }
+        });
+        isLoading = loading;
+    }
 
     // Hàm kiểm tra định dạng email cơ bản
     function isValidEmailFormat(email) {
@@ -84,24 +230,34 @@
         const domain = email.split('@')[1];
         if (!domain) return false;
         try {
-            // Sử dụng API công khai (free)
             const res = await fetch(`https://dns.google/resolve?name=${domain}&type=MX`);
             const data = await res.json();
             return data && data.Answer && data.Answer.length > 0;
         } catch (err) {
             console.warn('DNS check failed:', err);
-            // Nếu không thể kiểm tra, không chặn (trả về true để không gây false negative)
-            return true;
+            return true; // Nếu không thể kiểm tra, không chặn
         }
     }
 
     // Khi submit form đăng ký
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        msg.className = '';
-        msg.textContent = '';
+        if (isLoading) return;
+
+        hideMessage();
+        emailError.style.display = 'none';
+        emailInput.classList.remove('error');
 
         const email = emailInput.value.trim();
+        const name = document.getElementById('name').value.trim();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Validation
+        if (!name || !username || !password || !email) {
+            showMessage('❌ Please fill in all fields', 'error');
+            return;
+        }
 
         // 1️⃣ Kiểm tra định dạng email
         if (!isValidEmailFormat(email)) {
@@ -112,26 +268,29 @@
         }
 
         // 2️⃣ Kiểm tra domain tồn tại
+        showMessage('⏳ Checking email...', 'warning');
         const domainValid = await checkEmailDomainExists(email);
         if (!domainValid) {
             emailError.textContent = 'This email domain does not exist.';
             emailError.style.display = 'block';
             emailInput.classList.add('error');
+            hideMessage();
             return;
         }
 
-        // Nếu email hợp lệ
-        emailError.style.display = 'none';
-        emailInput.classList.remove('error');
+        hideMessage();
 
         const payload = {
-            name: document.getElementById('name').value.trim(),
-            username: document.getElementById('username').value.trim(),
-            password: document.getElementById('password').value,
-            email
+            name: name,
+            username: username,
+            password: password,
+            email: email
         };
 
         try {
+            showLoading(true);
+            showMessage('⏳ Sending verification code...', 'warning');
+
             const res = await fetch('/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -140,30 +299,50 @@
 
             const text = await res.text();
             if (res.ok) {
-                msg.className = 'success';
-                msg.textContent = text;
+                showMessage('✅ Verification code sent to your email!', 'success');
                 currentEmail = payload.email;
-                otpSection.style.display = 'block';
+                setTimeout(() => {
+                    otpSection.style.display = 'block';
+                    hideMessage();
+                }, 1500);
             } else {
-                msg.className = 'error';
-                msg.textContent = text || 'Register failed';
+                showMessage('❌ ' + text, 'error');
             }
         } catch (err) {
-            msg.className = 'error';
-            msg.textContent = 'Network error: ' + err.message;
+            showMessage('⚠️ Network error: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
         }
     });
 
     // Xác minh OTP
     verifyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        msg.className = '';
-        msg.textContent = '';
+        if (isLoading) return;
+
+        hideMessage();
 
         const otp = document.getElementById('otp').value.trim();
 
+        if (!otp) {
+            showMessage('❌ Please enter the verification code', 'error');
+            return;
+        }
+
+        if (!otp.match(/^\d{6}$/)) {
+            showMessage('❌ Please enter a valid 6-digit code', 'error');
+            return;
+        }
+
         try {
-            const body = new URLSearchParams({ email: currentEmail, otp });
+            showLoading(true);
+            showMessage('⏳ Verifying code...', 'warning');
+
+            const body = new URLSearchParams({
+                email: currentEmail,
+                otp: otp
+            });
+
             const res = await fetch('/auth/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -172,28 +351,69 @@
 
             const text = await res.text();
             if (res.ok) {
-                msg.className = 'success';
-                msg.textContent = text;
-                registerForm.reset();
-                verifyForm.reset();
-                otpSection.style.display = 'none';
+                showMessage('✅ Account created successfully!', 'success');
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 1500);
             } else {
-                msg.className = 'error';
-                msg.textContent = text || 'Verification failed';
+                showMessage('❌ ' + text, 'error');
             }
         } catch (err) {
-            msg.className = 'error';
-            msg.textContent = 'Network error: ' + err.message;
+            showMessage('⚠️ Network error: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
         }
     });
+
+    async function resendOtp() {
+        if (!currentEmail) {
+            showMessage('❌ Please complete the registration form first', 'error');
+            return;
+        }
+
+        try {
+            showMessage('⏳ Resending verification code...', 'warning');
+
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value,
+                email: currentEmail
+            };
+
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await res.text();
+            if (res.ok) {
+                showMessage('✅ New verification code sent!', 'success');
+                setTimeout(hideMessage, 3000);
+            } else {
+                showMessage('❌ ' + text, 'error');
+            }
+        } catch (err) {
+            showMessage('⚠️ Network error: ' + err.message, 'error');
+        }
+    }
 
     // Xóa lỗi khi người dùng nhập lại
     emailInput.addEventListener('input', () => {
         emailError.style.display = 'none';
         emailInput.classList.remove('error');
+    });
+
+    // Enter key support
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            if (otpSection.style.display === 'none') {
+                registerForm.dispatchEvent(new Event('submit'));
+            } else {
+                verifyForm.dispatchEvent(new Event('submit'));
+            }
+        }
     });
 </script>
 </body>
