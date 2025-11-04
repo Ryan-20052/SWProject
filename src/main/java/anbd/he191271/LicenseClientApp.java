@@ -8,7 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -24,28 +27,46 @@ public class LicenseClientApp extends Application {
 
     private final String BASE_URL = "http://localhost:8080";
     private Stage stage;
-    private String customerEmail; // lưu email sau khi login
+    private String customerEmail;
 
     @Override
     public void start(Stage primaryStage) {
         this.stage = primaryStage;
-        primaryStage.setTitle("SHINE SHOP Desktop");
+        primaryStage.setTitle("License Shop - Desktop Client");
         showLoginScene();
     }
 
     /* ===========================
-       1️⃣ MÀN HÌNH ĐĂNG NHẬP
+       1️⃣ MÀN HÌNH ĐĂNG NHẬP - ĐƯỢC THIẾT KẾ LẠI
        =========================== */
     private void showLoginScene() {
-        TextField usernameField = new TextField();
-        usernameField.setPromptText("Tên đăng nhập");
+        // Header
+        Label titleLabel = new Label("LICENSE SHOP");
+        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 24));
+        titleLabel.setTextFill(Color.web("#2C3E50"));
 
+        Label subtitleLabel = new Label("Đăng nhập vào hệ thống");
+        subtitleLabel.setFont(Font.font("System", 14));
+        subtitleLabel.setTextFill(Color.web("#7F8C8D"));
+
+        // Form fields
+        Label usernameLabel = new Label("Tên đăng nhập:");
+        usernameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2C3E50;");
+        TextField usernameField = new TextField();
+        usernameField.setPromptText("Nhập tên đăng nhập");
+        usernameField.setStyle("-fx-pref-height: 35px; -fx-background-radius: 5;");
+
+        Label passwordLabel = new Label("Mật khẩu:");
+        passwordLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2C3E50;");
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Mật khẩu");
+        passwordField.setPromptText("Nhập mật khẩu");
+        passwordField.setStyle("-fx-pref-height: 35px; -fx-background-radius: 5;");
 
         Label msgLabel = new Label();
+        msgLabel.setWrapText(true);
 
-        Button loginBtn = new Button("Đăng nhập");
+        Button loginBtn = new Button("ĐĂNG NHẬP");
+        loginBtn.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 40px; -fx-pref-width: 200px; -fx-background-radius: 5;");
         loginBtn.setOnAction(e -> {
             try {
                 Map<String, String> body = new HashMap<>();
@@ -55,38 +76,71 @@ public class LicenseClientApp extends Application {
                 String response = postJson(BASE_URL + "/auth/customer/app-login", mapToJson(body));
 
                 if (response.contains("\"ok\":true")) {
-                    msgLabel.setText("OTP đã gửi tới email của bạn!");
+                    msgLabel.setText("✅ OTP đã được gửi tới email của bạn!");
+                    msgLabel.setTextFill(Color.GREEN);
                     String email = extractJsonField(response, "email");
                     this.customerEmail = email;
                     showOtpScene(email);
                 } else {
                     String msg = extractJsonField(response, "message");
                     msgLabel.setText("❌ " + (msg.isEmpty() ? "Đăng nhập thất bại" : msg));
+                    msgLabel.setTextFill(Color.RED);
                 }
             } catch (Exception ex) {
-                msgLabel.setText("Lỗi kết nối backend!");
+                msgLabel.setText("⚠️ Lỗi kết nối đến server!");
+                msgLabel.setTextFill(Color.ORANGE);
                 ex.printStackTrace();
             }
         });
 
-        VBox root = new VBox(10,
-                new Label("Đăng nhập tài khoản Customer:"),
-                usernameField, passwordField, loginBtn, msgLabel);
-        root.setPadding(new Insets(15));
-        stage.setScene(new Scene(root, 400, 220));
+        // Layout
+        VBox headerBox = new VBox(5, titleLabel, subtitleLabel);
+        headerBox.setAlignment(Pos.CENTER);
+
+        VBox formBox = new VBox(10, usernameLabel, usernameField, passwordLabel, passwordField);
+        VBox mainContent = new VBox(20, headerBox, formBox, loginBtn, msgLabel);
+        mainContent.setAlignment(Pos.CENTER);
+        mainContent.setPadding(new Insets(30));
+        mainContent.setStyle("-fx-background-color: #ECF0F1;");
+
+        // Container với border
+        StackPane container = new StackPane(mainContent);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #BDC3C7; -fx-border-radius: 10;");
+
+        BorderPane root = new BorderPane(container);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #3498DB, #2C3E50);");
+
+        stage.setScene(new Scene(root, 500, 500));
+        stage.setMinWidth(500);
+        stage.setMinHeight(500);
         stage.show();
     }
 
     /* ===========================
-       2️⃣ MÀN HÌNH NHẬP OTP
+       2️⃣ MÀN HÌNH NHẬP OTP - ĐƯỢC THIẾT KẾ LẠI
        =========================== */
     private void showOtpScene(String email) {
-        Label emailLabel = new Label("Mã OTP đã gửi tới: " + email);
-        TextField otpField = new TextField();
-        otpField.setPromptText("Nhập mã OTP (6 chữ số)");
-        Label msgLabel = new Label();
+        Label titleLabel = new Label("XÁC THỰC OTP");
+        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
+        titleLabel.setTextFill(Color.web("#2C3E50"));
 
-        Button verifyBtn = new Button("Xác thực OTP");
+        Label emailLabel = new Label("Mã OTP đã được gửi tới:");
+        emailLabel.setStyle("-fx-font-weight: bold;");
+        Label emailValueLabel = new Label(email);
+        emailValueLabel.setStyle("-fx-text-fill: #E74C3C; -fx-font-weight: bold;");
+
+        TextField otpField = new TextField();
+        otpField.setPromptText("Nhập mã OTP 6 chữ số");
+        otpField.setStyle("-fx-pref-height: 40px; -fx-font-size: 16px; -fx-alignment: center; -fx-background-radius: 5;");
+        otpField.setMaxWidth(200);
+
+        Label msgLabel = new Label();
+        msgLabel.setWrapText(true);
+
+        Button verifyBtn = new Button("XÁC THỰC OTP");
+        verifyBtn.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 40px; -fx-pref-width: 200px; -fx-background-radius: 5;");
         verifyBtn.setOnAction(e -> {
             try {
                 Map<String, String> body = new HashMap<>();
@@ -96,37 +150,72 @@ public class LicenseClientApp extends Application {
                 String response = postJson(BASE_URL + "/auth/customer/verify-otp", mapToJson(body));
 
                 if (response.contains("\"ok\":true")) {
-                    msgLabel.setText("✅ OTP hợp lệ! Đang chuyển sang phần License...");
+                    msgLabel.setText("✅ Xác thực thành công! Đang chuyển hướng...");
+                    msgLabel.setTextFill(Color.GREEN);
                     showLicenseScene(email);
                 } else {
                     msgLabel.setText("❌ OTP không hợp lệ hoặc đã hết hạn");
+                    msgLabel.setTextFill(Color.RED);
                 }
             } catch (Exception ex) {
-                msgLabel.setText("Lỗi kết nối backend!");
+                msgLabel.setText("⚠️ Lỗi kết nối đến server!");
+                msgLabel.setTextFill(Color.ORANGE);
                 ex.printStackTrace();
             }
         });
 
-        VBox root = new VBox(10, emailLabel, otpField, verifyBtn, msgLabel);
-        root.setPadding(new Insets(15));
-        stage.setScene(new Scene(root, 400, 200));
-        stage.show();
+        Button backBtn = new Button("Quay lại");
+        backBtn.setStyle("-fx-background-color: #95A5A6; -fx-text-fill: white; -fx-pref-height: 35px; -fx-background-radius: 5;");
+        backBtn.setOnAction(e -> showLoginScene());
+
+        VBox emailBox = new VBox(5, emailLabel, emailValueLabel);
+        emailBox.setAlignment(Pos.CENTER);
+
+        VBox contentBox = new VBox(20, titleLabel, emailBox, otpField, verifyBtn, backBtn, msgLabel);
+        contentBox.setAlignment(Pos.CENTER);
+        contentBox.setPadding(new Insets(30));
+        contentBox.setStyle("-fx-background-color: #ECF0F1;");
+
+        StackPane container = new StackPane(contentBox);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #BDC3C7; -fx-border-radius: 10;");
+
+        BorderPane root = new BorderPane(container);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #3498DB, #2C3E50);");
+
+        stage.setScene(new Scene(root, 500, 500));
     }
 
     /* ===========================
-       3️⃣ MÀN HÌNH KIỂM TRA LICENSE
+       3️⃣ MÀN HÌNH KIỂM TRA LICENSE - ĐƯỢC THIẾT KẾ LẠI
        =========================== */
     private void showLicenseScene(String email) {
-        Label emailLabel = new Label("Email: " + email);
-        TextField keyField = new TextField();
-        keyField.setPromptText("Nhập license key (plain)");
-        Label resultLabel = new Label();
+        Label titleLabel = new Label("KIỂM TRA LICENSE");
+        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
+        titleLabel.setTextFill(Color.web("#2C3E50"));
 
-        Button checkBtn = new Button("Kiểm tra License");
+        Label emailLabel = new Label("Email đăng nhập:");
+        emailLabel.setStyle("-fx-font-weight: bold;");
+        Label emailValueLabel = new Label(email);
+        emailValueLabel.setStyle("-fx-text-fill: #2980B9; -fx-font-weight: bold;");
+
+        Label keyLabel = new Label("License Key:");
+        keyLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2C3E50;");
+        TextField keyField = new TextField();
+        keyField.setPromptText("Nhập license key của bạn");
+        keyField.setStyle("-fx-pref-height: 40px; -fx-background-radius: 5;");
+
+        Label resultLabel = new Label();
+        resultLabel.setWrapText(true);
+
+        Button checkBtn = new Button("KIỂM TRA LICENSE");
+        checkBtn.setStyle("-fx-background-color: #E67E22; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 40px; -fx-pref-width: 220px; -fx-background-radius: 5;");
         checkBtn.setOnAction(e -> {
             String key = keyField.getText();
             if (key == null || key.isBlank()) {
-                resultLabel.setText("⚠️ Vui lòng nhập key!");
+                resultLabel.setText("⚠️ Vui lòng nhập license key!");
+                resultLabel.setTextFill(Color.ORANGE);
                 return;
             }
             try {
@@ -141,27 +230,97 @@ public class LicenseClientApp extends Application {
                     String customerName = extractJsonField(response, "customerName");
                     String productName = extractJsonField(response, "productName");
 
-                    resultLabel.setText("✅ License hợp lệ — hết hạn: " + expired);
+                    resultLabel.setText("✅ License hợp lệ!");
+                    resultLabel.setTextFill(Color.GREEN);
                     showLicenseInfoScene(customerName, productName, expired);
                 } else {
                     String msg = extractJsonField(response, "message");
-                    resultLabel.setText("❌ Không hợp lệ: " + (msg.isEmpty() ? "Key sai hoặc hết hạn" : msg));
+                    resultLabel.setText("❌ " + (msg.isEmpty() ? "Key không hợp lệ hoặc đã hết hạn" : msg));
+                    resultLabel.setTextFill(Color.RED);
                 }
             } catch (Exception ex) {
-                resultLabel.setText("Lỗi: " + ex.getMessage());
+                resultLabel.setText("⚠️ Lỗi kết nối: " + ex.getMessage());
+                resultLabel.setTextFill(Color.ORANGE);
                 ex.printStackTrace();
             }
         });
 
-        VBox root = new VBox(10, emailLabel,
-                new Label("License key:"), keyField, checkBtn, resultLabel);
-        root.setPadding(new Insets(15));
-        stage.setScene(new Scene(root, 420, 220));
-        stage.show();
+        Button logoutBtn = new Button("Đăng xuất");
+        logoutBtn.setStyle("-fx-background-color: #95A5A6; -fx-text-fill: white; -fx-pref-height: 35px; -fx-background-radius: 5;");
+        logoutBtn.setOnAction(e -> showLoginScene());
+
+        VBox emailBox = new VBox(5, emailLabel, emailValueLabel);
+        emailBox.setAlignment(Pos.CENTER);
+
+        VBox formBox = new VBox(10, keyLabel, keyField);
+        VBox contentBox = new VBox(20, titleLabel, emailBox, formBox, checkBtn, logoutBtn, resultLabel);
+        contentBox.setAlignment(Pos.CENTER);
+        contentBox.setPadding(new Insets(30));
+        contentBox.setStyle("-fx-background-color: #ECF0F1;");
+
+        StackPane container = new StackPane(contentBox);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #BDC3C7; -fx-border-radius: 10;");
+
+        BorderPane root = new BorderPane(container);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #3498DB, #2C3E50);");
+
+        stage.setScene(new Scene(root, 550, 550));
     }
 
     /* ===========================
-       💡 HÀM TIỆN ÍCH
+       4️⃣ MÀN HÌNH THÔNG TIN LICENSE - ĐƯỢC THIẾT KẾ LẠI
+       =========================== */
+    private void showLicenseInfoScene(String customerName, String productName, String expiredAt) {
+        Label title = new Label("🎉 KÍCH HOẠT THÀNH CÔNG!");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #27AE60;");
+
+        VBox infoBox = new VBox(15);
+        infoBox.setAlignment(Pos.CENTER_LEFT);
+        infoBox.setStyle("-fx-background-color: #F8F9F9; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #27AE60; -fx-border-radius: 10;");
+
+        Label customerLabel = createInfoLabel("👤 Khách hàng: ", customerName);
+        Label productLabel = createInfoLabel("📦 Sản phẩm: ", productName);
+        Label expiredLabel = createInfoLabel("⏰ Ngày hết hạn: ", expiredAt);
+
+        infoBox.getChildren().addAll(customerLabel, productLabel, expiredLabel);
+
+        Button closeBtn = new Button("ĐÓNG ỨNG DỤNG");
+        closeBtn.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-height: 40px; -fx-background-radius: 5;");
+        closeBtn.setOnAction(e -> stage.close());
+
+        Button backBtn = new Button("KIỂM TRA LICENSE KHÁC");
+        backBtn.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white; -fx-pref-height: 35px; -fx-background-radius: 5;");
+        backBtn.setOnAction(e -> showLicenseScene(this.customerEmail));
+
+        HBox buttonBox = new HBox(15, backBtn, closeBtn);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        VBox contentBox = new VBox(25, title, infoBox, buttonBox);
+        contentBox.setAlignment(Pos.CENTER);
+        contentBox.setPadding(new Insets(30));
+        contentBox.setStyle("-fx-background-color: #ECF0F1;");
+
+        StackPane container = new StackPane(contentBox);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #BDC3C7; -fx-border-radius: 10;");
+
+        BorderPane root = new BorderPane(container);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #3498DB, #2C3E50);");
+
+        stage.setScene(new Scene(root, 600, 500));
+    }
+
+    private Label createInfoLabel(String prefix, String value) {
+        Label label = new Label(prefix + value);
+        label.setStyle("-fx-font-size: 14px; -fx-text-fill: #2C3E50;");
+        return label;
+    }
+
+    /* ===========================
+       🛠️ HÀM TIỆN ÍCH (GIỮ NGUYÊN)
        =========================== */
     private static String mapToJson(Map<String, String> data) {
         StringBuilder sb = new StringBuilder("{");
@@ -198,25 +357,6 @@ public class LicenseClientApp extends Application {
         Pattern p = Pattern.compile("\"" + field + "\":\"(.*?)\"");
         Matcher m = p.matcher(json);
         return m.find() ? m.group(1) : "";
-    }
-
-    private void showLicenseInfoScene(String customerName, String productName, String expiredAt) {
-        Label title = new Label("🎉 Kích hoạt thành công!");
-        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: green;");
-
-        Label customerLabel = new Label("Khách hàng: " + customerName);
-        Label productLabel = new Label("Sản phẩm: " + productName);
-        Label expiredLabel = new Label("Ngày hết hạn: " + expiredAt);
-
-        Button closeBtn = new Button("Đóng");
-        closeBtn.setOnAction(e -> stage.close());
-
-        VBox root = new VBox(15, title, customerLabel, productLabel, expiredLabel, closeBtn);
-        root.setPadding(new Insets(20));
-        root.setAlignment(Pos.CENTER);
-
-        stage.setScene(new Scene(root, 400, 250));
-        stage.show();
     }
 
     public static void main(String[] args) {

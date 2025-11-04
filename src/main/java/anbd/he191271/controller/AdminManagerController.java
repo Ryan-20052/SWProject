@@ -3,9 +3,11 @@ package anbd.he191271.controller;
 import anbd.he191271.entity.Manager;
 import anbd.he191271.service.AdminLogService;
 import anbd.he191271.service.ManagerService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -15,6 +17,7 @@ import anbd.he191271.service.ManagerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -94,5 +97,81 @@ public class AdminManagerController {
             @RequestParam(defaultValue = "5") int size
     ) {
         return ResponseEntity.ok(managerService.searchManagers(username, email, status, page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getManagerById(@PathVariable int id) {
+        try {
+            Manager manager = managerService.getManagerById(id);
+            if (manager == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Manager không tồn tại"));
+            }
+            return ResponseEntity.ok(manager);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Lỗi khi lấy thông tin Manager: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping(value = "/{id}/form", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateManagerForm(
+            @PathVariable int id,
+            @RequestPart(value = "name", required = false) String name,
+            @RequestPart(value = "username", required = false) String username,
+            @RequestPart(value = "email", required = false) String email,
+            @RequestPart(value = "phone", required = false) String phone,
+            @RequestPart(value = "status", required = false) String status,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+
+        try {
+            Manager manager = managerService.getManagerById(id);
+            if (manager == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Manager không tồn tại"));
+            }
+
+            // Validation
+            if (email != null && !email.isEmpty()) {
+                if (!email.matches("^[\\w._%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+                    return ResponseEntity.badRequest().body("Email không hợp lệ");
+                }
+            }
+
+            if (phone != null && !phone.isEmpty()) {
+                if (!phone.matches("^[0-9]{10,11}$")) {
+                    return ResponseEntity.badRequest().body("Số điện thoại không hợp lệ");
+                }
+            }
+
+            // Cập nhật thông tin
+            if (name != null) manager.setName(name);
+            if (username != null) manager.setUsername(username);
+            if (email != null) manager.setEmail(email);
+            if (phone != null) manager.setPhone(phone);
+            if (status != null) manager.setStatus(status);
+
+            // Xử lý avatar
+            if (avatar != null && !avatar.isEmpty()) {
+                // Validate file
+                if (avatar.getSize() > 5 * 1024 * 1024) {
+                    return ResponseEntity.badRequest().body("Avatar quá lớn (tối đa 5MB)");
+                }
+                String contentType = avatar.getContentType();
+                if (!Arrays.asList("image/jpeg", "image/png", "image/gif").contains(contentType)) {
+                    return ResponseEntity.badRequest().body("Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)");
+                }
+                manager.setAvatar(avatar.getBytes());
+            }
+
+            Manager updatedManager = managerService.save(manager);
+            logService.saveLog("Cập nhật Manager: " + updatedManager.getUsername(), "manager");
+
+            return ResponseEntity.ok(updatedManager);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Lỗi cập nhật: " + e.getMessage()));
+        }
     }
 }

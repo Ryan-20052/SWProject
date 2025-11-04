@@ -62,11 +62,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Lấy giá gốc từ text và nhân với số lượng
         const quantity = parseInt(amountInput.value || '1', 10);
-        const total = (originalPrice || 0) * quantity; // ✅ Dùng giá gốc, không dùng .price đã giảm
+        const total = (originalPrice || 0) * quantity;
 
         if (!total || total <= 0) {
             voucherMessage.textContent = '❌ Không thể áp dụng vì không xác định được giá sản phẩm!';
             voucherMessage.style.color = 'red';
+            return;
+        }
+        // 🔥 ĐOẠN CODE 1: Validation trước khi gọi API
+        const MINIMUM_AMOUNT = 5000;
+        if (total <= MINIMUM_AMOUNT) {
+            voucherMessage.textContent = `⚠️ Tổng tiền đã ở mức tối thiểu ${MINIMUM_AMOUNT.toLocaleString()}đ cho VNPay`;
+            voucherMessage.style.color = 'orange';
             return;
         }
 
@@ -75,12 +82,27 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!res.ok) throw new Error('Không thể áp dụng voucher');
 
             const data = await res.json();
+
+            // 🔥 KIỂM TRA LỖI TỪ SERVER
+            if (data.error) {
+                voucherMessage.textContent = `❌ ${data.error}`;
+                voucherMessage.style.color = 'red';
+                discountedTotal = null;
+                return;
+            }
+
             discountedTotal = data.discountedTotal;
 
-            voucherMessage.textContent =
-                `✅ Giảm ${data.discountAmount.toLocaleString()}đ! Tổng mới: ${data.discountedTotal.toLocaleString()}đ`;
-            document.querySelector('.price').innerText = data.discountedTotal.toLocaleString() + ' đ';
-            // 🔧 Cập nhật giá hiển thị trên giao diện
+            // 🔥 HIỂN THỊ THÔNG BÁO NẾU ĐẠT GIỚI HẠN TỐI THIỂU
+            let message = `✅ Giảm ${data.discountAmount.toLocaleString()}đ! Tổng mới: ${data.discountedTotal.toLocaleString()}đ`;
+            if (data.reachedMinimum) {
+                message += ` (Đã đạt mức tối thiểu 5,000đ cho thanh toán VNPay)`;
+            }
+
+            voucherMessage.textContent = message;
+            voucherMessage.style.color = data.reachedMinimum ? 'orange' : 'green';
+
+            // Cập nhật giá hiển thị
             const priceEl = document.querySelector('.price');
             if (priceEl) {
                 priceEl.innerText = data.discountedTotal.toLocaleString() + ' đ';
@@ -92,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function () {
             discountedTotal = null;
         }
     });
-
     // ----------------- Mua ngay (VNPAY) -----------------
     buyNowBtn?.addEventListener('click', async function () {
         if (!sessionCustomerId || sessionCustomerId === 'null') {
@@ -109,6 +130,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const quantity = parseInt(amountInput.value || '1', 10);
         const voucherCode = document.getElementById('voucherCode')?.value?.trim() || null;
+
+        
 
         const body = {
             customerId: parseInt(sessionCustomerId),

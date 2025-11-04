@@ -63,11 +63,22 @@ public class VoucherController {
             @RequestParam String code,
             @RequestParam double total
     ) {
-        double newTotal = voucherService.applyVoucher(code, total);
-        return ResponseEntity.ok(Map.of(
-                "originalTotal", total,
-                "discountedTotal", newTotal,
-                "discountAmount", total - newTotal
-        ));
+        try {
+            double newTotal = voucherService.applyVoucher(code, total);
+            double discountAmount = total - newTotal;
+            boolean reachedMinimum = newTotal <= 5000.0;
+
+            return ResponseEntity.ok(Map.of(
+                    "originalTotal", total,
+                    "discountedTotal", newTotal,
+                    "discountAmount", discountAmount,
+                    "reachedMinimum", reachedMinimum, // 🔥 Thêm flag này
+                    "minimumAmount", 5000.0
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
     }
 }

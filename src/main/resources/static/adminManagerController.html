@@ -156,7 +156,9 @@
                             ${isBanned ? 'Bị khóa' : 'Hoạt động'}
                         </span>
                     </td>
+
                     <td>
+                    <button onclick="goEditManager(${m.id})" style="background:#0288d1; margin-right:5px;">✏️ Sửa</button>
                         ${
                     isBanned
                         ? `<button class="btn-unban" onclick="unbanManager(${m.id})">Mở khóa</button>`
@@ -280,6 +282,9 @@
     }
 
     window.onload = () => { checkSession(); loadManagers(); }
+    function goEditManager(id) {
+        window.location.href = `adminEditManager.html?id=${id}`;
+    }
 </script>
 </body>
 </html>

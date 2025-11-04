@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
@@ -31,7 +32,13 @@ public class LicenseController {
         if (!r.isOk()) {
             return ResponseEntity.ok(Map.of("ok", false, "message", r.getMessage()));
         } else {
-            String expired = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(r.getExpiredAt());
+            String expired = "";
+            if (r.getExpiredAt() != null) {
+                // Sử dụng DateTimeFormatter cho LocalDateTime
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                expired = r.getExpiredAt().format(formatter);
+            }
+
             return ResponseEntity.ok(Map.of(
                     "ok", true,
                     "message", "Key hợp lệ",

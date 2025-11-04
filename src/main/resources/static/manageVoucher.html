@@ -254,21 +254,33 @@
     <div class="modal-content">
         <h3 id="modalTitle">Thêm Voucher</h3>
         <input type="hidden" id="voucherId">
-        <label>Mã voucher</label>
-        <input id="code" placeholder="VD: SALE10">
-        <label>Giá trị giảm</label>
-        <input id="discountValue" type="number" placeholder="VD: 10">
-        <label>Loại giảm</label>
-        <select id="percent">
+
+        <label>Mã voucher *</label>
+        <input id="code" placeholder="VD: SALE10" required minlength="2" maxlength="20">
+        <div class="validation-error" id="codeError"></div>
+
+        <label>Giá trị giảm *</label>
+        <input id="discountValue" type="number" placeholder="VD: 10" required min="0.01" step="0.01">
+        <div class="validation-error" id="discountError"></div>
+
+        <label>Loại giảm *</label>
+        <select id="percent" required>
             <option value="true">Phần trăm (%)</option>
             <option value="false">VNĐ</option>
         </select>
+
         <label>Giới hạn sử dụng</label>
-        <input id="usageLimit" type="number" placeholder="VD: 100">
-        <label>Ngày bắt đầu</label>
-        <input id="startDate" type="datetime-local">
+        <input id="usageLimit" type="number" placeholder="VD: 100" min="1">
+        <div class="validation-error" id="usageError"></div>
+
+        <label>Ngày bắt đầu *</label>
+        <input id="startDate" type="datetime-local" required>
+        <div class="validation-error" id="startDateError"></div>
+
         <label>Ngày kết thúc</label>
         <input id="endDate" type="datetime-local">
+        <div class="validation-error" id="endDateError"></div>
+
         <div class="modal-footer">
             <button class="btn btn-add" onclick="saveVoucher()">Lưu</button>
             <button class="btn btn-del" onclick="closeModal()">Hủy</button>
@@ -344,6 +356,23 @@
     function openModal() {
         document.getElementById("voucherId").value = "";
         document.getElementById("modalTitle").textContent = "Thêm Voucher";
+        document.getElementById("code").value = "";
+        document.getElementById("discountValue").value = "";
+        document.getElementById("percent").value = "true";
+        document.getElementById("usageLimit").value = "";
+
+        // 🔥 SET NGÀY BẮT ĐẦU MẶC ĐỊNH LÀ HIỆN TẠI + 1 PHÚT
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1);
+        const defaultStartDate = now.toISOString().slice(0, 16);
+        document.getElementById("startDate").value = defaultStartDate;
+
+        document.getElementById("endDate").value = "";
+
+        // 🔥 THÊM EVENT LISTENER CHO LOẠI VOUCHER
+        document.getElementById("percent").addEventListener('change', validateDiscountValue);
+        document.getElementById("discountValue").addEventListener('input', validateDiscountValue);
+
         modal.style.display = "flex";
     }
 
@@ -352,6 +381,9 @@
     }
 
     async function saveVoucher() {
+        if (!validateVoucherForm()) {
+            return;
+        }
         const id = document.getElementById("voucherId").value;
         const voucher = {
             code: document.getElementById("code").value,
@@ -382,9 +414,23 @@
         document.getElementById("discountValue").value = v.discountValue;
         document.getElementById("percent").value = v.percent;
         document.getElementById("usageLimit").value = v.usageLimit;
-        document.getElementById("startDate").value = v.startDate.slice(0, 16);
-        document.getElementById("endDate").value = v.endDate.slice(0, 16);
+
+        // 🔥 FORMAT LẠI NGÀY THÁNG CHO INPUT datetime-local
+        if (v.startDate) {
+            const startDate = new Date(v.startDate);
+            document.getElementById("startDate").value = startDate.toISOString().slice(0, 16);
+        }
+        if (v.endDate) {
+            const endDate = new Date(v.endDate);
+            document.getElementById("endDate").value = endDate.toISOString().slice(0, 16);
+        }
+
         document.getElementById("modalTitle").textContent = "Sửa Voucher";
+
+        // 🔥 THÊM EVENT LISTENER CHO VALIDATION
+        document.getElementById("percent").addEventListener('change', validateDiscountValue);
+        document.getElementById("discountValue").addEventListener('input', validateDiscountValue);
+
         modal.style.display = "flex";
     }
 
@@ -466,6 +512,86 @@
         };
     }
 
+    function validateVoucherForm() {
+        const code = document.getElementById("code").value.trim();
+        const discountValue = parseFloat(document.getElementById("discountValue").value);
+        const isPercent = document.getElementById("percent").value === "true";
+        const usageLimit = document.getElementById("usageLimit").value;
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        const now = new Date();
+        const startDateTime = new Date(startDate);
+
+        // 1. Kiểm tra mã voucher
+        if (!code) {
+            alert("Mã voucher không được để trống!");
+            return false;
+        }
+
+        // 2. Kiểm tra giá trị voucher
+        if (!discountValue || discountValue <= 0) {
+            alert("Giá trị voucher phải lớn hơn 0!");
+            return false;
+        }
+
+        // 3. Kiểm tra voucher % không vượt quá 100%
+        if (isPercent && discountValue > 100) {
+            alert("Voucher giảm giá % không được vượt quá 100%!");
+            return false;
+        }
+
+        // 4. Kiểm tra ngày bắt đầu không trong quá khứ
+        if (startDate && startDateTime < now) {
+            alert("Ngày bắt đầu không được trong quá khứ!");
+            return false;
+        }
+
+        // 5. Kiểm tra ngày kết thúc phải sau ngày bắt đầu
+        if (startDate && endDate) {
+            const endDateTime = new Date(endDate);
+            if (endDateTime <= startDateTime) {
+                alert("Ngày kết thúc phải sau ngày bắt đầu!");
+                return false;
+            }
+        }
+
+        // 6. Kiểm tra giới hạn sử dụng
+        if (usageLimit && parseInt(usageLimit) <= 0) {
+            alert("Giới hạn sử dụng phải lớn hơn 0!");
+            return false;
+        }
+
+        return true;
+    }
+
+    // 🔥 VALIDATION REAL-TIME CHO GIÁ TRỊ VOUCHER
+    function validateDiscountValue() {
+        const discountValueInput = document.getElementById("discountValue");
+        const discountValue = parseFloat(discountValueInput.value);
+        const isPercent = document.getElementById("percent").value === "true";
+
+        if (isPercent && discountValue > 100) {
+            discountValueInput.style.borderColor = "red";
+            discountValueInput.title = "Voucher % không được vượt quá 100%";
+        } else {
+            discountValueInput.style.borderColor = "";
+            discountValueInput.title = "";
+        }
+    }
+    const style = document.createElement('style');
+    style.textContent = `
+        input:invalid {
+            border-color: #ff4444 !important;
+        }
+        .validation-error {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: -12px;
+            margin-bottom: 10px;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>

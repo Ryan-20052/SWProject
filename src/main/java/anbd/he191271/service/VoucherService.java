@@ -19,6 +19,8 @@ public class VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
+    private static final double MINIMUM_AMOUNT = 5000.0;
+
     // ========== MANAGER FUNCTIONS ==========
 
     @Transactional
@@ -35,6 +37,7 @@ public class VoucherService {
     }
 
     public Voucher createVoucher(Voucher voucher) {
+        validateVoucher(voucher);
         voucher.setCode(voucher.getCode().trim().toUpperCase());
         voucher.setUsedCount(0);
         return voucherRepository.save(voucher);
@@ -43,6 +46,7 @@ public class VoucherService {
     public Voucher updateVoucher(Long id, Voucher updated) {
         Voucher v = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        validateVoucher(updated);
 
         v.setDiscountValue(updated.getDiscountValue());
         v.setPercent(updated.isPercent());
@@ -81,7 +85,14 @@ public class VoucherService {
                 ? orderTotal * (v.getDiscountValue() / 100)
                 : v.getDiscountValue();
 
-        return Math.max(0, orderTotal - discountAmount);
+        double discountedTotal = orderTotal - discountAmount;
+
+        // 🔥 THÊM VALIDATION: Đảm bảo không dưới 5,000đ
+        if (discountedTotal < MINIMUM_AMOUNT) {
+            discountedTotal = MINIMUM_AMOUNT;
+        }
+
+        return discountedTotal;
     }
 
     /**
@@ -142,5 +153,40 @@ public class VoucherService {
     }
     public Optional<Voucher> findByCode(String code) {
         return voucherRepository.findByCodeIgnoreCase(code);
+    }
+
+    private void validateVoucher(Voucher voucher) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Kiểm tra ngày bắt đầu không được trong quá khứ
+        if (voucher.getStartDate() != null && voucher.getStartDate().isBefore(now)) {
+            throw new RuntimeException("Ngày bắt đầu không được trong quá khứ!");
+        }
+
+        // 2. Kiểm tra ngày kết thúc phải sau ngày bắt đầu
+        if (voucher.getStartDate() != null && voucher.getEndDate() != null
+                && voucher.getEndDate().isBefore(voucher.getStartDate())) {
+            throw new RuntimeException("Ngày kết thúc phải sau ngày bắt đầu!");
+        }
+
+        // 3. Kiểm tra voucher % không vượt quá 100%
+        if (voucher.isPercent() && voucher.getDiscountValue() > 100) {
+            throw new RuntimeException("Voucher giảm giá % không được vượt quá 100%!");
+        }
+
+        // 4. Kiểm tra giá trị voucher phải lớn hơn 0
+        if (voucher.getDiscountValue() <= 0) {
+            throw new RuntimeException("Giá trị voucher phải lớn hơn 0!");
+        }
+
+        // 5. Kiểm tra mã voucher không được trống
+        if (voucher.getCode() == null || voucher.getCode().trim().isEmpty()) {
+            throw new RuntimeException("Mã voucher không được để trống!");
+        }
+
+        // 6. Kiểm tra giới hạn sử dụng phải lớn hơn 0 nếu có
+        if (voucher.getUsageLimit() != null && voucher.getUsageLimit() <= 0) {
+            throw new RuntimeException("Giới hạn sử dụng phải lớn hơn 0!");
+        }
     }
 }
