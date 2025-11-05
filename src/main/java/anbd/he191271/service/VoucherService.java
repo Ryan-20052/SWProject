@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -54,6 +53,8 @@ public class VoucherService {
         v.setStartDate(updated.getStartDate());
         v.setEndDate(updated.getEndDate());
         v.setActive(updated.isActive());
+        v.setMaxDiscountAmount(updated.getMaxDiscountAmount()); // 🔥 Cập nhật max discount
+        v.setMinOrderAmount(updated.getMinOrderAmount()); // 🔥 Cập nhật min order amount
 
         return voucherRepository.save(v);
     }
@@ -62,10 +63,18 @@ public class VoucherService {
     public void deactivateVoucher(Long id) {
         Voucher v = voucherRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        v.setActive(false); // 🔒 Khóa voucher
+        v.setActive(false);
         voucherRepository.save(v);
-
         System.out.println("🚫 Voucher " + v.getCode() + " đã bị khóa, không thể sử dụng nữa.");
+    }
+
+    @Transactional
+    public void activateVoucher(Long id) {
+        Voucher v = voucherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        v.setActive(true);
+        voucherRepository.save(v);
+        System.out.println("✅ Voucher " + v.getCode() + " đã được mở khóa.");
     }
 
     // ========== CUSTOMER FUNCTIONS ==========
@@ -77,17 +86,14 @@ public class VoucherService {
         Voucher v = voucherRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
 
-        if (!isVoucherUsable(v)) {
-            throw new RuntimeException("Voucher đã hết hạn hoặc không còn hiệu lực!");
+        if (!isVoucherUsable(v, orderTotal)) {
+            throw new RuntimeException("Voucher không thể áp dụng cho đơn hàng này!");
         }
 
-        double discountAmount = v.isPercent()
-                ? orderTotal * (v.getDiscountValue() / 100)
-                : v.getDiscountValue();
-
+        double discountAmount = calculateDiscountAmount(v, orderTotal);
         double discountedTotal = orderTotal - discountAmount;
 
-        // 🔥 THÊM VALIDATION: Đảm bảo không dưới 5,000đ
+        // 🔥 Đảm bảo không dưới 5,000đ
         if (discountedTotal < MINIMUM_AMOUNT) {
             discountedTotal = MINIMUM_AMOUNT;
         }
@@ -96,15 +102,82 @@ public class VoucherService {
     }
 
     /**
+     * ✅ Tính toán số tiền được giảm dựa trên voucher
+     */
+    private double calculateDiscountAmount(Voucher v, double orderTotal) {
+        double discountAmount;
+
+        if (v.isPercent()) {
+            // Tính giảm theo %
+            discountAmount = orderTotal * (v.getDiscountValue() / 100);
+
+            // Áp dụng mức giảm tối đa nếu có
+            if (v.getMaxDiscountAmount() != null && discountAmount > v.getMaxDiscountAmount()) {
+                discountAmount = v.getMaxDiscountAmount();
+            }
+        } else {
+            // Giảm theo số tiền cố định
+            discountAmount = v.getDiscountValue();
+        }
+
+        return discountAmount;
+    }
+
+    /**
+     * ✅ Kiểm tra tính hợp lệ của voucher
+     */
+    private boolean isVoucherUsable(Voucher v, double orderTotal) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Kiểm tra active
+        if (!v.isActive()) {
+            throw new RuntimeException("Voucher đã bị khóa!");
+        }
+
+        // 2. Kiểm tra ngày hiệu lực
+        if (v.getStartDate() != null && now.isBefore(v.getStartDate())) {
+            throw new RuntimeException("Voucher chưa đến thời gian sử dụng!");
+        }
+
+        if (v.getEndDate() != null && now.isAfter(v.getEndDate())) {
+            throw new RuntimeException("Voucher đã hết hạn!");
+        }
+
+        // 3. Kiểm tra lượt sử dụng
+        if (v.getUsageLimit() != null && v.getUsedCount() >= v.getUsageLimit()) {
+            throw new RuntimeException("Voucher đã hết lượt sử dụng!");
+        }
+
+        // 🔥 4. Kiểm tra số tiền đơn hàng tối thiểu
+        if (orderTotal < v.getMinOrderAmount()) {
+            throw new RuntimeException("Đơn hàng phải có giá trị tối thiểu " +
+                    String.format("%,.0f", v.getMinOrderAmount()) + "đ để áp dụng voucher!");
+        }
+
+        return true;
+    }
+    private boolean isVoucherUsableBasic(Voucher v) {
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean withinDate = (v.getStartDate() == null || !now.isBefore(v.getStartDate())) &&
+                (v.getEndDate() == null || !now.isAfter(v.getEndDate()));
+        boolean active = v.isActive();
+
+        return withinDate && active;
+    }
+
+
+    /**
      * ✅ Giảm 1 lượt sử dụng sau khi thanh toán thành công
      */
     @Transactional
-    public void decreaseUsage(String code) {
+    public void decreaseUsage(String code) { // 🔥 XÓA orderTotal parameter
         Voucher v = voucherRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new RuntimeException("Voucher không tồn tại: " + code));
 
-        if (!isVoucherUsable(v)) {
-            throw new RuntimeException("Voucher đã hết hạn hoặc không còn hiệu lực!");
+        // 🔥 CHỈ kiểm tra điều kiện cơ bản, KHÔNG kiểm tra minOrderAmount lại
+        if (!isVoucherUsableBasic(v)) {
+            throw new RuntimeException("Voucher không thể sử dụng!");
         }
 
         if (v.getUsageLimit() != null && v.getUsedCount() >= v.getUsageLimit()) {
@@ -118,19 +191,6 @@ public class VoucherService {
                 v.getUsedCount() + "/" + v.getUsageLimit() + " lần.");
     }
 
-    /**
-     * ✅ Kiểm tra tính hợp lệ của voucher (active, ngày, lượt dùng)
-     */
-    private boolean isVoucherUsable(Voucher v) {
-        LocalDateTime now = LocalDateTime.now();
-
-        boolean withinDate = (v.getStartDate() == null || !now.isBefore(v.getStartDate())) &&
-                (v.getEndDate() == null || !now.isAfter(v.getEndDate()));
-        boolean withinUsage = (v.getUsageLimit() == null || v.getUsedCount() < v.getUsageLimit());
-        boolean active = v.isActive();
-
-        return withinDate && withinUsage && active;
-    }
     public List<Voucher> searchVouchers(String code, Boolean percent, Boolean active) {
         List<Voucher> all = voucherRepository.findAll();
 
@@ -142,15 +202,6 @@ public class VoucherService {
                 .toList();
     }
 
-    @Transactional
-    public void activateVoucher(Long id) {
-        Voucher v = voucherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        v.setActive(true); // 🔓 Mở khóa voucher
-        voucherRepository.save(v);
-
-        System.out.println("✅ Voucher " + v.getCode() + " đã được mở khóa.");
-    }
     public Optional<Voucher> findByCode(String code) {
         return voucherRepository.findByCodeIgnoreCase(code);
     }
@@ -187,6 +238,17 @@ public class VoucherService {
         // 6. Kiểm tra giới hạn sử dụng phải lớn hơn 0 nếu có
         if (voucher.getUsageLimit() != null && voucher.getUsageLimit() <= 0) {
             throw new RuntimeException("Giới hạn sử dụng phải lớn hơn 0!");
+        }
+
+        // 🔥 7. Kiểm tra mức giảm tối đa (chỉ áp dụng cho voucher %)
+        if (voucher.isPercent() && voucher.getMaxDiscountAmount() != null
+                && voucher.getMaxDiscountAmount() <= 0) {
+            throw new RuntimeException("Mức giảm tối đa phải lớn hơn 0!");
+        }
+
+        // 🔥 8. Kiểm tra số tiền đơn hàng tối thiểu
+        if (voucher.getMinOrderAmount() == null || voucher.getMinOrderAmount() < 0) {
+            throw new RuntimeException("Số tiền đơn hàng tối thiểu không hợp lệ!");
         }
     }
 }

@@ -68,12 +68,34 @@ public class VoucherController {
             double discountAmount = total - newTotal;
             boolean reachedMinimum = newTotal <= 5000.0;
 
+            var voucherOpt = voucherService.findByCode(code);
+            Double maxDiscount = voucherOpt.map(v -> v.getMaxDiscountAmount()).orElse(null);
+            Double minOrderAmount = voucherOpt.map(v -> v.getMinOrderAmount()).orElse(0.0);
+
             return ResponseEntity.ok(Map.of(
                     "originalTotal", total,
                     "discountedTotal", newTotal,
                     "discountAmount", discountAmount,
-                    "reachedMinimum", reachedMinimum, // 🔥 Thêm flag này
-                    "minimumAmount", 5000.0
+                    "reachedMinimum", reachedMinimum,
+                    "minimumAmount", 5000.0,
+                    "maxDiscountAmount", maxDiscount,
+                    "minOrderAmount", minOrderAmount,
+                    "voucherCode", code
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/{code}/use")
+    public ResponseEntity<Map<String, Object>> useVoucher(@PathVariable String code) {
+        try {
+            voucherService.decreaseUsage(code); // 🔥 Gọi lại method gốc
+            return ResponseEntity.ok(Map.of(
+                    "message", "Voucher đã được sử dụng thành công!",
+                    "voucherCode", code
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of(

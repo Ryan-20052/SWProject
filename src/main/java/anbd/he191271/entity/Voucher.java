@@ -36,6 +36,28 @@ public class Voucher {
     @Column(nullable = false)
     private boolean active = true; // Đang hoạt động?
 
+    @Column
+    private Double maxDiscountAmount; // Mức giảm tối đa (chỉ áp dụng cho voucher %)
+
+    @Column(nullable = false)
+    private Double minOrderAmount = 0.0; // Số tiền đơn hàng tối thiểu
+
+    public Double getMaxDiscountAmount() {
+        return maxDiscountAmount;
+    }
+
+    public void setMaxDiscountAmount(Double maxDiscountAmount) {
+        this.maxDiscountAmount = maxDiscountAmount;
+    }
+
+    public Double getMinOrderAmount() {
+        return minOrderAmount;
+    }
+
+    public void setMinOrderAmount(Double minOrderAmount) {
+        this.minOrderAmount = minOrderAmount;
+    }
+
     public String getCode() {
         return code;
     }

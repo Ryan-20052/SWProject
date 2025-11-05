@@ -3,27 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name}">Chi tiết sản phẩm</title>
-
-    <!-- Gắn CSS ngoài -->
     <link rel="stylesheet" th:href="@{/product.css}">
-
-    <!-- CSRF bảo mật cho POST request (Spring Security) -->
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
     <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
 
-    <!-- Lấy dữ liệu session & sản phẩm từ backend Spring -->
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // Nếu người dùng đăng nhập thì lấy ID của họ, nếu không thì gán 'null'
         const sessionCustomerId = /*[[${session.customer != null ? session.customer.id : 'null'}]]*/ 'null';
-        // Lấy tên sản phẩm hiện tại để ghi chú khi tạo đơn thanh toán
         const productName = /*[[${product.name}]]*/ 'Sản phẩm';
         /*]]>*/
     </script>
 
     <style>
-
-        /* ===== HEADER CĂN GIỮA ĐẸP ===== */
         /* ===== HEADER ===== */
         #siteHeader {
             background: linear-gradient(90deg, #2563eb, #06b6d4);
@@ -60,7 +51,6 @@
         }
         .logo:hover { opacity: 0.9; }
 
-        /* Nhóm nút */
         .actions {
             display: flex;
             align-items: center;
@@ -73,7 +63,6 @@
             gap: 10px;
         }
 
-        /* ===== NÚT CĂN ĐỀU ===== */
         .nav-btn {
             background: rgba(255,255,255,0.15);
             border: none;
@@ -87,10 +76,8 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-
-            /* 👇 Kích thước chuẩn hóa */
             height: 36px;
-            min-width: 100px; /* đảm bảo đồng đều */
+            min-width: 100px;
             padding: 0 12px;
             line-height: 1;
             white-space: nowrap;
@@ -103,29 +90,140 @@
             transform: translateY(-1px);
         }
 
-        /* Biểu tượng căn giữa */
-        .nav-btn i, .nav-btn svg {
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
-
-
         /* ====== PHẦN MUA HÀNG ====== */
         .alert { margin: 10px 0; padding: 12px; border-radius: 6px; font-weight: bold; }
         .alert-success { background-color: #e6ffed; color: #0f5132; border: 1px solid #badbcc; }
         .alert-warning { background-color: #fff3cd; color: #664d03; border: 1px solid #ffeeba; }
         .alert-error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
 
-        .purchase-section { margin: 20px 0; padding: 15px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
-        .amount-wrapper { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-        .amount-wrapper input { width:80px; padding:6px; font-size:16px; text-align:center; border:1px solid #ccc; border-radius:6px; }
-        .action-buttons { display:flex; gap:12px; }
-        button.cart, button.buy-now { flex:1; padding:10px 14px; font-size:15px; border:none; border-radius:6px; cursor:pointer; color:white; }
-        button.cart { background:#007bff; } button.cart:hover{background:#0069d9;}
-        button.buy-now{ background:#28a745; } button.buy-now:hover{background:#218838;}
-        button:disabled { opacity:0.6; cursor:not-allowed; }
-        .variant-option { display:block; margin:6px 0; }
+        .purchase-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .amount-wrapper {
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:15px;
+        }
+
+        .amount-wrapper input {
+            width:80px;
+            padding:8px;
+            font-size:16px;
+            text-align:center;
+            border:1px solid #ccc;
+            border-radius:6px;
+        }
+
+        .voucher-wrapper {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .voucher-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+            font-size: 14px;
+        }
+
+        .voucher-info .discount-details {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .voucher-info .min-order {
+            color: #ff6b00;
+            font-weight: 500;
+        }
+
+        .voucher-info .max-discount {
+            color: #6f42c1;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display:flex;
+            gap:12px;
+            margin-top: 15px;
+        }
+
+        button.cart, button.buy-now {
+            flex:1;
+            padding:12px 16px;
+            font-size:16px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            color:white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button.cart {
+            background:#007bff;
+        }
+
+        button.cart:hover {
+            background:#0069d9;
+            transform: translateY(-2px);
+        }
+
+        button.buy-now {
+            background:#28a745;
+        }
+
+        button.buy-now:hover {
+            background:#218838;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity:0.6;
+            cursor:not-allowed;
+            transform: none !important;
+        }
+
+        .variant-option {
+            display:block;
+            margin:8px 0;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .variant-option:hover {
+            background: #f8f9fa;
+        }
+
+        .price-highlight {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 10px 0;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            margin-right: 10px;
+        }
+
+        .discounted-price {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -134,26 +232,20 @@
 <!-- ====== HEADER ====== -->
 <header id="siteHeader">
     <div class="header-inner">
-        <!-- Logo -->
         <h1 class="logo" onclick="window.location.href='/home/homepage'">🏷️ License Shop</h1>
 
         <div class="actions">
-            <!-- Nút điều hướng luôn hiển thị -->
             <button class="nav-btn" onclick="window.location.href='/home/homepage'">🏠 Trang chủ</button>
             <button class="nav-btn" onclick="window.location.href='/cart/view'">🛒 Giỏ hàng</button>
 
-            <!-- Nếu chưa đăng nhập -->
             <div class="auth-group" th:if="${session.customer == null}">
                 <button class="nav-btn" onclick="window.location.href='/login.html'">Đăng nhập</button>
                 <button class="nav-btn" onclick="window.location.href='/register.html'">Đăng ký</button>
             </div>
 
-            <!-- Nếu đã đăng nhập -->
             <div class="auth-group" th:if="${session.customer != null}">
                 <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
-                    <button type="submit" class="nav-btn">
-                        Đăng xuất
-                    </button>
+                    <button type="submit" class="nav-btn">Đăng xuất</button>
                 </form>
             </div>
         </div>
@@ -174,10 +266,10 @@
                 <div th:if="${!(#strings.contains(message, 'thành công') or #strings.contains(message, 'Vui lòng đăng nhập'))}" class="alert alert-error" th:text="${message}"></div>
             </div>
 
-            <div class="price"
-                 th:text="${selectedVariant != null ? selectedVariant.price + ' đ' :
-                          (variants != null and #lists.isEmpty(variants) == false ? variants[0].price + ' đ' : 'Liên hệ')}">
-                Giá
+            <!-- 🔥 HIỂN THỊ GIÁ CÓ THỂ THAY ĐỔI KHI ÁP DỤNG VOUCHER -->
+            <div class="price-highlight">
+                <span id="originalPriceDisplay" class="original-price"></span>
+                <span id="finalPriceDisplay" class="discounted-price"></span>
             </div>
 
             <section class="product-description">
@@ -195,7 +287,7 @@
                                    th:checked="${selectedVariant != null and selectedVariant.id == v.id}" />
                             <span>
                                 <span th:text="${v.duration}">Thời hạn</span> -
-                                <span th:text="${v.price + ' đ'}">Giá</span>
+                                <span class="variant-price" th:text="${v.price + ' đ'}">Giá</span>
                             </span>
                         </label>
                     </div>
@@ -212,36 +304,53 @@
                            (variants != null and #lists.isEmpty(variants) == false ? variants[0].id : '')}" />
 
                     <div class="amount-wrapper">
-                        <label for="amountInput">Số lượng:</label>
+                        <label for="amountInput" style="font-weight: bold;">Số lượng:</label>
                         <input type="number" id="amountInput" name="amount" value="1" min="1" />
                         <span th:if="${param.message}" th:text="${param.message}"
                               style="margin-left:10px;color:red;font-weight:bold;"></span>
                     </div>
 
-                    <div class="voucher-wrapper" style="margin-bottom: 12px;">
-                        <label for="voucherCode">Mã giảm giá:</label>
-                        <input type="text" id="voucherCode" name="voucherCode" placeholder="Nhập mã voucher..."
-                               style="padding:6px; border:1px solid #ccc; border-radius:6px; width:160px;">
-                        <button type="button" id="applyVoucherBtn"
-                                style="padding:6px 10px; background:#f59e0b; border:none; border-radius:6px; color:white; cursor:pointer;">
-                            Áp dụng
-                        </button>
-                        <span id="voucherMessage" style="margin-left:10px;font-weight:bold;"></span>
+                    <!-- 🔥 PHẦN VOUCHER ĐƯỢC CẢI THIỆN -->
+                    <div class="voucher-wrapper">
+                        <label for="voucherCode" style="font-weight: bold; display: block; margin-bottom: 8px;">
+                            🎫 Mã giảm giá:
+                        </label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="voucherCode" name="voucherCode" placeholder="Nhập mã voucher..."
+                                   style="padding:8px; border:1px solid #ccc; border-radius:6px; width:180px; flex:1;">
+                            <button type="button" id="applyVoucherBtn"
+                                    style="padding:8px 16px; background:#f59e0b; border:none; border-radius:6px; color:white; cursor:pointer; font-weight: bold;">
+                                Áp dụng
+                            </button>
+                            <button type="button" id="removeVoucherBtn"
+                                    style="padding:8px 12px; background:#6c757d; border:none; border-radius:6px; color:white; cursor:pointer; display:none;">
+                                ❌
+                            </button>
+                        </div>
+
+                        <!-- Thông báo voucher -->
+                        <div id="voucherMessage" style="margin-top: 8px; font-weight: bold;"></div>
+
+                        <!-- Thông tin chi tiết voucher -->
+                        <div id="voucherDetails" class="voucher-info" style="display: none;">
+                            <div class="discount-details" id="discountDetails"></div>
+                            <div class="min-order" id="minOrderInfo"></div>
+                            <div class="max-discount" id="maxDiscountInfo"></div>
+                        </div>
                     </div>
 
                     <div class="action-buttons">
-
-
                         <button type="button" class="buy-now" id="buyNowBtn"
                                 th:attr="disabled=${selectedVariant == null and (variants == null or #lists.isEmpty(variants))}">
-                            ⚡ Mua ngay
+                            ⚡ Mua ngay (VNPay)
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <!-- ====== PHẦN REVIEW (đã rút gọn) ====== -->
+
+    <!-- ====== PHẦN REVIEW ====== -->
     <div class="reviews-short" style="margin-top:30px; text-align:center;">
         <a th:href="@{/review/list(productId=${product.id})}">
             <button style="background:#ffc107; color:#000; border:none; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;">
@@ -249,89 +358,9 @@
             </button>
         </a>
     </div>
-
 </div>
 
 <!-- ====== SCRIPT CHÍNH ====== -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    document.addEventListener('DOMContentLoaded', function () {
-        const buyNowBtn = document.getElementById('buyNowBtn');
-        const variantRadios = document.querySelectorAll("input[name='variantId']");
-        const variantIdInput = document.getElementById('variantIdInput');
-
-        function syncVariantFromRadio() {
-            const checked = Array.from(variantRadios).find(r => r.checked);
-            if (checked) {
-                variantIdInput.value = checked.value;
-                buyNowBtn.disabled = false;
-            } else if (!variantIdInput.value) {
-                buyNowBtn.disabled = true;
-            }
-        }
-
-        variantRadios.forEach(radio => radio.addEventListener('change', syncVariantFromRadio));
-        syncVariantFromRadio();
-
-        buyNowBtn?.addEventListener('click', async function () {
-            if (!sessionCustomerId || sessionCustomerId === 'null') {
-                alert('Vui lòng đăng nhập để mua sản phẩm!');
-                window.location.href = '/login.html';
-                return;
-            }
-
-            const variantId = variantIdInput.value;
-            const amountEl = document.getElementById('amountInput');
-            const quantity = amountEl && parseInt(amountEl.value || '1', 10) > 0
-                ? parseInt(amountEl.value || '1', 10) : 1;
-
-            if (!variantId) {
-                alert('Vui lòng chọn gói sản phẩm trước khi mua!');
-                return;
-            }
-
-            const body = {
-                customerId: parseInt(sessionCustomerId),
-                items: [{ variantId: parseInt(variantId), quantity: quantity }],
-                orderInfo: "Thanh toán " + productName
-            };
-
-            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-            const headers = { 'Content-Type': 'application/json' };
-            if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
-
-            try {
-                const res = await fetch('/api/payment/create', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(body)
-                });
-
-                if (!res.ok) {
-                    let text;
-                    try { text = await res.text(); } catch (e) { text = ''; }
-                    console.error('Payment create failed', res.status, text);
-                    alert('Không thể tạo thanh toán. Vui lòng thử lại.');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data && data.paymentUrl) {
-                    window.location.href = data.paymentUrl;
-                } else {
-                    console.error('Payment create response lacks paymentUrl:', data);
-                    alert('Không có URL thanh toán trả về.');
-                }
-            } catch (err) {
-                console.error('Error creating payment', err);
-                alert('Có lỗi xảy ra khi tạo thanh toán!');
-            }
-        });
-    });
-    /*]]>*/
-
-</script>
 <script th:src="@{/product.js}"></script>
 </body>
 </html>

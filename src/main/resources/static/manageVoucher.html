@@ -109,11 +109,12 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            font-size: 14px;
         }
 
         th, td {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 8px;
             text-align: left;
         }
 
@@ -145,9 +146,11 @@
 
         .modal-content {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 10px;
-            width: 450px;
+            width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
@@ -155,15 +158,40 @@
         .modal-content select {
             width: 100%;
             padding: 8px 10px;
-            margin: 8px 0 16px;
+            margin: 6px 0 12px;
             border-radius: 6px;
             border: 1px solid #ccc;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         .modal-footer {
             display: flex;
             justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .conditional-field {
+            display: none;
+        }
+
+        .field-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: -8px;
+            margin-bottom: 8px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -171,7 +199,6 @@
 <header>
     <div class="header-inner">
         <h1>Manager Dashboard</h1>
-
         <div style="display:flex; align-items:center; gap:16px;">
             <div style="font-size:16px; color:white;">Xin chào, Manager</div>
             <div class="avatar-fallback"
@@ -207,7 +234,7 @@
         <button class="btn btn-add" onclick="openModal()">+ Thêm Voucher</button>
     </div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
+    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
         <input id="searchCode" placeholder="Tìm theo mã..." style="padding:6px; border-radius:6px; border:1px solid #ccc;">
         <select id="searchPercent">
             <option value="">Loại</option>
@@ -219,8 +246,6 @@
             <option value="true">Hoạt động</option>
             <option value="false">Đã khóa</option>
         </select>
-
-
         <button class="btn btn-edit" onclick="searchVouchers()">Tìm kiếm</button>
     </div>
 
@@ -233,6 +258,8 @@
             <th>Loại</th>
             <th>Giới hạn</th>
             <th>Đã dùng</th>
+            <th>Giảm tối đa</th>
+            <th>Đơn tối thiểu</th>
             <th>Bắt đầu</th>
             <th>Kết thúc</th>
             <th>Trạng thái</th>
@@ -241,12 +268,12 @@
         </thead>
         <tbody></tbody>
     </table>
+
     <div id="pagination" style="margin-top: 20px; text-align: center;">
         <button id="prevPage" class="btn btn-edit" disabled>⬅ Trước</button>
         <span id="pageInfo" style="margin: 0 10px; font-weight: 600;">Trang 1 / 1</span>
         <button id="nextPage" class="btn btn-edit" disabled>Tiếp ➡</button>
     </div>
-
 </div>
 
 <!-- MODAL -->
@@ -255,31 +282,60 @@
         <h3 id="modalTitle">Thêm Voucher</h3>
         <input type="hidden" id="voucherId">
 
-        <label>Mã voucher *</label>
-        <input id="code" placeholder="VD: SALE10" required minlength="2" maxlength="20">
-        <div class="validation-error" id="codeError"></div>
+        <div class="form-group">
+            <label>Mã voucher *</label>
+            <input id="code" placeholder="VD: SALE10" required minlength="2" maxlength="20">
+            <div class="validation-error" id="codeError"></div>
+        </div>
 
-        <label>Giá trị giảm *</label>
-        <input id="discountValue" type="number" placeholder="VD: 10" required min="0.01" step="0.01">
-        <div class="validation-error" id="discountError"></div>
+        <div class="form-group">
+            <label>Giá trị giảm *</label>
+            <input id="discountValue" type="number" placeholder="VD: 10" required min="0.01" step="0.01">
+            <div class="validation-error" id="discountError"></div>
+        </div>
 
-        <label>Loại giảm *</label>
-        <select id="percent" required>
-            <option value="true">Phần trăm (%)</option>
-            <option value="false">VNĐ</option>
-        </select>
+        <div class="form-group">
+            <label>Loại giảm *</label>
+            <select id="percent" required onchange="toggleMaxDiscountField()">
+                <option value="true">Phần trăm (%)</option>
+                <option value="false">VNĐ</option>
+            </select>
+        </div>
 
-        <label>Giới hạn sử dụng</label>
-        <input id="usageLimit" type="number" placeholder="VD: 100" min="1">
-        <div class="validation-error" id="usageError"></div>
+        <!-- 🔥 MỨC GIẢM TỐI ĐA (CHỈ HIỆN KHI CHỌN PHẦN TRĂM) -->
+        <div class="form-group conditional-field" id="maxDiscountGroup">
+            <label>Mức giảm tối đa (VNĐ)</label>
+            <input id="maxDiscountAmount" type="number" placeholder="VD: 50000" min="0" step="1000">
+            <div class="field-note">Chỉ áp dụng cho voucher % - để trống nếu không giới hạn</div>
+            <div class="validation-error" id="maxDiscountError"></div>
+        </div>
 
-        <label>Ngày bắt đầu *</label>
-        <input id="startDate" type="datetime-local" required>
-        <div class="validation-error" id="startDateError"></div>
+        <div class="form-group">
+            <label>Số tiền đơn hàng tối thiểu (VNĐ) *</label>
+            <input id="minOrderAmount" type="number" placeholder="VD: 100000" required min="0" step="1000" value="0">
+            <div class="field-note">Đơn hàng phải đạt số tiền tối thiểu này mới được áp dụng voucher</div>
+            <div class="validation-error" id="minOrderError"></div>
+        </div>
 
-        <label>Ngày kết thúc</label>
-        <input id="endDate" type="datetime-local">
-        <div class="validation-error" id="endDateError"></div>
+        <div class="form-group">
+            <label>Giới hạn sử dụng</label>
+            <input id="usageLimit" type="number" placeholder="VD: 100" min="1">
+            <div class="field-note">Để trống nếu không giới hạn số lần sử dụng</div>
+            <div class="validation-error" id="usageError"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày bắt đầu *</label>
+            <input id="startDate" type="datetime-local" required>
+            <div class="validation-error" id="startDateError"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày kết thúc</label>
+            <input id="endDate" type="datetime-local">
+            <div class="field-note">Để trống nếu voucher không có hạn sử dụng</div>
+            <div class="validation-error" id="endDateError"></div>
+        </div>
 
         <div class="modal-footer">
             <button class="btn btn-add" onclick="saveVoucher()">Lưu</button>
@@ -294,28 +350,35 @@
     const modal = document.getElementById("voucherModal");
     let currentPage = 0;
     let totalPages = 1;
-    let pageSize = 10; // bạn có thể đổi 5/20 tùy ý
+    let pageSize = 10;
+
+    // 🔥 TOGGLE HIỂN THỊ TRƯỜNG MỨC GIẢM TỐI ĐA
+    function toggleMaxDiscountField() {
+        const isPercent = document.getElementById("percent").value === "true";
+        const maxDiscountGroup = document.getElementById("maxDiscountGroup");
+
+        if (isPercent) {
+            maxDiscountGroup.style.display = "block";
+        } else {
+            maxDiscountGroup.style.display = "none";
+            document.getElementById("maxDiscountAmount").value = "";
+        }
+    }
 
     async function loadVouchers(page = 0) {
-        // Nếu backend chưa sửa để trả về dạng phân trang, vẫn gọi API cũ không tham số
         const url = (typeof page === 'number') ? `${API_URL}?page=${page}&size=${pageSize}` : API_URL;
 
         const res = await fetch(url);
         const data = await res.json();
 
-        // Hỗ trợ cả 2 dạng dữ liệu:
-        // 1) Dạng cũ: [ ...voucher ]
-        // 2) Dạng mới có phân trang: { vouchers: [...], currentPage, totalPages, ... }
         const list = Array.isArray(data) ? data : (data.vouchers || []);
 
-        // Nếu có phân trang từ server thì cập nhật thông tin trang
         if (!Array.isArray(data)) {
             currentPage = data.currentPage ?? 0;
             totalPages = data.totalPages ?? 1;
             updatePagination && updatePagination();
         }
 
-        // === GIỮ NGUYÊN CÁCH RENDER CỦA BẠN ===
         tableBody.innerHTML = "";
         const now = new Date();
 
@@ -329,19 +392,30 @@
                 badge = `<span class='status-badge status-active'>Hoạt động</span>`;
             }
 
+            // 🔥 HIỂN THỊ 2 TRƯỜNG MỚI
+            const maxDiscount = v.maxDiscountAmount
+                ? `${v.maxDiscountAmount.toLocaleString()} đ`
+                : '<span style="color:#666;">Không giới hạn</span>';
+
+            const minOrder = v.minOrderAmount
+                ? `${v.minOrderAmount.toLocaleString()} đ`
+                : '0 đ';
+
             tableBody.innerHTML += `
         <tr>
           <td>${v.id}</td>
-          <td>${v.code}</td>
-          <td>${v.discountValue}</td>
+          <td><strong>${v.code}</strong></td>
+          <td>${v.discountValue} ${v.percent ? '%' : 'đ'}</td>
           <td>${v.percent ? "%" : "VNĐ"}</td>
-          <td>${v.usageLimit}</td>
+          <td>${v.usageLimit || '∞'}</td>
           <td>${v.usedCount}</td>
+          <td>${maxDiscount}</td>
+          <td>${minOrder}</td>
           <td>${v.startDate.replace("T"," ").split(".")[0]}</td>
-          <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
+          <td>${v.endDate ? v.endDate.replace("T"," ").split(".")[0] : 'Không hạn'}</td>
           <td>${badge}</td>
           <td>
-            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
+            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v).replace(/'/g, "&#39;")})'>Sửa</button>
             ${
                 v.active
                     ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
@@ -352,26 +426,25 @@
         });
     }
 
-
     function openModal() {
         document.getElementById("voucherId").value = "";
         document.getElementById("modalTitle").textContent = "Thêm Voucher";
         document.getElementById("code").value = "";
         document.getElementById("discountValue").value = "";
         document.getElementById("percent").value = "true";
+        document.getElementById("maxDiscountAmount").value = "";
+        document.getElementById("minOrderAmount").value = "0";
         document.getElementById("usageLimit").value = "";
 
-        // 🔥 SET NGÀY BẮT ĐẦU MẶC ĐỊNH LÀ HIỆN TẠI + 1 PHÚT
+        // Set ngày bắt đầu mặc định
         const now = new Date();
         now.setMinutes(now.getMinutes() + 1);
         const defaultStartDate = now.toISOString().slice(0, 16);
         document.getElementById("startDate").value = defaultStartDate;
-
         document.getElementById("endDate").value = "";
 
-        // 🔥 THÊM EVENT LISTENER CHO LOẠI VOUCHER
-        document.getElementById("percent").addEventListener('change', validateDiscountValue);
-        document.getElementById("discountValue").addEventListener('input', validateDiscountValue);
+        // 🔥 KÍCH HOẠT TOGGLE CHO TRƯỜNG MỨC GIẢM TỐI ĐA
+        toggleMaxDiscountField();
 
         modal.style.display = "flex";
     }
@@ -384,38 +457,61 @@
         if (!validateVoucherForm()) {
             return;
         }
+
         const id = document.getElementById("voucherId").value;
         const voucher = {
-            code: document.getElementById("code").value,
+            code: document.getElementById("code").value.trim().toUpperCase(),
             discountValue: parseFloat(document.getElementById("discountValue").value),
             percent: document.getElementById("percent").value === "true",
-            usageLimit: parseInt(document.getElementById("usageLimit").value),
+            maxDiscountAmount: document.getElementById("maxDiscountAmount").value
+                ? parseFloat(document.getElementById("maxDiscountAmount").value)
+                : null,
+            minOrderAmount: parseFloat(document.getElementById("minOrderAmount").value),
+            usageLimit: document.getElementById("usageLimit").value
+                ? parseInt(document.getElementById("usageLimit").value)
+                : null,
             startDate: document.getElementById("startDate").value,
-            endDate: document.getElementById("endDate").value,
+            endDate: document.getElementById("endDate").value || null,
             active: true
         };
 
         const method = id ? "PUT" : "POST";
         const url = id ? `${API_URL}/${id}` : API_URL;
 
-        await fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(voucher)
-        });
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(voucher)
+            });
 
-        closeModal();
-        loadVouchers();
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Lỗi khi lưu voucher');
+            }
+
+            closeModal();
+            loadVouchers();
+            alert(id ? '✅ Cập nhật voucher thành công!' : '✅ Thêm voucher thành công!');
+        } catch (error) {
+            console.error('Lỗi khi lưu voucher:', error);
+            alert('❌ Lỗi: ' + error.message);
+        }
     }
 
     function editVoucher(v) {
         document.getElementById("voucherId").value = v.id;
+        document.getElementById("modalTitle").textContent = "Sửa Voucher";
         document.getElementById("code").value = v.code;
         document.getElementById("discountValue").value = v.discountValue;
         document.getElementById("percent").value = v.percent;
-        document.getElementById("usageLimit").value = v.usageLimit;
 
-        // 🔥 FORMAT LẠI NGÀY THÁNG CHO INPUT datetime-local
+        // 🔥 SET GIÁ TRỊ CHO 2 TRƯỜNG MỚI
+        document.getElementById("maxDiscountAmount").value = v.maxDiscountAmount || "";
+        document.getElementById("minOrderAmount").value = v.minOrderAmount || 0;
+        document.getElementById("usageLimit").value = v.usageLimit || "";
+
+        // Format lại ngày tháng
         if (v.startDate) {
             const startDate = new Date(v.startDate);
             document.getElementById("startDate").value = startDate.toISOString().slice(0, 16);
@@ -425,97 +521,18 @@
             document.getElementById("endDate").value = endDate.toISOString().slice(0, 16);
         }
 
-        document.getElementById("modalTitle").textContent = "Sửa Voucher";
-
-        // 🔥 THÊM EVENT LISTENER CHO VALIDATION
-        document.getElementById("percent").addEventListener('change', validateDiscountValue);
-        document.getElementById("discountValue").addEventListener('input', validateDiscountValue);
+        // 🔥 KÍCH HOẠT TOGGLE CHO TRƯỜNG MỨC GIẢM TỐI ĐA
+        toggleMaxDiscountField();
 
         modal.style.display = "flex";
-    }
-
-
-
-    window.onload = loadVouchers;
-    async function toggleVoucher(id, newState) {
-        const actionText = newState ? "mở khóa" : "khóa";
-        if (!confirm(`Bạn có chắc muốn ${actionText} voucher này không?`)) return;
-
-        const endpoint = newState ? "activate" : "deactivate";
-        await fetch(`${API_URL}/${id}/${endpoint}`, { method: "PUT" });
-
-        alert(`Voucher đã được ${actionText}!`);
-        loadVouchers();
-    }
-    async function searchVouchers() {
-        const code = document.getElementById("searchCode").value;
-        const percent = document.getElementById("searchPercent").value;
-        const status = document.getElementById("searchStatus").value;
-
-        const params = new URLSearchParams();
-        if (code) params.append("code", code);
-        if (percent) params.append("percent", percent);
-        if (status) params.append("active", status);
-
-
-        const res = await fetch(`${API_URL}/search?${params.toString()}`);
-        const data = await res.json();
-
-        renderVoucherTable(data);
-    }
-
-    function renderVoucherTable(data) {
-        const tableBody = document.querySelector("#voucherTable tbody");
-        tableBody.innerHTML = "";
-        const now = new Date();
-
-        data.forEach(v => {
-            let badge = "";
-            if (!v.active) badge = `<span class='status-badge status-expired'>Đã khóa</span>`;
-            else if (new Date(v.endDate) < now) badge = `<span class='status-badge status-expired'>Hết hạn</span>`;
-            else badge = `<span class='status-badge status-active'>Hoạt động</span>`;
-
-            tableBody.innerHTML += `
-        <tr>
-          <td>${v.id}</td>
-          <td>${v.code}</td>
-          <td>${v.discountValue}</td>
-          <td>${v.percent ? "%" : "VNĐ"}</td>
-          <td>${v.usageLimit}</td>
-          <td>${v.usedCount}</td>
-          <td>${v.startDate.replace("T"," ").split(".")[0]}</td>
-          <td>${v.endDate.replace("T"," ").split(".")[0]}</td>
-          <td>${badge}</td>
-          <td>
-            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v)})'>Sửa</button>
-            ${v.active
-                ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
-                : `<button class='btn btn-add' onclick='toggleVoucher(${v.id}, true)'>Mở khóa</button>`}
-          </td>
-        </tr>`;
-        });
-    }
-    function updatePagination() {
-        document.getElementById("pageInfo").textContent = `Trang ${currentPage + 1} / ${totalPages}`;
-
-        const prevBtn = document.getElementById("prevPage");
-        const nextBtn = document.getElementById("nextPage");
-
-        prevBtn.disabled = currentPage === 0;
-        nextBtn.disabled = currentPage >= totalPages - 1;
-
-        prevBtn.onclick = () => {
-            if (currentPage > 0) loadVouchers(currentPage - 1);
-        };
-        nextBtn.onclick = () => {
-            if (currentPage < totalPages - 1) loadVouchers(currentPage + 1);
-        };
     }
 
     function validateVoucherForm() {
         const code = document.getElementById("code").value.trim();
         const discountValue = parseFloat(document.getElementById("discountValue").value);
         const isPercent = document.getElementById("percent").value === "true";
+        const maxDiscountAmount = document.getElementById("maxDiscountAmount").value;
+        const minOrderAmount = parseFloat(document.getElementById("minOrderAmount").value);
         const usageLimit = document.getElementById("usageLimit").value;
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
@@ -541,13 +558,25 @@
             return false;
         }
 
-        // 4. Kiểm tra ngày bắt đầu không trong quá khứ
+        // 🔥 4. Kiểm tra mức giảm tối đa (chỉ áp dụng cho voucher %)
+        if (isPercent && maxDiscountAmount && parseFloat(maxDiscountAmount) <= 0) {
+            alert("Mức giảm tối đa phải lớn hơn 0!");
+            return false;
+        }
+
+        // 🔥 5. Kiểm tra số tiền đơn hàng tối thiểu
+        if (minOrderAmount < 0) {
+            alert("Số tiền đơn hàng tối thiểu không được âm!");
+            return false;
+        }
+
+        // 6. Kiểm tra ngày bắt đầu không trong quá khứ
         if (startDate && startDateTime < now) {
             alert("Ngày bắt đầu không được trong quá khứ!");
             return false;
         }
 
-        // 5. Kiểm tra ngày kết thúc phải sau ngày bắt đầu
+        // 7. Kiểm tra ngày kết thúc phải sau ngày bắt đầu
         if (startDate && endDate) {
             const endDateTime = new Date(endDate);
             if (endDateTime <= startDateTime) {
@@ -556,7 +585,7 @@
             }
         }
 
-        // 6. Kiểm tra giới hạn sử dụng
+        // 8. Kiểm tra giới hạn sử dụng
         if (usageLimit && parseInt(usageLimit) <= 0) {
             alert("Giới hạn sử dụng phải lớn hơn 0!");
             return false;
@@ -565,33 +594,96 @@
         return true;
     }
 
-    // 🔥 VALIDATION REAL-TIME CHO GIÁ TRỊ VOUCHER
-    function validateDiscountValue() {
-        const discountValueInput = document.getElementById("discountValue");
-        const discountValue = parseFloat(discountValueInput.value);
-        const isPercent = document.getElementById("percent").value === "true";
+    // Các hàm khác giữ nguyên...
+    window.onload = function() {
+        loadVouchers();
+        toggleMaxDiscountField(); // 🔥 KÍCH HOẠT KHI TẢI TRANG
+    };
 
-        if (isPercent && discountValue > 100) {
-            discountValueInput.style.borderColor = "red";
-            discountValueInput.title = "Voucher % không được vượt quá 100%";
-        } else {
-            discountValueInput.style.borderColor = "";
-            discountValueInput.title = "";
-        }
+    async function toggleVoucher(id, newState) {
+        const actionText = newState ? "mở khóa" : "khóa";
+        if (!confirm(`Bạn có chắc muốn ${actionText} voucher này không?`)) return;
+
+        const endpoint = newState ? "activate" : "deactivate";
+        await fetch(`${API_URL}/${id}/${endpoint}`, { method: "PUT" });
+
+        alert(`Voucher đã được ${actionText}!`);
+        loadVouchers();
     }
-    const style = document.createElement('style');
-    style.textContent = `
-        input:invalid {
-            border-color: #ff4444 !important;
-        }
-        .validation-error {
-            color: #ff4444;
-            font-size: 12px;
-            margin-top: -12px;
-            margin-bottom: 10px;
-        }
-    `;
-    document.head.appendChild(style);
+
+    async function searchVouchers() {
+        const code = document.getElementById("searchCode").value;
+        const percent = document.getElementById("searchPercent").value;
+        const status = document.getElementById("searchStatus").value;
+
+        const params = new URLSearchParams();
+        if (code) params.append("code", code);
+        if (percent) params.append("percent", percent);
+        if (status) params.append("active", status);
+
+        const res = await fetch(`${API_URL}/search?${params.toString()}`);
+        const data = await res.json();
+
+        renderVoucherTable(data);
+    }
+
+    function renderVoucherTable(data) {
+        tableBody.innerHTML = "";
+        const now = new Date();
+
+        data.forEach(v => {
+            let badge = "";
+            if (!v.active) badge = `<span class='status-badge status-expired'>Đã khóa</span>`;
+            else if (v.endDate && new Date(v.endDate) < now) badge = `<span class='status-badge status-expired'>Hết hạn</span>`;
+            else badge = `<span class='status-badge status-active'>Hoạt động</span>`;
+
+            const maxDiscount = v.maxDiscountAmount
+                ? `${v.maxDiscountAmount.toLocaleString()} đ`
+                : '<span style="color:#666;">Không giới hạn</span>';
+
+            const minOrder = v.minOrderAmount
+                ? `${v.minOrderAmount.toLocaleString()} đ`
+                : '0 đ';
+
+            tableBody.innerHTML += `
+        <tr>
+          <td>${v.id}</td>
+          <td><strong>${v.code}</strong></td>
+          <td>${v.discountValue} ${v.percent ? '%' : 'đ'}</td>
+          <td>${v.percent ? "%" : "VNĐ"}</td>
+          <td>${v.usageLimit || '∞'}</td>
+          <td>${v.usedCount}</td>
+          <td>${maxDiscount}</td>
+          <td>${minOrder}</td>
+          <td>${v.startDate.replace("T"," ").split(".")[0]}</td>
+          <td>${v.endDate ? v.endDate.replace("T"," ").split(".")[0] : 'Không hạn'}</td>
+          <td>${badge}</td>
+          <td>
+            <button class='btn btn-edit' onclick='editVoucher(${JSON.stringify(v).replace(/'/g, "&#39;")})'>Sửa</button>
+            ${v.active
+                ? `<button class='btn btn-del' onclick='toggleVoucher(${v.id}, false)'>Khóa</button>`
+                : `<button class='btn btn-add' onclick='toggleVoucher(${v.id}, true)'>Mở khóa</button>`}
+          </td>
+        </tr>`;
+        });
+    }
+
+    function updatePagination() {
+        document.getElementById("pageInfo").textContent = `Trang ${currentPage + 1} / ${totalPages}`;
+
+        const prevBtn = document.getElementById("prevPage");
+        const nextBtn = document.getElementById("nextPage");
+
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = currentPage >= totalPages - 1;
+
+        prevBtn.onclick = () => {
+            if (currentPage > 0) loadVouchers(currentPage - 1);
+        };
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages - 1) loadVouchers(currentPage + 1);
+        };
+    }
 </script>
 </body>
 </html>

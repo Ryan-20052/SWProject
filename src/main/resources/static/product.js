@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const header = document.getElementById("siteHeader");
     window.addEventListener("scroll", () => {
         if (window.scrollY > lastScrollY) {
-            header?.classList.add("compact"); // khi kéo xuống
+            header?.classList.add("compact");
         } else {
-            header?.classList.remove("compact"); // khi kéo lên
+            header?.classList.remove("compact");
         }
         lastScrollY = window.scrollY;
     });
@@ -21,14 +21,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // ----------------- Biến chung -----------------
     const buyNowBtn = document.getElementById('buyNowBtn');
     const applyBtn = document.getElementById('applyVoucherBtn');
+    const removeVoucherBtn = document.getElementById('removeVoucherBtn');
     const voucherInput = document.getElementById('voucherCode');
     const voucherMessage = document.getElementById('voucherMessage');
+    const voucherDetails = document.getElementById('voucherDetails');
     const variantRadios = document.querySelectorAll("input[name='variantId']");
     const variantIdInput = document.getElementById('variantIdInput');
     const amountInput = document.getElementById('amountInput');
+    const originalPriceDisplay = document.getElementById('originalPriceDisplay');
+    const finalPriceDisplay = document.getElementById('finalPriceDisplay');
 
-    let discountedTotal = null; // 💰 Tổng sau giảm
-    let originalPrice = null; // 💰 Giá gốc của variant được chọn
+    let discountedTotal = null;
+    let originalPrice = null;
+    let currentVoucherCode = null;
+    let currentVoucherData = null;
 
     // ----------------- Đồng bộ variant được chọn -----------------
     function syncVariantFromRadio() {
@@ -38,18 +44,52 @@ document.addEventListener('DOMContentLoaded', function () {
             buyNowBtn.disabled = false;
 
             // ✅ Cập nhật giá hiển thị + lưu giá gốc
-            const priceEl = document.querySelector('.price');
-            const priceText = checked.nextElementSibling.querySelector('span:nth-child(2)')?.innerText;
-            if (priceEl && priceText) {
-                priceEl.innerText = priceText;
-                originalPrice = parseFloat(priceText.replace(/[^\d]/g, '')) || 0; // Lưu giá gốc thật
+            const priceText = checked.nextElementSibling.querySelector('.variant-price')?.innerText;
+            if (priceText) {
+                const price = parseFloat(priceText.replace(/[^\d]/g, '')) || 0;
+                originalPrice = price;
+                updatePriceDisplay(price);
             }
         } else if (!variantIdInput.value) {
             buyNowBtn.disabled = true;
         }
     }
+
+    // 🔥 CẬP NHẬT HIỂN THỊ GIÁ
+    function updatePriceDisplay(price, discountedPrice = null) {
+        const quantity = parseInt(amountInput.value || '1', 10);
+        const totalOriginal = price * quantity;
+
+        if (discountedPrice !== null && discountedPrice < totalOriginal) {
+            // Hiển thị giá gốc bị gạch ngang và giá khuyến mãi
+            originalPriceDisplay.textContent = totalOriginal.toLocaleString() + ' đ';
+            finalPriceDisplay.textContent = discountedPrice.toLocaleString() + ' đ';
+            originalPriceDisplay.style.display = 'inline';
+        } else {
+            // Chỉ hiển thị giá gốc
+            originalPriceDisplay.style.display = 'none';
+            finalPriceDisplay.textContent = totalOriginal.toLocaleString() + ' đ';
+        }
+    }
+
     variantRadios.forEach(radio => radio.addEventListener('change', syncVariantFromRadio));
     syncVariantFromRadio();
+
+    // 🔥 XÓA VOUCHER
+    removeVoucherBtn?.addEventListener('click', function() {
+        voucherInput.value = '';
+        voucherMessage.textContent = '🗑️ Đã xóa voucher';
+        voucherMessage.style.color = 'gray';
+        voucherDetails.style.display = 'none';
+        removeVoucherBtn.style.display = 'none';
+        currentVoucherCode = null;
+        currentVoucherData = null;
+
+        // Khôi phục giá gốc
+        if (originalPrice) {
+            updatePriceDisplay(originalPrice);
+        }
+    });
 
     // ----------------- Áp dụng voucher -----------------
     applyBtn?.addEventListener('click', async function () {
@@ -69,51 +109,105 @@ document.addEventListener('DOMContentLoaded', function () {
             voucherMessage.style.color = 'red';
             return;
         }
-        // 🔥 ĐOẠN CODE 1: Validation trước khi gọi API
-        const MINIMUM_AMOUNT = 5000;
-        if (total <= MINIMUM_AMOUNT) {
-            voucherMessage.textContent = `⚠️ Tổng tiền đã ở mức tối thiểu ${MINIMUM_AMOUNT.toLocaleString()}đ cho VNPay`;
-            voucherMessage.style.color = 'orange';
-            return;
-        }
 
         try {
             const res = await fetch(`/api/vouchers/apply?code=${encodeURIComponent(code)}&total=${total}`);
-            if (!res.ok) throw new Error('Không thể áp dụng voucher');
+
+            // 🔥 SỬA LẠI PHẦN XỬ LÝ RESPONSE
+            if (!res.ok) {
+                let errorMessage = 'Không thể áp dụng voucher';
+                try {
+                    const errorData = await res.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    // Nếu không parse được JSON, lấy text thô
+                    const errorText = await res.text();
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
 
             const data = await res.json();
 
-            // 🔥 KIỂM TRA LỖI TỪ SERVER
+            // 🔥 KIỂM TRA LỖI TỪ SERVER (nếu có field error trong response success)
             if (data.error) {
                 voucherMessage.textContent = `❌ ${data.error}`;
                 voucherMessage.style.color = 'red';
+                voucherDetails.style.display = 'none';
+                removeVoucherBtn.style.display = 'none';
                 discountedTotal = null;
+                currentVoucherCode = null;
                 return;
             }
 
+            // 🔥 LƯU THÔNG TIN VOUCHER
             discountedTotal = data.discountedTotal;
+            currentVoucherCode = code;
+            currentVoucherData = data;
 
-            // 🔥 HIỂN THỊ THÔNG BÁO NẾU ĐẠT GIỚI HẠN TỐI THIỂU
-            let message = `✅ Giảm ${data.discountAmount.toLocaleString()}đ! Tổng mới: ${data.discountedTotal.toLocaleString()}đ`;
-            if (data.reachedMinimum) {
-                message += ` (Đã đạt mức tối thiểu 5,000đ cho thanh toán VNPay)`;
+            // 🔥 HIỂN THỊ THÔNG TIN CHI TIẾT VOUCHER
+            let message = `✅ Áp dụng thành công!`;
+            voucherMessage.textContent = message;
+            voucherMessage.style.color = 'green';
+
+            // Hiển thị thông tin chi tiết
+            document.getElementById('discountDetails').textContent =
+                `💰 Giảm ${data.discountAmount.toLocaleString()}đ (Tổng mới: ${data.discountedTotal.toLocaleString()}đ)`;
+
+            document.getElementById('minOrderInfo').textContent =
+                `📦 Đơn tối thiểu: ${(data.minOrderAmount || 0).toLocaleString()}đ`;
+
+            if (data.maxDiscountAmount) {
+                document.getElementById('maxDiscountInfo').textContent =
+                    `🎯 Giảm tối đa: ${data.maxDiscountAmount.toLocaleString()}đ`;
+            } else {
+                document.getElementById('maxDiscountInfo').textContent = '';
             }
 
-            voucherMessage.textContent = message;
-            voucherMessage.style.color = data.reachedMinimum ? 'orange' : 'green';
+            voucherDetails.style.display = 'block';
+            removeVoucherBtn.style.display = 'inline-block';
+
+            // Hiển thị cảnh báo nếu đạt mức tối thiểu
+            if (data.reachedMinimum) {
+                voucherMessage.textContent += ` (Đã đạt mức tối thiểu 5,000đ cho VNPay)`;
+                voucherMessage.style.color = 'orange';
+            }
 
             // Cập nhật giá hiển thị
-            const priceEl = document.querySelector('.price');
-            if (priceEl) {
-                priceEl.innerText = data.discountedTotal.toLocaleString() + ' đ';
-            }
+            updatePriceDisplay(originalPrice, data.discountedTotal);
+
         } catch (err) {
             console.error('❌ Voucher error:', err);
-            voucherMessage.textContent = '❌ Mã không hợp lệ hoặc đã hết hạn!';
+            // 🔥 HIỂN THỊ LỖI CỤ THỂ TỪ SERVER
+            voucherMessage.textContent = `❌ ${err.message}`;
             voucherMessage.style.color = 'red';
+            voucherDetails.style.display = 'none';
+            removeVoucherBtn.style.display = 'none';
             discountedTotal = null;
+            currentVoucherCode = null;
         }
     });
+
+    // ----------------- Cập nhật giá khi thay đổi số lượng -----------------
+    amountInput?.addEventListener('change', function() {
+        if (originalPrice) {
+            const quantity = parseInt(this.value || '1', 10);
+            const total = originalPrice * quantity;
+
+            if (currentVoucherCode && total >= (currentVoucherData?.minOrderAmount || 0)) {
+                // Nếu có voucher và đủ điều kiện, tính lại giá
+                applyBtn.click();
+            } else {
+                // Nếu không đủ điều kiện, hiển thị giá gốc
+                updatePriceDisplay(originalPrice);
+                if (currentVoucherCode && total < (currentVoucherData?.minOrderAmount || 0)) {
+                    voucherMessage.textContent = `❌ Đơn hàng chưa đạt tối thiểu ${currentVoucherData.minOrderAmount.toLocaleString()}đ`;
+                    voucherMessage.style.color = 'red';
+                }
+            }
+        }
+    });
+
     // ----------------- Mua ngay (VNPAY) -----------------
     buyNowBtn?.addEventListener('click', async function () {
         if (!sessionCustomerId || sessionCustomerId === 'null') {
@@ -129,16 +223,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const quantity = parseInt(amountInput.value || '1', 10);
-        const voucherCode = document.getElementById('voucherCode')?.value?.trim() || null;
-
-        
+        const voucherCode = currentVoucherCode; // 🔥 Sử dụng voucher đã được áp dụng
 
         const body = {
             customerId: parseInt(sessionCustomerId),
             items: [{ variantId: parseInt(variantId), quantity }],
             orderInfo: "Thanh toán " + productName,
             voucherCode: voucherCode,
-            totalAfterDiscount: discountedTotal
+            totalAfterDiscount: discountedTotal // 🔥 Gửi tổng sau giảm giá
         };
 
         const headers = { 'Content-Type': 'application/json', ...getCsrfHeaders() };
@@ -154,12 +246,31 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!res.ok) {
                 const text = await res.text();
                 console.error('❌ Payment create failed:', res.status, text);
-                alert('Không thể tạo thanh toán. Vui lòng thử lại.');
+
+                // 🔥 XỬ LÝ LỖI VOUCHER CỤ THỂ
+                if (text.includes('Voucher') || text.includes('voucher')) {
+                    voucherMessage.textContent = `❌ Lỗi voucher: ${text}`;
+                    voucherMessage.style.color = 'red';
+                } else {
+                    alert('Không thể tạo thanh toán. Vui lòng thử lại.');
+                }
                 return;
             }
 
             const data = await res.json();
             if (data && data.paymentUrl) {
+                // 🔥 TRỪ LƯỢT SỬ DỤNG VOUCHER SAU KHI THANH TOÁN THÀNH CÔNG
+                if (voucherCode) {
+                    try {
+                        await fetch(`/api/vouchers/${voucherCode}/use`, {
+                            method: 'POST',
+                            headers: getCsrfHeaders()
+                        });
+                    } catch (e) {
+                        console.warn('⚠️ Không thể trừ lượt voucher:', e);
+                    }
+                }
+
                 window.location.href = data.paymentUrl;
             } else {
                 alert('Không có URL thanh toán trả về!');
@@ -172,5 +283,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ----------------- Ghi log để kiểm tra -----------------
-    console.log("✅ JS loaded: product.js ready");
+    console.log("✅ JS loaded: product.js ready with enhanced voucher features");
 });
