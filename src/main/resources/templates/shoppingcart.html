@@ -499,7 +499,7 @@
                     </button>
                 </div>
 
-                <div id="voucherMessage" style="display: none;"></div>
+                <div id="voucherMessage"></div>
             </div>
 
             <!-- 🔥 PHÂN TÍCH GIÁ -->
@@ -525,16 +525,27 @@
         </form>
     </div>
 </main>
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // ĐỢI CHO ĐẾN KHI DOM HOÀN TOÀN SẴN SÀNG
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔥 DOM loaded, initializing cart...');
+
+        // KIỂM TRA XEM ELEMENT CÓ TỒN TẠI KHÔNG
+        const voucherMessageElement = document.getElementById('voucherMessage');
+        console.log('🔥 voucherMessage element on load:', voucherMessageElement);
+
+        if (!voucherMessageElement) {
+            console.error('❌ CRITICAL: voucherMessage element not found on page load!');
+            // Tạo element nếu không tồn tại
+            createVoucherMessageElement();
+        }
+
         const checkAll = document.getElementById('selectAll');
         const checkboxes = document.querySelectorAll('input[name="selectedItems"]');
         const originalTotalEl = document.getElementById('originalTotal');
         const finalTotalEl = document.getElementById('finalTotal');
         const discountRow = document.getElementById('discountRow');
         const discountAmountEl = document.getElementById('discountAmount');
-        const voucherMessage = document.getElementById('voucherMessage');
         const btnRemoveVoucher = document.getElementById('btnRemoveVoucher');
 
         let appliedVoucher = null;
@@ -573,25 +584,76 @@
             }
         }
 
-        // Chọn tất cả
-        if (checkAll) {
-            checkAll.addEventListener('change', e => {
-                checkboxes.forEach(cb => cb.checked = e.target.checked);
-                updateTotals();
-                validateVoucher(); // Kiểm tra lại voucher khi thay đổi selection
-            });
+        // TẠO ELEMENT NẾU KHÔNG TỒN TẠI
+        function createVoucherMessageElement() {
+            console.log('🔥 Creating voucherMessage element...');
+            const voucherSection = document.querySelector('.voucher-section');
+            if (voucherSection) {
+                const newElement = document.createElement('div');
+                newElement.id = 'voucherMessage';
+                newElement.style.display = 'none';
+                voucherSection.appendChild(newElement);
+                console.log('✅ voucherMessage element created successfully');
+                return newElement;
+            } else {
+                console.error('❌ Cannot find voucher-section to append message');
+                return null;
+            }
         }
 
-        // Cập nhật khi chọn từng item
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', () => {
-                if (!cb.checked) checkAll.checked = false;
-                updateTotals();
-                validateVoucher(); // Kiểm tra lại voucher khi thay đổi selection
-            });
-        });
+        // HIỂN THỊ THÔNG BÁO VOUCHER - FIX KHÔNG XÓA ELEMENT GỐC
+        // HIỂN THỊ THÔNG BÁO VOUCHER - CÁCH CỰC ĐOAN
+        function showVoucherMessage(message, type) {
+            console.log('🔥 showVoucherMessage called - EXTREME VERSION');
 
-        // 🔥 VALIDATE VOUCHER KHI THAY ĐỔI SELECTION
+            // LUÔN TẠO ELEMENT MỚI Ở VỊ TRÍ KHÁC
+            const newElement = document.createElement('div');
+            newElement.id = 'voucherMessageDynamic';
+            newElement.innerHTML = message;
+
+            // STYLE CỰC KỲ NỔI BẬT
+            Object.assign(newElement.style, {
+                position: 'fixed',
+                top: '200px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: '99999',
+                display: 'block',
+                visibility: 'visible',
+                opacity: '1',
+                padding: '25px',
+                margin: '0',
+                borderRadius: '12px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                width: '80%',
+                maxWidth: '500px',
+                boxSizing: 'border-box',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
+                textAlign: 'center'
+            });
+
+            if (type === 'error') {
+                Object.assign(newElement.style, {
+                    backgroundColor: '#ff4444',
+                    color: 'white',
+                    border: '4px solid #cc0000'
+                });
+            }
+
+            // THÊM VÀO BODY
+            document.body.appendChild(newElement);
+            console.log('✅ Extreme message added to body');
+
+            // TỰ ĐỘNG XÓA SAU 8 GIÂY
+            setTimeout(() => {
+                if (newElement.parentNode) {
+                    newElement.remove();
+                }
+            }, 8000);
+        }
+
+        // VALIDATE VOUCHER KHI THAY ĐỔI SELECTION
         function validateVoucher() {
             if (!appliedVoucher) return;
 
@@ -602,13 +664,14 @@
                     'error'
                 );
             } else {
-                applyVoucher(appliedVoucher); // Áp dụng lại voucher
+                applyVoucher(appliedVoucher);
             }
         }
 
-        // 🔥 ÁP DỤNG VOUCHER
+        // ÁP DỤNG VOUCHER
         async function applyVoucher(code) {
             const total = calculateSelectedTotal();
+            console.log('🔥 applyVoucher called, total:', total);
 
             if (total === 0) {
                 showVoucherMessage("❌ Hãy chọn sản phẩm trước khi áp dụng mã giảm giá!", 'error');
@@ -617,12 +680,10 @@
 
             try {
                 const res = await fetch(`/api/vouchers/apply?code=${code}&total=${total}`);
+                console.log('🔥 Response status:', res.status);
 
-                console.log('Response status:', res.status); // 🔥 DEBUG
-
-                // 🔥 XỬ LÝ TẤT CẢ CÁC TRƯỜNG HỢP RESPONSE
                 const responseText = await res.text();
-                console.log('Raw response:', responseText); // 🔥 DEBUG
+                console.log('🔥 Raw response:', responseText);
 
                 let data;
                 try {
@@ -632,18 +693,18 @@
                     throw new Error('Lỗi định dạng response từ server');
                 }
 
-                // 🔥 NẾU STATUS KHÔNG PHẢI 200, XEM CÓ ERROR TRONG DATA KHÔNG
+                // XỬ LÝ LỖI TỪ SERVER
                 if (!res.ok) {
                     const errorMessage = data.error || data.message || `Lỗi ${res.status}: ${res.statusText}`;
                     throw new Error(errorMessage);
                 }
 
-                // 🔥 KIỂM TRA LỖI TRONG RESPONSE SUCCESS (nếu có)
+                // KIỂM TRA LỖI TRONG RESPONSE
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
-                // 🔥 KIỂM TRA ĐIỀU KIỆN TỐI THIỂU
+                // KIỂM TRA ĐIỀU KIỆN TỐI THIỂU
                 if (total < (data.minOrderAmount || 0)) {
                     showVoucherMessage(
                         `❌ Đơn hàng phải có giá trị tối thiểu ${formatVND(data.minOrderAmount)} để áp dụng voucher này`,
@@ -652,6 +713,7 @@
                     return;
                 }
 
+                // ÁP DỤNG VOUCHER THÀNH CÔNG
                 appliedVoucher = code;
                 currentVoucherData = data;
 
@@ -666,60 +728,48 @@
                     message += `<br>📦 Đơn tối thiểu: ${formatVND(data.minOrderAmount)}`;
                 }
 
-                if (data.reachedMinimum) {
-                    message += `<br>⚠️ Đã đạt mức tối thiểu 5,000đ cho thanh toán VNPay`;
-                }
-
                 showVoucherMessage(message, 'success');
                 btnRemoveVoucher.style.display = 'inline-block';
                 updateTotals();
 
             } catch (err) {
-                console.error('Voucher error:', err);
-                // 🔥 HIỂN THỊ LỖI CỤ THỂ
+                console.error('🔥 Voucher error:', err);
                 showVoucherMessage(`❌ ${err.message}`, 'error');
                 removeVoucher();
             }
         }
 
-        // 🔥 HIỂN THỊ THÔNG BÁO VOUCHER - ĐẢM BẢO HOẠT ĐỘNG ĐÚNG
-        function showVoucherMessage(message, type) {
-            const voucherMessage = document.getElementById('voucherMessage');
-            if (!voucherMessage) {
-                console.error('Không tìm thấy element voucherMessage');
-                return;
-            }
-
-            voucherMessage.innerHTML = message;
-            voucherMessage.className = `voucher-info ${type}`;
-            voucherMessage.style.display = 'block';
-
-            // 🔥 TỰ ĐỘNG ẨN THÔNG BÁO SAU 5 GIÂY ĐỐI VỚI LỖI
-            if (type === 'error' || type === 'warning') {
-                setTimeout(() => {
-                    voucherMessage.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-
-
-        // 🔥 XÓA VOUCHER
+        // XÓA VOUCHER
         function removeVoucher() {
             appliedVoucher = null;
             currentVoucherData = null;
-            voucherMessage.style.display = 'none';
+            const voucherMessageElement = document.getElementById('voucherMessage');
+            if (voucherMessageElement) {
+                voucherMessageElement.style.display = 'none'; // CHỈ ẨN, KHÔNG XÓA
+                voucherMessageElement.innerHTML = ''; // XÓA NỘI DUNG
+            }
             btnRemoveVoucher.style.display = 'none';
             document.getElementById('voucherCode').value = '';
             updateTotals();
         }
 
-        // 🔥 HIỂN THỊ THÔNG BÁO VOUCHER
-        function showVoucherMessage(message, type) {
-            voucherMessage.innerHTML = message;
-            voucherMessage.className = `voucher-info ${type}`;
-            voucherMessage.style.display = 'block';
+        // Chọn tất cả
+        if (checkAll) {
+            checkAll.addEventListener('change', e => {
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+                updateTotals();
+                validateVoucher();
+            });
         }
+
+        // Cập nhật khi chọn từng item
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (!cb.checked) checkAll.checked = false;
+                updateTotals();
+                validateVoucher();
+            });
+        });
 
         // EVENT LISTENERS
         document.getElementById('btnApplyVoucher').addEventListener('click', () => {
@@ -739,7 +789,7 @@
             }
         });
 
-        // 🔥 THANH TOÁN
+        // THANH TOÁN
         document.getElementById('btnCheckout').addEventListener('click', async () => {
             const checkedItems = Array.from(document.querySelectorAll('input[name="selectedItems"]:checked'))
                 .map(cb => cb.value);
@@ -749,7 +799,6 @@
                 return;
             }
 
-            // Lấy quantity tương ứng
             const items = checkedItems.map(id => {
                 const row = document.querySelector(`input[name="selectedItems"][value="${id}"]`).closest('tr');
                 const qty = parseInt(row.querySelector('input[name="quantities"]').value);
@@ -784,7 +833,6 @@
                 const data = await response.json();
 
                 if (data && data.paymentUrl) {
-                    // 🔥 TRỪ LƯỢT VOUCHER TRƯỚC KHI CHUYỂN HƯỚNG
                     if (appliedVoucher) {
                         try {
                             await fetch(`/api/vouchers/${appliedVoucher}/use`, {
@@ -808,6 +856,7 @@
 
         // Khởi tạo
         updateTotals();
+        console.log('✅ Cart initialized successfully');
     });
 </script>
 
