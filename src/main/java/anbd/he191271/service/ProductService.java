@@ -93,4 +93,6 @@ public class ProductService {
     public Variant findVariantById(int variantId) {
         return variantRepository.findById(variantId).get();
     }
+
+
 }

@@ -461,7 +461,23 @@
     <section class="products">
         <div class="section-inner">
             <div class="content-inner">
+                <div class="filter-bar">
+                    <label for="categorySelect">Danh mục: </label>
+                    <select id="categorySelect" onchange="if(this.value) location.href=this.value;">
+                        <!-- Option mặc định: ALL -->
+                        <option th:value="@{/home/homepage}"
+                                th:selected="${currentCategory == null}">
+                            Tất cả
+                        </option>
 
+                        <!-- Sinh động từ DB -->
+                        <option th:each="cat : ${categories}"
+                                th:value="@{/home/category/{id}(id=${cat.id})}"
+                                th:text="${cat.name}"
+                                th:selected="${currentCategory != null and currentCategory.id == cat.id}">
+                        </option>
+                    </select>
+                </div>
 
                 <h2>Tất cả sản phẩm</h2>
                 <div class="sub">Danh sách đầy đủ sản phẩm</div>

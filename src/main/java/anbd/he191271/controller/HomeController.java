@@ -86,7 +86,29 @@ public class HomeController {
         return "homepage"; // file templates/homepage.html
     }
 
+    @GetMapping("/categories/{id}")
+    public String productsByCategories(
+            @PathVariable("id") Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            Model model,
+            HttpSession session) {
 
+        Page<Product> productPage = productService.getProductsByCategoryPage(id, page, size);
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalItems", productPage.getTotalElements());
+
+        // 🟢 Lấy toàn bộ categories để dropdown luôn có sẵn
+        model.addAttribute("categories", categoryRepository.findAll());
+
+        // 🟢 Lấy category hiện tại để đánh dấu selected
+        categoryRepository.findById(id)
+                .ifPresent(c -> model.addAttribute("currentCategory", c));
+
+        return "homepage";
+    }
     /**
      * Lọc theo category có phân trang
      */
