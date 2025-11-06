@@ -304,20 +304,6 @@
         }
     </style>
 </head>
-<script>
-    // Nếu bạn đã có homepage.js, hàm này có thể nằm ở đó. Đây là fallback/tiện lợi.
-    function loadCart() {
-        try {
-            const raw = localStorage.getItem('cart');
-            if (!raw) return [];
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return parsed;
-            return [];
-        } catch (e) {
-            return [];
-        }
-    }
-</script>
 
 <body>
 <header id="siteHeader">
@@ -345,19 +331,19 @@
             <div class="user-menu" th:if="${customer != null}" style="display:inline-flex; gap:8px; align-items:center;">
                 <!-- Trợ lý ảo (chỉ sau đăng nhập) -->
                 <a th:href="@{/chat}" class="assistant-btn" role="button" aria-label="Trợ lý ảo">
-
                     Trợ lý ảo
                 </a>
 
-                <!-- Giỏ hàng (chỉ sau đăng nhập) -->
+                <!-- Giỏ hàng (chỉ sau đăng nhập) - ĐÃ SỬA: BỎ SỐ LƯỢNG -->
                 <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
-
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
+                    </svg>
                     <span class="cart-text">Giỏ hàng</span>
                 </a>
 
                 <!-- Hỗ trợ khách hàng (chỉ sau đăng nhập) -->
                 <a th:href="@{/support/view}" class="support-btn" role="button" aria-label="Hỗ trợ khách hàng">
-
                     <span>Hỗ trợ</span>
                 </a>
 
@@ -542,24 +528,8 @@
     </section>
 </main>
 
-<!-- Toast element (tạo động nếu chưa có) và script xử lý cart + tìm kiếm + header compact -->
 <script>
-    /* =========================
-       Local Storage Cart Utils (cập nhật UI cho mọi .cart-btn)
-       ========================= */
-
-    function updateCartCountUI() {
-        const cart = typeof loadCart === 'function' ? loadCart() : [];
-        const total = cart.reduce((s, it) => s + (it.qty||1), 0);
-
-        // Cập nhật tất cả phần tử có class .cart-btn
-        document.querySelectorAll('.cart-btn').forEach(btn => {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/></svg>`;
-            const text = ` <span class="cart-text">Giỏ hàng (${total})</span>`;
-            btn.innerHTML = svg + text;
-        });
-    }
+    // XÓA HOÀN TOÀN HÀM updateCartCountUI() VÀ CÁC LỜI GỌI LIÊN QUAN
 
     // Search input clear button behavior
     document.addEventListener('DOMContentLoaded', function() {
@@ -598,11 +568,7 @@
                 // nếu có chức năng lọc, submit form hoặc call search lại tại đây
             });
         }
-
-        updateCartCountUI();
     });
-
-    // Nếu bạn có logic thêm vào cart (thêm sp), hãy gọi updateCartCountUI() sau khi cập nhật localStorage.
 </script>
 
 </body>
