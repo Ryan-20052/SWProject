@@ -27,14 +27,35 @@
         .pagination-container {
             margin-top: 20px;
         }
+        .btn-group-custom {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            .btn-group-custom {
+                flex-direction: column;
+            }
+            .btn-group-custom .btn {
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container mt-4">
-    <!-- Nút quay lại -->
-    <div class="mb-3">
-        <a href="http://localhost:8080/report/view" class="btn btn-secondary">
+    <!-- Nhóm nút điều hướng -->
+    <div class="mb-3 btn-group-custom">
+        <a th:href="@{/report/view}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-2"></i>Quay lại trang báo cáo
+        </a>
+        <!-- THÊM NÚT TRUNG TÂM HỖ TRỢ -->
+        <a th:href="@{/support/view}" class="btn btn-info">
+            <i class="fas fa-life-ring me-2"></i>Trung tâm hỗ trợ
+        </a>
+        <!-- Có thể thêm nút trang chủ nếu cần -->
+        <a th:href="@{/home/homepage}" class="btn btn-outline-primary">
+            <i class="fas fa-home me-2"></i>Trang chủ
         </a>
     </div>
 
