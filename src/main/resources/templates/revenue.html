@@ -307,11 +307,20 @@
 
     <!-- KPI Cards - Chỉ hiển thị doanh thu tổng -->
     <div th:if="${dashboard}" style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; margin-bottom: 20px;">
-        <div class="kpi-card">
-            <h5 style="margin:0 0 8px 0; color:#666; font-size:14px;">Doanh thu tổng</h5>
+        <div class="kpi-card" style="position: relative;">
+            <h5 style="margin:0 0 8px 0; color:#666; font-size:14px;">
+                <span th:if="${isDateFiltered}">Doanh thu</span>
+            </h5>
             <h3 style="margin:0; color:#2563eb; font-size:24px;"
                 th:text="|${#numbers.formatInteger(dashboard.totalRevenue, 0, 'POINT')} VND|">
             </h3>
+
+            <!-- Nút chi tiết -->
+            <a th:href="@{/revenue/daily-details(startDate=${startDate}, endDate=${endDate})}"
+               class="btn"
+               style="position: absolute; top: 15px; right: 15px; padding: 6px 12px; font-size: 12px; background: #059669;">
+                📊 Chi tiết theo ngày
+            </a>
         </div>
     </div>
 
@@ -401,13 +410,13 @@
     </div>
 </div>
 
-<script>
-    // Auto-submit form khi thay đổi ngày
-    document.querySelectorAll('input[type="date"]').forEach(input => {
-        input.addEventListener('change', function() {
-            document.getElementById('mainFilterForm').submit();
-        });
-    });
-</script>
+<!--<script>-->
+<!--    // Auto-submit form khi thay đổi ngày-->
+<!--    document.querySelectorAll('input[type="date"]').forEach(input => {-->
+<!--        input.addEventListener('change', function() {-->
+<!--            document.getElementById('mainFilterForm').submit();-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
 </body>
 </html>

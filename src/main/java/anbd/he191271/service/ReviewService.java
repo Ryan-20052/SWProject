@@ -51,17 +51,6 @@ public class ReviewService {
                 productId, rating, hasImage, startDateTime, endDateTime, pageable);
     }
 
-    // Overload method cũ để tránh lỗi biên dịch
-    public Page<Review> getFilteredReviews(int productId,
-                                           Integer rating,
-                                           Boolean hasImage,
-                                           LocalDate startDate,
-                                           LocalDate endDate,
-                                           int page,
-                                           int size) {
-        return getFilteredReviews(productId, rating, hasImage, startDate, endDate, page, size, "newest");
-    }
-
     public Map<String, Object> getReviewStats(int productId, Integer rating, Boolean hasImage,
                                               LocalDate startDate, LocalDate endDate) {
         Map<String, Object> stats = new HashMap<>();

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Doanh Thu Theo Ngày</title>
+    <style>
+        :root {
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --red: #dc2626;
+            --green: #059669;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            color: #111;
+        }
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-inner {
+            width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        nav {
+            background: #1e3a8a;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-inner {
+            width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+        }
+
+        .nav-inner a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .nav-inner a:hover {
+            background: #2563eb;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .table-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: var(--blue-dark);
+        }
+
+        .btn-back {
+            background: #6b7280;
+        }
+
+        .btn-back:hover {
+            background: #4b5563;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .avatar, .avatar-fallback {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-fallback {
+            background: #fff;
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1>Manager Dashboard</h1>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="font-size:16px; color:white;"
+                 th:text="|Xin chào, ${manager.username}|">
+            </div>
+
+            <div th:if="${manager.avatar != null}" class="avatar"
+                 style="width:40px; height:40px; border-radius:50%; overflow:hidden; cursor:pointer;"
+                 onclick="window.location.href='/manager/profile'">
+                <img th:src="@{/manager/avatar/{id}(id=${manager.id})}"
+                     alt="Avatar" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+
+            <div th:if="${manager.avatar == null}" class="avatar-fallback"
+                 style="width:40px; height:40px; border-radius:50%; background:#555; color:white;
+                    display:flex; align-items:center; justify-content:center;
+                    font-weight:bold; cursor:pointer;"
+                 th:text="${#strings.substring(manager.username,0,1).toUpperCase()}"
+                 onclick="window.location.href='/manager/profile'">
+            </div>
+
+            <form th:action="@{/auth/manager/logout}" method="post" style="margin:0;">
+                <button type="submit"
+                        style="padding:8px 14px; background:#dc2626; color:white; border:none;
+                           border-radius:6px; cursor:pointer; font-weight:500;">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<nav>
+    <div class="nav-inner">
+        <a th:href="@{/manage/manageHome}">Quản lý sản phẩm</a>
+        <a th:href="@{/manage/category}">Danh mục</a>
+        <a th:href="@{/manageOrder/viewOrder}">Đơn hàng</a>
+        <a th:href="@{/manageLicense/viewLicense}">Quản lý license</a>
+        <a th:href="@{/revenue/dashboard}" style="background:#2563eb; font-weight:bold;">Báo cáo tài chính</a>
+        <a th:href="@{/manageReport/viewPendingReport}">Báo cáo khách hàng</a>
+        <a href="/manageVoucher.html">Voucher</a>
+    </div>
+</nav>
+
+<div class="dashboard">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color:#2563eb; margin:0;">📊 Chi Tiết Doanh Thu Theo Ngày</h2>
+        <a th:href="@{/revenue/dashboard(startDate=${startDate}, endDate=${endDate})}" class="btn btn-back">← Quay lại</a>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="filter-section">
+        <form th:action="@{/revenue/daily-details}" method="get">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-weight:600; margin-bottom:4px; font-size:14px;">Từ ngày</label>
+                    <input type="date" name="startDate" th:value="${startDate}"
+                           style="padding:8px; border-radius:6px; border:1px solid #ccc; width:150px;">
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <label style="font-weight:600; margin-bottom:4px; font-size:14px;">Đến ngày</label>
+                    <input type="date" name="endDate" th:value="${endDate}"
+                           style="padding:8px; border-radius:6px; border:1px solid #ccc; width:150px;">
+                </div>
+                <div>
+                    <button type="submit" class="btn">Áp dụng</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bảng chi tiết doanh thu theo ngày -->
+    <div class="table-section">
+        <h4 style="margin:0 0 15px 0; color:#2563eb; font-size:16px;">
+            📅 Doanh thu từ <span th:text="${startDate}"></span> đến <span th:text="${endDate}"></span>
+        </h4>
+
+        <table>
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Ngày</th>
+                <th style="text-align:right;">Số đơn hàng</th>
+                <th style="text-align:right;">Doanh thu</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="daily, iter : ${dailyRevenue}">
+                <td th:text="${iter.index + 1}"></td>
+                <td th:text="${#temporals.format(daily.date, 'dd/MM/yyyy')}"></td>
+                <td style="text-align:right;" th:text="${daily.orderCount}"></td>
+                <td style="text-align:right; font-weight:600; color:#059669;"
+                    th:text="|${#numbers.formatInteger(daily.revenue, 0, 'POINT')} VND|">
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(dailyRevenue)}">
+                <td colspan="4" class="no-data">Không có dữ liệu doanh thu trong khoảng thời gian này</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Auto-submit form khi thay đổi ngày
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        input.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+</script>
+</body>
+</html>

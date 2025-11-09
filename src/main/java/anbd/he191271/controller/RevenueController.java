@@ -40,9 +40,12 @@ public class RevenueController {
             return "redirect:/login.html";
         }
 
-        // Set default date range if not provided
+        // Xác định xem có đang filter theo ngày không
+        boolean isDateFiltered = (startDate != null && endDate != null);
+
+        // Set default date range if not provided - lấy tất cả doanh thu từ trước đến nay
         if (startDate == null) {
-            startDate = LocalDate.now().withDayOfMonth(1);
+            startDate = LocalDate.of(2020, 1, 1); // Ngày bắt đầu rất xa
         }
         if (endDate == null) {
             endDate = LocalDate.now();
@@ -51,7 +54,7 @@ public class RevenueController {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        var dashboard = revenueService.getRevenueDashboard(startDateTime, endDateTime, timeRange);
+        var dashboard = revenueService.getRevenueDashboard(startDateTime, endDateTime, timeRange, isDateFiltered);
 
         // Xử lý search và sort cho sản phẩm
         List<Map<String, Object>> allProducts = dashboard.get("revenueByProduct") != null ?
@@ -116,7 +119,40 @@ public class RevenueController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("search", search);
         model.addAttribute("sort", sort);
+        model.addAttribute("isDateFiltered", isDateFiltered);
 
         return "revenue";
+    }
+
+    @GetMapping("/daily-details")
+    public String getDailyRevenueDetails(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            HttpSession session,
+            Model model) {
+
+        // Lấy manager từ session
+        Manager manager = (Manager) session.getAttribute("manager");
+        if (manager == null) {
+            return "redirect:/login.html";
+        }
+
+        // Set default date range if not provided
+        if (startDate == null) {
+            startDate = LocalDate.now().minusDays(30); // 30 ngày gần nhất
+        }
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+
+        // Lấy chi tiết doanh thu theo ngày
+        var dailyRevenue = revenueService.getDailyRevenueDetails(startDate, endDate);
+
+        model.addAttribute("dailyRevenue", dailyRevenue);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("manager", manager);
+
+        return "revenue-daily-details";
     }
 }

@@ -138,60 +138,6 @@ public class ProductReviewReportController {
         return "reportSuccess";
     }
 
-    // API tạo report (AJAX) - ĐÃ SỬA
-    @PostMapping("/create")
-    @ResponseBody
-    public ResponseEntity<?> createReport(
-            @RequestParam Long reviewId,
-            @RequestParam String reportReason,
-            @RequestParam(required = false) String description,
-            HttpSession session) {
-
-        Customer currentCustomer = (Customer) session.getAttribute("customer");
-        if (currentCustomer == null) {
-            return ResponseEntity.status(401).body(
-                    Map.of("success", false, "message", "Vui lòng đăng nhập để báo cáo"));
-        }
-
-        try {
-            Review review = reviewService.getReviewById(reviewId);
-            if (review == null) {
-                return ResponseEntity.badRequest().body(
-                        Map.of("success", false, "message", "Đánh giá không tồn tại"));
-            }
-
-            // Kiểm tra - ĐÃ SỬA
-            if (review.getCustomer().getId() == currentCustomer.getId()) {
-                return ResponseEntity.badRequest().body(
-                        Map.of("success", false, "message", "Bạn không thể báo cáo chính đánh giá của mình"));
-            }
-
-            // ĐÃ SỬA
-            if (reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId())) {
-                return ResponseEntity.badRequest().body(
-                        Map.of("success", false, "message", "Bạn đã báo cáo đánh giá này rồi"));
-            }
-
-            ProductReviewReport.ReportReason reason = ProductReviewReport.ReportReason.valueOf(reportReason.toUpperCase());
-
-            ProductReviewReport report = reportService.createReport(
-                    review, currentCustomer, review.getProduct(), reason, description);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Báo cáo đã được gửi thành công");
-            response.put("reportId", report.getId());
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(
-                    Map.of("success", false, "message", "Lý do báo cáo không hợp lệ"));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    Map.of("success", false, "message", "Có lỗi xảy ra khi gửi báo cáo"));
-        }
-    }
 
     // API kiểm tra user đã report review chưa - ĐÃ SỬA
     @GetMapping("/check/{reviewId}")
@@ -209,9 +155,6 @@ public class ProductReviewReportController {
         boolean hasReported = reportService.hasUserReportedReview(reviewId, (long) currentCustomer.getId());
         return ResponseEntity.ok(Map.of("hasReported", hasReported, "isLoggedIn", true));
     }
-
-    // ====== ADMIN SIDE ======
-
 
     // Form chỉnh sửa report - ĐÃ SỬA
     @GetMapping("/edit/{reportId}")
