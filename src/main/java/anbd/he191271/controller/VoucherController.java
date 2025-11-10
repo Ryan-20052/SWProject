@@ -1,7 +1,11 @@
 package anbd.he191271.controller;
 
+import anbd.he191271.entity.Manager;
+import anbd.he191271.entity.ManagerLog;
 import anbd.he191271.entity.Voucher;
+import anbd.he191271.service.ManagerLogService;
 import anbd.he191271.service.VoucherService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +20,8 @@ public class VoucherController {
 
     @Autowired
     private VoucherService voucherService;
+    @Autowired
+    private ManagerLogService managerLogService;
 
     // ========== MANAGER ==========
     @GetMapping
@@ -28,22 +34,34 @@ public class VoucherController {
 
 
     @PostMapping
-    public ResponseEntity<Voucher> createVoucher(@RequestBody Voucher voucher) {
+    public ResponseEntity<Voucher> createVoucher(@RequestBody Voucher voucher, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "add voucher "+ voucher.getCode());
+        managerLogService.save(log);
         return ResponseEntity.ok(voucherService.createVoucher(voucher));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Voucher> updateVoucher(@PathVariable Long id, @RequestBody Voucher voucher) {
+    public ResponseEntity<Voucher> updateVoucher(@PathVariable Long id, @RequestBody Voucher voucher, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "Update information voucher id: " + id );
+        managerLogService.save(log);
         return ResponseEntity.ok(voucherService.updateVoucher(id, voucher));
     }
 
     @PutMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateVoucher(@PathVariable Long id) {
+    public ResponseEntity<Void> deactivateVoucher(@PathVariable Long id, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "deactivate voucher id: " + id );
+        managerLogService.save(log);
         voucherService.deactivateVoucher(id);
         return ResponseEntity.noContent().build();
     }
     @PutMapping("/{id}/activate")
-    public ResponseEntity<Void> activateVoucher(@PathVariable Long id) {
+    public ResponseEntity<Void> activateVoucher(@PathVariable Long id, HttpSession session) {
+        Manager manager=(Manager)session.getAttribute("manager");
+        ManagerLog log =  new ManagerLog(manager.getUsername(), "activate voucher id: " + id );
+        managerLogService.save(log);
         voucherService.activateVoucher(id);
         return ResponseEntity.noContent().build();
     }

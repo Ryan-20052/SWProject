@@ -104,7 +104,7 @@
 </header>
 
 <div class="dashboard">
-    <h2>Cập nhật sản phẩm</h2>
+    <h2>Cập nhật gói sản phẩm</h2>
 
     <div th:if="${msg}" class="notice" th:text="${msg}"></div>
 
@@ -113,8 +113,8 @@
         <input type="hidden" th:field="*{id}">
 
 
-        <label for="name">Tên sản phẩm</label>
-        <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên sản phẩm" required>
+        <label for="name">Tên gói sản phẩm</label>
+        <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên gói sản phẩm" required>
         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
              style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
 
@@ -123,7 +123,7 @@
         <div th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}"
              style="color:#dc2626; font-size:0.9em; margin-top:4px;"></div>
 
-        <label for="category">Danh mục</label>
+        <label for="category">Sản phẩm liên kết</label>
         <select id="category" th:field="*{productId}" required>
             <option value="">-- Chọn danh mục --</option>
             <option th:each="p : ${productList}" th:value="${p.id}" th:text="${p.name}"
