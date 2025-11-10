@@ -597,8 +597,8 @@
                         <div class="thumb" th:style="|background-image: url('${item.product.img_url}')|"></div>
                         <p th:text="${item.product.name}">Tên sản phẩm</p>
                     </td>
-                    <td th:text="${item.variant != null ? (item.variant.name != null ? item.variant.name : item.variant.duration) : 'Mặc định'}">1 tháng</td>
-                    <td th:text="${item.variant != null ? item.variant.price + ' đ' : ''}">100.000 đ</td>
+                    <td th:text="${item.variant != null ? (item.variant.name != null ? item.variant.name : item.variant.duration) : 'Mặc định'}"></td>
+                    <td th:text="${item.variant != null ? item.variant.price + ' đ' : ''}"></td>
                     <td class="quantity">
                         <input type="number" name="quantities" th:value="${item.quantity}" min="1">
                         <input type="hidden" name="itemIds" th:value="${item.id}">
