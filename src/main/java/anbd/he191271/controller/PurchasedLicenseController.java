@@ -63,9 +63,10 @@ public class PurchasedLicenseController {
 
         // tìm kiếm theo tên sản phẩm
         if (search != null && !search.isBlank()) {
+
             allLicenses = allLicenses.stream()
                     .filter(l -> l.getOrderDetail().getVariant().getProduct()
-                            .getName().toLowerCase().contains(search.toLowerCase()))
+                            .getName().toLowerCase().contains(search.toLowerCase().trim()))
                     .toList();
         }
 
