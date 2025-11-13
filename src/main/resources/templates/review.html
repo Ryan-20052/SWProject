@@ -113,6 +113,42 @@
       padding: 30px;
     }
 
+    /* ✅ CẬP NHẬT STYLE CHO ERROR MESSAGE */
+    .error-message {
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 25px;
+      border-left: 4px solid #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .error-message.warning {
+      background: #fef3c7;
+      color: #92400e;
+      border-left-color: #f59e0b;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+    }
+
+    .error-message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left-color: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+    }
+
+    .error-message i {
+      font-size: 18px;
+    }
+
     .rating-section {
       text-align: center;
       margin-bottom: 30px;
@@ -324,28 +360,21 @@
 <body>
 <div class="container">
   <div class="header">
-    <<a th:href="@{/purchasedlicenses}" class="back-btn">
-    <i class="fas fa-arrow-left"></i> Trở về danh sách
-  </a>
-
+    <a th:href="@{/purchasedlicenses}" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Trở về danh sách
+    </a>
 
     <h2>Đánh giá sản phẩm</h2>
     <p th:text="${product.name}">Tên sản phẩm</p>
   </div>
 
   <div class="form-content">
-    <!-- ✅ Thông báo lỗi & cảnh báo -->
-    <div th:if="${errorMessage}"
-         style="background:#fee2e2; color:#b91c1c; padding:12px; border-radius:10px; text-align:center; font-weight:600; margin-bottom:20px;">
-      <i class="fas fa-exclamation-triangle"></i>
-      <span th:text="${errorMessage}"></span>
+    <!-- ✅ GỘP TẤT CẢ THÔNG BÁO VÀO 1 PHẦN ERROR MESSAGE DUY NHẤT -->
+    <div th:if="${errorMessage}" class="error-message" th:classappend="${warningMessage ? 'warning' : ''}">
+      <i th:class="${warningMessage ? 'fas fa-exclamation-triangle' : 'fas fa-exclamation-circle'}"></i>
+      <span th:text="${errorMessage} ?: ${warningMessage}">Thông báo lỗi hoặc cảnh báo</span>
     </div>
 
-    <div th:if="${warningMessage}"
-         style="background:#fef3c7; color:#92400e; padding:12px; border-radius:10px; text-align:center; font-weight:600; margin-bottom:20px;">
-      <i class="fas fa-info-circle"></i>
-      <span th:text="${warningMessage}"></span>
-    </div>
     <form id="reviewForm" th:action="@{/review/save}" th:object="${review}" method="post" enctype="multipart/form-data">
       <input type="hidden" name="productId" th:value="${product.id}" />
 
@@ -406,7 +435,7 @@
         <button type="submit" class="btn btn-save">
           <i class="fas fa-save"></i> Lưu đánh giá
         </button>
-        <a href="http://localhost:8080/purchasedlicenses" class="btn btn-cancel">
+        <a th:href="@{/purchasedlicenses}" class="btn btn-cancel">
           <i class="fas fa-times"></i> Hủy bỏ
         </a>
       </div>

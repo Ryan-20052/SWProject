@@ -19,7 +19,7 @@ public class Product {
     @Column(name = "manager_id")
     private int manager_id;
 
-    @Column(name = "img_url")
+    @Column(name = "img_url", length = 10000)
     private String img_url;
 
     @Column(name = "status")

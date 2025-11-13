@@ -29,15 +29,36 @@ public class ManagerProfileService {
 
         // Validate tên
         if (name == null || name.trim().isEmpty()) {
-            errors.add("Họ tên không được để trống");
+            errors.add("Tên không được để trống");
         } else {
             name = name.trim();
-            if (name.length() < 2) {
-                errors.add("Họ tên phải có ít nhất 2 ký tự");
+
+            if (name == null || name.trim().isEmpty()) {
+                errors.add("Tên không được để trống");
+            } else {
+                name = name.trim();
+
+                // Kiểm tra độ dài
+                if (name.length() < 5) {
+                    errors.add("Tên phải có ít nhất 5 ký tự");
+                } else if (name.length() > 50) {
+                    errors.add("Tên không được vượt quá 50 ký tự");
+                }
+
+
+                for (char c : name.toCharArray()) {
+                    if (!Character.isLetter(c) && c != ' ' && c != '\'' && c != '-') {
+                        errors.add("Tên chỉ được chứa chữ cái, dấu cách, dấu nháy (') hoặc dấu gạch nối (-)");
+                        break;
+                    }
+                }
+
+                // Không cho phép 2 khoảng trắng liên tiếp
+                if (name.contains("  ")) {
+                    errors.add("Tên không được chứa nhiều khoảng trắng liên tiếp");
+                }
             }
-            if (name.length() > 100) {
-                errors.add("Họ tên không được vượt quá 100 ký tự");
-            }
+
         }
 
         // Validate số điện thoại

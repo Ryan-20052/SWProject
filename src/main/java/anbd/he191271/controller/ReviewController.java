@@ -46,7 +46,7 @@ public class ReviewController {
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size,
-            @RequestParam(defaultValue = "newest") String sort, // Thêm tham số sắp xếp
+            @RequestParam(defaultValue = "newest") String sort,
             Model model
     ) {
         try {
@@ -88,7 +88,7 @@ public class ReviewController {
             model.addAttribute("hasImage", hasImage);
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
-            model.addAttribute("selectedSort", sort); // Thêm selectedSort
+            model.addAttribute("selectedSort", sort);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,14 +98,27 @@ public class ReviewController {
         return "viewReview";
     }
 
-    // ✅ Hiển thị form review
+    // ✅ Hiển thị form review - ĐÃ THÊM VALIDATION MUA HÀNG
     @GetMapping("/review/{productId}")
     public String showReviewForm(@PathVariable int productId, HttpSession session, Model model) {
         Customer customer = (Customer) session.getAttribute("customer");
-        if (customer == null) return "redirect:/login.html";
+        if (customer == null) {
+            return "redirect:/login.html";
+        }
 
         Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) return "redirect:/purchasedlicenses";
+        if (product == null) {
+            model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
+            return "redirect:/purchasedlicenses";
+        }
+
+        boolean hasPurchased = reviewService.hasCustomerPurchasedProduct(customer.getId(), productId);
+        if (!hasPurchased) {
+            model.addAttribute("errorMessage",
+                    "Bạn cần mua sản phẩm này trước khi đánh giá! " +
+                            "Vui lòng kiểm tra trong danh sách license đã mua.");
+            return "redirect:/purchasedlicenses";
+        }
 
         Optional<Review> existingReview = reviewRepository.findByCustomer_IdAndProduct_Id(customer.getId(), productId);
         Review review = existingReview.orElse(new Review());
@@ -124,23 +137,35 @@ public class ReviewController {
                              HttpSession session,
                              Model model) {
         Customer customer = (Customer) session.getAttribute("customer");
-        if (customer == null) return "redirect:/login.html";
+        if (customer == null) {
+            return "redirect:/login.html";
+        }
 
         Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) return "redirect:/purchasedlicenses";
+        if (product == null) {
+            model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
+            return "redirect:/purchasedlicenses";
+        }
+
+        boolean hasPurchased = reviewService.hasCustomerPurchasedProduct(customer.getId(), productId);
+        if (!hasPurchased) {
+            model.addAttribute("errorMessage",
+                    "Bạn cần mua sản phẩm này trước khi đánh giá! " +
+                            "Hành động này đã được ghi nhận.");
+            return "redirect:/purchasedlicenses";
+        }
 
         Optional<Review> existingReview = reviewRepository.findByCustomer_IdAndProduct_Id(customer.getId(), productId);
 
-        // ===== VALIDATION BẮT BUỘC =====
+        // ===== VALIDATION =====
         String comment = review.getComment();
         if (comment != null) {
-            comment = comment.trim(); // Xóa khoảng trắng đầu/cuối
-            // Nếu chỉ có khoảng trắng → coi như rỗng
+            comment = comment.trim();
             if (comment.isEmpty()) comment = null;
         }
         review.setComment(comment);
 
-        // 🟡 VALIDATE RATING BẮT BUỘC
+        // 🟡 VALIDATE RATING
         if (rating == null || rating < 1 || rating > 5) {
             model.addAttribute("errorMessage", "Vui lòng chọn số sao đánh giá từ 1 đến 5!");
             model.addAttribute("product", product);

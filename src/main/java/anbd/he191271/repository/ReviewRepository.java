@@ -51,4 +51,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    @Query("SELECT COUNT(lk) FROM LicenseKey lk " +
+            "WHERE lk.orderDetail.order.customer.id = :customerId " +
+            "AND lk.orderDetail.variant.product.id = :productId "
+            )
+    long countByCustomerIdAndProductId(@Param("customerId") int customerId,
+                                       @Param("productId") int productId);
 }

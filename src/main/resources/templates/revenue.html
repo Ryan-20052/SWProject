@@ -10,6 +10,8 @@
             --blue-dark: #1d4ed8;
             --red: #dc2626;
             --green: #059669;
+            --gray: #6b7280;
+            --gray-light: #9ca3af;
         }
 
         body {
@@ -108,6 +110,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
+            transition: background 0.3s;
         }
 
         .btn:hover {
@@ -185,6 +188,8 @@
             background: white;
             border-radius: 4px;
             cursor: pointer;
+            text-decoration: none;
+            color: #333;
         }
 
         .page-btn.active {
@@ -231,6 +236,31 @@
             padding: 40px;
             color: #666;
             font-style: italic;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .date-input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 150px;
         }
     </style>
 </head>
@@ -287,16 +317,20 @@
     <!-- Bộ lọc chính -->
     <div class="filter-section">
         <form th:action="@{/revenue/dashboard}" method="get" id="mainFilterForm">
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: end;">
-                <div style="display:flex; flex-direction:column;">
-                    <label style="font-weight:600; margin-bottom:4px; font-size:14px;">Từ ngày</label>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Từ ngày</label>
                     <input type="date" name="startDate" th:value="${startDate}"
-                           style="padding:8px; border-radius:6px; border:1px solid #ccc; width:150px;">
+                           class="date-input" id="startDate"
+                           max th:attr="max=${today}"
+                           onchange="updateDateConstraints()">
                 </div>
-                <div style="display:flex; flex-direction:column;">
-                    <label style="font-weight:600; margin-bottom:4px; font-size:14px;">Đến ngày</label>
+                <div class="filter-group">
+                    <label class="filter-label">Đến ngày</label>
                     <input type="date" name="endDate" th:value="${endDate}"
-                           style="padding:8px; border-radius:6px; border:1px solid #ccc; width:150px;">
+                           class="date-input" id="endDate"
+                           max th:attr="max=${today}"
+                           onchange="updateDateConstraints()">
                 </div>
                 <div>
                     <button type="submit" class="btn">Áp dụng</button>
@@ -305,14 +339,12 @@
         </form>
     </div>
 
-    <!-- KPI Cards - Chỉ hiển thị doanh thu tổng -->
-    <div th:if="${dashboard}" style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; margin-bottom: 20px;">
+    <!-- KPI Cards-->
+    <div style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; margin-bottom: 20px;">
         <div class="kpi-card" style="position: relative;">
-            <h5 style="margin:0 0 8px 0; color:#666; font-size:14px;">
-                <span th:if="${isDateFiltered}">Doanh thu</span>
-            </h5>
+
             <h3 style="margin:0; color:#2563eb; font-size:24px;"
-                th:text="|${#numbers.formatInteger(dashboard.totalRevenue, 0, 'POINT')} VND|">
+                th:text="|${#numbers.formatInteger(dashboard.revenue, 0, 'POINT')} VND|">
             </h3>
 
             <!-- Nút chi tiết -->
@@ -410,13 +442,31 @@
     </div>
 </div>
 
-<!--<script>-->
-<!--    // Auto-submit form khi thay đổi ngày-->
-<!--    document.querySelectorAll('input[type="date"]').forEach(input => {-->
-<!--        input.addEventListener('change', function() {-->
-<!--            document.getElementById('mainFilterForm').submit();-->
-<!--        });-->
-<!--    });-->
-<!--</script>-->
+<script>
+    function updateDateConstraints() {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        // Khi chọn startDate, set min cho endDate = startDate
+        if (startDateInput.value) {
+            endDateInput.min = startDateInput.value;
+        }
+
+        // Khi chọn endDate, set max cho startDate = endDate
+        if (endDateInput.value) {
+            startDateInput.max = endDateInput.value;
+        }
+    }
+
+    // Khởi tạo
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').max = today;
+        document.getElementById('endDate').max = today;
+
+        // Set constraints ban đầu
+        updateDateConstraints();
+    });
+</script>
 </body>
 </html>

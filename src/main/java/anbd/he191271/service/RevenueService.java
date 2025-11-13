@@ -20,33 +20,23 @@ public class RevenueService {
     private final OrderRepository orderRepository;
 
     public Map<String, Object> getRevenueDashboard(LocalDateTime startDate,
-                                                   LocalDateTime endDate,
-                                                   String timeRange,
-                                                   boolean isDateFiltered) {
+                                                   LocalDateTime endDate
+                                                   ) {
         Map<String, Object> result = new HashMap<>();
 
         System.out.println("=== REVENUE DASHBOARD DATA ===");
         System.out.println("Start Date: " + startDate);
         System.out.println("End Date: " + endDate);
-        System.out.println("Time Range: " + timeRange);
-        System.out.println("Is Date Filtered: " + isDateFiltered);
 
-        // Doanh thu hiện tại - nếu không filter thì lấy tổng tất cả
-        Long currentRevenue;
-        if (isDateFiltered) {
-            currentRevenue = orderRepository.getTotalRevenueByPeriod(startDate, endDate);
-        } else {
-            currentRevenue = orderRepository.getTotalRevenue();
-        }
-        System.out.println("Current Revenue: " + currentRevenue);
+        Long revenue = orderRepository.getTotalRevenueByPeriod(startDate, endDate);
 
         // Doanh thu theo sản phẩm
         List<Map<String, Object>> revenueByProduct = getRevenueByProduct(startDate, endDate);
         System.out.println("Product Revenue size: " + (revenueByProduct != null ? revenueByProduct.size() : 0));
 
-        result.put("totalRevenue", currentRevenue);
+        result.put("revenue", revenue);
         result.put("revenueByProduct", revenueByProduct);
-        result.put("isDateFiltered", isDateFiltered);
+
 
         return result;
     }
