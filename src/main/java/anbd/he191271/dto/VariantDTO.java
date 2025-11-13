@@ -1,10 +1,12 @@
 package anbd.he191271.dto;
 
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.Length;
 
 public class VariantDTO {
     private Integer id;
     @NotBlank(message = "Không được để trống")
+    @Length(max = 250, message = "Độ dài không quá 250 kí tự")
     private String name;
     @NotBlank(message = "Thời hạn không được để trống")
     @Pattern(
@@ -13,7 +15,7 @@ public class VariantDTO {
     )
     private String duration;
     @NotNull(message = "Giá không được để trống")
-    @Min(value = 1000, message = "Giá phải lớn hơn hoặc bằng 1.000 VNĐ")
+    @Min(value = 10000, message = "Giá phải lớn hơn hoặc bằng 10.000 VNĐ")
     @Max(value = 100000000, message = "Giá không được vượt quá 100.000.000 VNĐ")
     private Integer price;
     private Integer productId;

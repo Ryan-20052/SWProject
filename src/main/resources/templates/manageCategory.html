@@ -299,13 +299,29 @@
         </a>
     </form>
 
-    <!-- Form Thêm sản phẩm -->
-    <h3>Thêm Danh Mục</h3>
-    <form th:action="@{/manage/addCategory}" th:object="${newCategory}" method="post" required>
-        <input type="text" th:field="*{name}" placeholder="Tên sản phẩm" required>
-        <input type="text" th:field="*{description}" placeholder="Mô tả" required>
-        <button type="submit" style="background:var(--blue);color:white;">Lưu</button>
-    </form>
+    <!-- Form Thêm Danh Mục -->
+    <div style="margin-top:20px; padding:20px; border-radius:8px; background:#f8f9fa; border:1px solid #e5e7eb;">
+        <h3 style="margin-bottom:12px;">Thêm Danh Mục</h3>
+        <form th:action="@{/manage/addCategory}" th:object="${newCategory}" method="post" style="display:flex; flex-direction:column; gap:12px; max-width:500px;">
+            <div style="display:flex; flex-direction:column;">
+                <input type="text" th:field="*{name}" placeholder="Tên danh mục" required
+                       style="padding:8px 10px; border-radius:6px; border:1px solid #ccc;">
+                <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:#dc2626; font-size:0.9em; margin-top:2px;"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column;">
+                <input type="text" th:field="*{description}" placeholder="Mô tả" required
+                       style="padding:8px 10px; border-radius:6px; border:1px solid #ccc;">
+                <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" style="color:#dc2626; font-size:0.9em; margin-top:2px;"></div>
+            </div>
+
+            <button type="submit" style="padding:10px 16px; background:var(--blue); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:500; width:120px;">
+                Lưu
+            </button>
+        </form>
+    </div>
+
+
     <table border="1">
         <thead>
         <tr>

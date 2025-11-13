@@ -345,11 +345,16 @@ public class ManagerController {
     }
 
     @PostMapping("/addCategory")
-    public String addCategory(@ModelAttribute("newCategory") CategoryDTO request, RedirectAttributes redirectAttributes, HttpSession session)
+    public String addCategory(@Valid @ModelAttribute("newCategory") CategoryDTO request, BindingResult bindingResult, RedirectAttributes redirectAttributes, HttpSession session, Model model)
     {
         Manager manager=(Manager)session.getAttribute("manager");
         if (manager == null) {
             return "redirect:/login.html";
+        }
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("categoryList", categoryService.getAllCategories());
+            model.addAttribute("manager", manager);
+            return "manageCategory";
         }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add category "+ request.getName());
         managerLogService.save(log);

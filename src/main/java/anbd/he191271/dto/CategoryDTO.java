@@ -1,8 +1,15 @@
 package anbd.he191271.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.Length;
+
 public class CategoryDTO {
     private Integer  category_id;
+    @NotBlank(message = "Không được để trống")
+    @Length(max = 250, message = "Không quá 250 kí tự")
     private String name;
+    @NotBlank(message = "Không được để trống")
+    @Length(max = 250, message = "Không quá 250 kí tự")
     private String description;
 
     public CategoryDTO() {
