@@ -202,6 +202,7 @@
 </div>
 
 <script>
+    // Lấy các phần tử HTML từ DOM bằng ID
     const input = document.getElementById("userInput");
     const sendBtn = document.getElementById("sendBtn");
     const messages = document.getElementById("messages");
@@ -209,6 +210,7 @@
     // Auto focus khi trang load
     input.focus();
 
+    // Hiển thị tin nhắn
     function addMessage(role, text) {
         const msg = document.createElement("div");
         msg.className = "msg " + role;
@@ -223,11 +225,12 @@
         } else {
             msg.textContent = text;
         }
-
+        // Thêm tin nhắn vào khu vực messages
         messages.appendChild(msg);
         messages.scrollTop = messages.scrollHeight;
     }
 
+    // Hiện hiệu ứng typing
     function addLoading() {
         const wrap = document.createElement("div");
         wrap.className = "typing-indicator";
@@ -247,6 +250,7 @@
         if (loading) loading.remove();
     }
 
+    //XỬ LÝ GỬI TIN NHẮN
     async function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
