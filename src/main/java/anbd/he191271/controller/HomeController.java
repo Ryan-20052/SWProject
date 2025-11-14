@@ -66,12 +66,18 @@ public class HomeController {
     public String homepage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) String sort,
             Model model,
             HttpSession session) {
 
-        Page<Product> productPage = productService.getAllProductByStatusPage("available", page, size);
+        // Gọi service mới với bộ lọc
+        Page<Product> productPage = productService.getProductsWithFilters(
+                null, search, minPrice, maxPrice, sort, page, size);
 
-        model.addAttribute("products", productPage.getContent()); //getContent() — danh sách phần tử trên trang hiện tại (List<T>).
+        model.addAttribute("products", productPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("pageSize", size);
@@ -79,11 +85,16 @@ public class HomeController {
         model.addAttribute("hasNext", productPage.hasNext());
         model.addAttribute("hasPrev", productPage.hasPrevious());
 
-        // customer (nếu có đăng nhập)
+        // Thêm các tham số filter vào model để giữ lại giá trị trong form
+        model.addAttribute("search", search);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("sort", sort);
+
         Customer customer = (Customer) session.getAttribute("customer");
         if (customer != null) model.addAttribute("customer", customer);
 
-        return "homepage"; // file templates/homepage.html
+        return "homepage";
     }
 
     @GetMapping("/categories/{id}")
@@ -117,29 +128,29 @@ public class HomeController {
             @PathVariable("id") Integer id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) String sort,
             Model model,
             HttpSession session) {
 
-        Page<Product> productPage;
-        try {
-            productPage = productService.getProductsByCategoryPage(id, page, size);
-            model.addAttribute("products", productPage.getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", productPage.getTotalPages());
-            model.addAttribute("pageSize", size);
-            model.addAttribute("totalItems", productPage.getTotalElements());
-            model.addAttribute("hasNext", productPage.hasNext());
-            model.addAttribute("hasPrev", productPage.hasPrevious());
-        } catch (Exception ex) {
-            // Fallback: nếu repository chưa hỗ trợ Page (sử dụng method cũ)
-            model.addAttribute("products", productRepository.findByCategoryId(id));
-            model.addAttribute("currentPage", 0);
-            model.addAttribute("totalPages", 1);
-            model.addAttribute("pageSize", Integer.MAX_VALUE);
-            model.addAttribute("totalItems", ((List) model.getAttribute("products")).size());
-            model.addAttribute("hasNext", false);
-            model.addAttribute("hasPrev", false);
-        }
+        Page<Product> productPage = productService.getProductsWithFilters(
+                id, search, minPrice, maxPrice, sort, page, size);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalItems", productPage.getTotalElements());
+        model.addAttribute("hasNext", productPage.hasNext());
+        model.addAttribute("hasPrev", productPage.hasPrevious());
+
+        // Thêm các tham số filter vào model
+        model.addAttribute("search", search);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("sort", sort);
 
         Optional<Categories> current = categoryRepository.findById(id);
         current.ifPresent(c -> model.addAttribute("currentCategory", c));

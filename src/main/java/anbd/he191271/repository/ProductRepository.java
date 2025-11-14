@@ -32,6 +32,17 @@ public interface ProductRepository<P, I extends Number> extends JpaRepository<Pr
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE %:keyword% OR LOWER(p.description) LIKE %:keyword%")
     List<Product> searchByKeyword(@Param("keyword") String keyword);
 
-
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN p.variants v " +
+            "WHERE p.status = 'available' " +
+            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND (:search IS NULL OR LOWER(p.name) LIKE LOWER(:search)) " +
+            "AND (:minPrice IS NULL OR v.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR v.price <= :maxPrice)")
+    Page<Product> findWithFilters(@Param("categoryId") Integer categoryId,
+                                  @Param("search") String search,
+                                  @Param("minPrice") Integer minPrice,
+                                  @Param("maxPrice") Integer maxPrice,
+                                  Pageable pageable);
 }
 

@@ -4,6 +4,7 @@ import anbd.he191271.entity.Product;
 import anbd.he191271.entity.Review;
 import anbd.he191271.entity.Variant;
 import anbd.he191271.repository.CategoryRepository;
+import anbd.he191271.repository.VariantRepository;
 import anbd.he191271.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,7 +26,8 @@ public class ProductController {
 
     @Autowired
     private CategoryRepository categoryRepository;
-
+    private VariantRepository variantRepository;
+    //Hàm này để lấy variant trong 1 product (Product.html)
     @GetMapping("/product/{id}")
     public String productDetail(
             @PathVariable("id") int id,
