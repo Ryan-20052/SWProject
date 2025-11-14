@@ -15,6 +15,10 @@
             --blue-dark: #1d4ed8;
             --accent: #f43f5e; /* màu đỏ/đậm cho nút thêm giỏ */
             --white-90: rgba(255,255,255,0.9);
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
         }
 
         /* --------------------
@@ -261,9 +265,166 @@
         /* toast nhỏ khi thêm giỏ hàng */
         .toast-cart { position: fixed; right: 20px; bottom: 20px; background: #111; color: white; padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); transform: translateY(10px); opacity: 0; transition: all 240ms ease; z-index: 9999; }
         .toast-cart.show { opacity: 1; transform: translateY(0); }
+
         /* --------------------
-              Pagination styles
-              -------------------- */
+           Bộ lọc sản phẩm - CSS ĐÃ CẢI THIỆN
+           -------------------- */
+        .filter-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--gray-200);
+        }
+
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-bar {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-bar label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 14px;
+        }
+
+        .filter-bar select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .filter-bar select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .filter-form {
+            flex: 3;
+            min-width: 300px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .filter-group {
+            margin-bottom: 0;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 14px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .price-range-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .price-range-container input {
+            flex: 1;
+        }
+
+        .price-range-separator {
+            color: var(--gray-600);
+            font-weight: 600;
+            padding: 0 4px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 0;
+            align-items: center;
+            height: 100%;
+        }
+
+        .filter-buttons button {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .filter-buttons button:hover {
+            background: var(--blue-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .filter-buttons a {
+            padding: 10px 16px;
+            background: var(--gray-200);
+            color: var(--gray-800);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .filter-buttons a:hover {
+            background: var(--gray-600);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* --------------------
+           Pagination styles
+           -------------------- */
         .pagination {
             display: flex;
             justify-content: center;
@@ -295,12 +456,52 @@
             border-color: rgba(0,0,0,0.06);
         }
         .page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+
         /* Responsive: rút gọn layout header cho mobile */
         @media (max-width: 880px) {
             .header-inner { padding: 0 12px; gap: 10px; }
             .search-box { display: none; } /* ẩn search trên mobile header để gọn (tùy bạn) */
             .nav-inner { padding: 8px 12px; gap: 12px; overflow-x:auto; }
             .grid-featured, .grid-all { grid-template-columns: repeat(2, 1fr); }
+
+            /* Responsive cho bộ lọc */
+            .filter-container {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .filter-bar, .filter-form {
+                width: 100%;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                justify-content: stretch;
+            }
+
+            .filter-buttons button,
+            .filter-buttons a {
+                flex: 1;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filter-section {
+                padding: 16px;
+            }
+
+            .price-range-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .price-range-separator {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -399,7 +600,7 @@
 <main id="pageContent" style="margin-top:0;">
     <div style="height: 8px;"></div>
 
-    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/554418352_770267042671107_6961607438473419344_n.png?stp=dst-png_s720x720&_nc_cat=105&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeHyEG88V0DdnLVBMkWAgYkvokjCGs1qhreiSMIazWqGt9gSNYfky-rFMwsRQ9xtFUnBikEQnwSPNDujEYFs-Zzz&_nc_ohc=imsD9FHbcRkQ7kNvwGKjasb&_nc_oc=AdkJmZJingJ-oIouY3Tr1huLHpiI3L8kQ6tyNoFyga7bCbG7JQqE3Rr8fCdci8I8U4A&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&oh=03_Q7cD3gGI69ff7TPgpqGRnbvjHTFf9CyXp0VzWHHYl3GFS7n3Rw&oe=690B3783');">
+    <div class="banner" style="background-image: url('https://scontent.fhan14-1.fna.fbcdn.net/v/t1.15752-9/582426735_843664641352653_6255392200947647626_n.png?stp=dst-png_s720x720&_nc_cat=107&ccb=1-7&_nc_sid=0024fc&_nc_eui2=AeFNHCCKVNoRMcQPNZDaIxnlBN5edadTvYQE3l51p1O9hE-zn_OI8UhJ2yIgDg_D0Kwnj-TtuOiq7XbD4OVhHjNt&_nc_ohc=zmkzig7SOiUQ7kNvwE-JxkT&_nc_oc=Adk6iZXE2itMhjghfp92yHpF5YUBl-WKDGJoCaFwn7RvSr7nJpYy_WvBMkvnhkxLYhw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&oh=03_Q7cD3wFyEhv4nUhoq-RT9GfWOYQwdM2cXocd4x73jOj0VTtMwA&oe=693A1531');">
     </div>
 
     <section class="products">
@@ -447,22 +648,79 @@
     <section class="products">
         <div class="section-inner">
             <div class="content-inner">
-                <div class="filter-bar">
-                    <label for="categorySelect">Danh mục: </label>
-                    <select id="categorySelect" onchange="if(this.value) location.href=this.value;">
-                        <!-- Option mặc định: ALL -->
-                        <option th:value="@{/home/homepage}"
-                                th:selected="${currentCategory == null}">
-                            Tất cả
-                        </option>
+                <!-- Bộ lọc sản phẩm - ĐÃ CẢI THIỆN -->
+                <div class="filter-section">
+                    <div class="filter-container">
+                        <!-- Thanh danh mục (bên trái) -->
+                        <div class="filter-bar" aria-label="Chọn danh mục">
+                            <label for="categorySelect">Danh mục</label>
+                            <select id="categorySelect" onchange="if(this.value) location.href=this.value;">
+                                <option th:value="@{/home/homepage}" th:selected="${currentCategory == null}">Tất cả</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="@{/home/category/{id}(id=${cat.id})}"
+                                        th:text="${cat.name}"
+                                        th:selected="${currentCategory != null and currentCategory.id == cat.id}">
+                                </option>
+                            </select>
+                        </div>
 
-                        <!-- Sinh động từ DB -->
-                        <option th:each="cat : ${categories}"
-                                th:value="@{/home/category/{id}(id=${cat.id})}"
-                                th:text="${cat.name}"
-                                th:selected="${currentCategory != null and currentCategory.id == cat.id}">
-                        </option>
-                    </select>
+                        <!-- Form lọc (bên phải, chiếm diện tích còn lại) -->
+                        <form th:action="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id})} : @{/home/homepage}"
+                              method="get"
+                              class="filter-form">
+
+                            <!-- Giữ lại category và page parameters -->
+                            <input type="hidden" name="page" value="0">
+
+                            <div class="filter-grid">
+                                <!-- Tìm kiếm theo tên -->
+                                <div class="filter-group">
+                                    <label for="search">Tìm kiếm</label>
+                                    <input type="text"
+                                           id="search"
+                                           name="search"
+                                           th:value="${search}"
+                                           placeholder="Nhập tên sản phẩm...">
+                                </div>
+
+                                <!-- Khoảng giá -->
+                                <div class="filter-group">
+                                    <label>Khoảng giá</label>
+                                    <div class="price-range-container">
+                                        <input type="number"
+                                               name="minPrice"
+                                               th:value="${minPrice}"
+                                               placeholder="Giá thấp nhất">
+                                        <span class="price-range-separator">-</span>
+                                        <input type="number"
+                                               name="maxPrice"
+                                               th:value="${maxPrice}"
+                                               placeholder="Giá cao nhất">
+                                    </div>
+                                </div>
+
+                                <!-- Sắp xếp -->
+                                <div class="filter-group">
+                                    <label for="sort">Sắp xếp</label>
+                                    <select id="sort" name="sort" th:value="${sort}">
+                                        <option value="">Mặc định</option>
+                                        <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên A-Z</option>
+                                        <option value="name_desc" th:selected="${sort == 'name_desc'}">Tên Z-A</option>
+                                    </select>
+                                </div>
+
+                                <!-- Nút lọc -->
+                                <div class="filter-group">
+                                    <div class="filter-buttons">
+                                        <button type="submit">Lọc</button>
+                                        <a th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id})} : @{/home/homepage}">
+                                            Xóa lọc
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
                 <h2>Tất cả sản phẩm</h2>
@@ -502,23 +760,29 @@
 
                 <div id="noResults" class="no-results" style="display:none;">Không tìm thấy sản phẩm nào khớp.</div>
 
-                <!-- ======== Pagination ======== -->
+                <!-- ======== Pagination ĐÃ SỬA LỖI ======== -->
                 <div th:if="${totalPages != null and totalPages > 1}" class="pagination" role="navigation" aria-label="Phân trang sản phẩm">
                     <!-- Prev -->
                     <a th:if="${hasPrev}"
-                       th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${currentPage - 1})} : @{/home/homepage(page=${currentPage - 1})}"
+                       th:href="${currentCategory != null} ?
+                                @{/home/category/{id}(id=${currentCategory.id}, page=${currentPage - 1}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})} :
+                                @{/home/homepage(page=${currentPage - 1}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
                        class="page-btn">← Trước</a>
 
                     <!-- Pages (hiển thị 1-based cho người dùng, model dùng 0-based) -->
                     <span th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
                         <a th:classappend="${p == currentPage} ? ' page-num active' : ' page-num'"
-                           th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${p})} : @{/home/homepage(page=${p})}"
+                           th:href="${currentCategory != null} ?
+                                    @{/home/category/{id}(id=${currentCategory.id}, page=${p}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})} :
+                                    @{/home/homepage(page=${p}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
                            th:text="${p + 1}">1</a>
                     </span>
 
                     <!-- Next -->
                     <a th:if="${hasNext}"
-                       th:href="${currentCategory != null} ? @{/home/category/{id}(id=${currentCategory.id},page=${currentPage + 1})} : @{/home/homepage(page=${currentPage + 1})}"
+                       th:href="${currentCategory != null} ?
+                                @{/home/category/{id}(id=${currentCategory.id}, page=${currentPage + 1}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})} :
+                                @{/home/homepage(page=${currentPage + 1}, search=${search}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
                        class="page-btn">Tiếp →</a>
                 </div>
                 <!-- ======== end pagination ======== -->
