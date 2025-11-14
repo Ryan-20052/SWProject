@@ -3,6 +3,7 @@ package anbd.he191271.service;
 import anbd.he191271.dto.IntentAnalysis;
 import anbd.he191271.entity.Product;
 import anbd.he191271.entity.Variant;
+import anbd.he191271.entity.Review;
 import anbd.he191271.repository.ProductRepository;
 import anbd.he191271.repository.ReviewRepository;
 import anbd.he191271.service.AIChatService;
@@ -64,19 +65,29 @@ public class AIChatServiceImpl implements AIChatService {
         - Tư vấn sản phẩm license phù hợp với nhu cầu khách hàng
         - Cung cấp thông tin giá cả, tính năng sản phẩm
         - Hỗ trợ thông tin về cửa hàng, chính sách
+        - Cung cấp thông tin đánh giá, xếp hạng sản phẩm từ người dùng
         - Luôn thân thiện, nhiệt tình, chuyên nghiệp
+        - Được chào thì phải chào lại
         
         QUY TẮC:
         - CHỈ trả lời các câu hỏi liên quan đến LicenseShop và sản phẩm license
         - KHÔNG trả lời các câu hỏi không liên quan, thay vào đó chuyển hướng về sản phẩm
         - Luôn sử dụng tiếng Việt tự nhiên, thân thiện
         - Khi có thông tin sản phẩm từ database, hãy sử dụng chính xác thông tin đó
+        - Khi có thông tin đánh giá, hãy sử dụng để tư vấn khách hàng
         - Khi không có sản phẩm phù hợp, gợi ý sản phẩm tương tự
+        
+        THÔNG TIN ĐÁNH GIÁ:
+        - Khi khách hỏi về đánh giá, cung cấp thông tin:
+          + Đánh giá tốt nhất (rating cao nhất)
+          + Đánh giá tệ nhất (rating thấp nhất) 
+          + Sản phẩm được đánh giá nhiều nhất
         
         ĐỊNH DẠNG TRẢ LỜI:
         - Sử dụng emoji để sinh động
         - Cấu trúc rõ ràng, dễ đọc
         - Luôn có call-to-action rõ ràng
+        - Khi có đánh giá: hiển thị ⭐ rating và số lượng review
         """;
 
     @Override
@@ -88,12 +99,17 @@ public class AIChatServiceImpl implements AIChatService {
         }
 
         try {
+            // Kiểm tra câu hỏi về đánh giá
+            if (isReviewRelated(message)) {
+                return handleReviewRequest(message);
+            }
+
             // 1. Phân tích intent và query database
             IntentAnalysis intent = analyzeIntent(message);
             List<Product> relevantProducts = findRelevantProducts(intent, message);
 
             // 2. Tạo context từ database results
-            String context = buildContext(relevantProducts, intent, message);
+            String context = buildEnhancedContext(relevantProducts, intent, message);
 
             // 3. Gọi Gemini với context HOẶC fallback thông minh
             String aiResponse = handleAIResponse(message, context, relevantProducts);
@@ -104,6 +120,181 @@ public class AIChatServiceImpl implements AIChatService {
             log.error("Error in AI chat service", e);
             return fallbackResponse(message);
         }
+    }
+
+    // ==================== REVIEW HANDLING ====================
+
+    private boolean isReviewRelated(String message) {
+        String normalized = normalize(message);
+
+        Pattern reviewPattern = Pattern.compile(
+                "(?i)\\b(đánh giá|review|rating|sao|bình luận|nhận xét|" +
+                        "tốt nhất|tệ nhất|tồi nhất|hay nhất|chất lượng|" +
+                        "được đánh giá|nhiều đánh giá|ít đánh giá)\\b"
+        );
+
+        return reviewPattern.matcher(normalized).find();
+    }
+
+    private String handleReviewRequest(String message) {
+        String normalized = normalize(message);
+
+        try {
+            if (normalized.contains("tốt nhất") || normalized.contains("rating cao") || normalized.contains("hay nhất")) {
+                return buildBestRatedProductsResponse();
+            } else if (normalized.contains("tệ nhất") || normalized.contains("tồi nhất") || normalized.contains("rating thấp")) {
+                return buildWorstRatedProductsResponse();
+            } else if (normalized.contains("nhiều đánh giá") || normalized.contains("được đánh giá")) {
+                return buildMostReviewedProductsResponse();
+            } else {
+                return buildCompleteReviewResponse();
+            }
+
+        } catch (Exception e) {
+            log.error("Error handling review request", e);
+            return "❌ Hiện không thể lấy thông tin đánh giá. Vui lòng thử lại sau.";
+        }
+    }
+
+    private String buildBestRatedProductsResponse() {
+        List<Object[]> topRatedData = reviewRepository.findTopRatedProducts();
+
+        if (topRatedData.isEmpty()) {
+            return "⭐ **Chưa có đánh giá nào cho sản phẩm**\n\nHãy là người đầu tiên đánh giá sản phẩm của chúng tôi!";
+        }
+
+        StringBuilder response = new StringBuilder();
+        response.append("🏆 **TOP SẢN PHẨM ĐƯỢC ĐÁNH GIÁ TỐT NHẤT** ⭐\n\n");
+
+        for (int i = 0; i < Math.min(5, topRatedData.size()); i++) {
+            Object[] data = topRatedData.get(i);
+            String productName = (String) data[0];
+            Double avgRating = (Double) data[1];
+
+            // Tìm product để lấy giá
+            List<Product> products = productRepository.searchByKeyword(productName);
+            String priceInfo = "Liên hệ";
+            if (!products.isEmpty()) {
+                Product product = products.get(0);
+                priceInfo = "Từ " + formatPrice(getMinPrice(product.getVariants()));
+            }
+
+            response.append(i + 1).append(". **").append(productName).append("**\n");
+            response.append("   ⭐ ").append(String.format("%.1f", avgRating));
+            response.append(" • 💰 ").append(priceInfo).append("\n\n");
+        }
+
+        response.append("💡 **Dựa trên đánh giá thực tế từ khách hàng!**");
+        return response.toString();
+    }
+
+    private String buildWorstRatedProductsResponse() {
+        List<Product> allProducts = getCachedProducts();
+        List<ProductStats> worstRated = new ArrayList<>();
+
+        for (Product product : allProducts) {
+            List<Review> reviews = reviewRepository.findByProduct_IdAndStatus(product.getId(), "ACTIVE");
+            if (!reviews.isEmpty()) {
+                double avgRating = reviews.stream()
+                        .mapToInt(Review::getRating)
+                        .average()
+                        .orElse(0.0);
+
+                if (avgRating > 0 && avgRating < 3.0) {
+                    worstRated.add(new ProductStats(product, avgRating, reviews.size()));
+                }
+            }
+        }
+
+        if (worstRated.isEmpty()) {
+            return "😊 **Tất cả sản phẩm đều có đánh giá tích cực!**";
+        }
+
+        worstRated.sort(Comparator.comparingDouble(ProductStats::getAverageRating));
+
+        StringBuilder response = new StringBuilder();
+        response.append("⚠️ **SẢN PHẨM CẦN CẢI THIỆN**\n\n");
+
+        for (int i = 0; i < Math.min(5, worstRated.size()); i++) {
+            ProductStats stats = worstRated.get(i);
+            Product product = stats.getProduct();
+            response.append(i + 1).append(". **").append(product.getName()).append("**\n");
+            response.append("   ⭐ ").append(String.format("%.1f", stats.getAverageRating()));
+            response.append(" • ").append(stats.getReviewCount()).append(" đánh giá\n");
+            response.append("   💰 ").append(formatPrice(getMinPrice(product.getVariants()))).append("\n\n");
+        }
+
+        response.append("📞 **Chúng tôi đang nỗ lực cải thiện chất lượng!**");
+        return response.toString();
+    }
+
+    private String buildMostReviewedProductsResponse() {
+        List<Product> allProducts = getCachedProducts();
+        List<ProductStats> mostReviewed = new ArrayList<>();
+
+        for (Product product : allProducts) {
+            List<Review> reviews = reviewRepository.findByProduct_IdAndStatus(product.getId(), "ACTIVE");
+            if (!reviews.isEmpty()) {
+                double avgRating = reviews.stream()
+                        .mapToInt(Review::getRating)
+                        .average()
+                        .orElse(0.0);
+                mostReviewed.add(new ProductStats(product, avgRating, reviews.size()));
+            }
+        }
+
+        if (mostReviewed.isEmpty()) {
+            return "📝 **Chưa có sản phẩm nào được đánh giá**";
+        }
+
+        mostReviewed.sort((p1, p2) -> Integer.compare(p2.getReviewCount(), p1.getReviewCount()));
+
+        StringBuilder response = new StringBuilder();
+        response.append("🗣️ **SẢN PHẨM ĐƯỢC ĐÁNH GIÁ NHIỀU NHẤT**\n\n");
+
+        for (int i = 0; i < Math.min(5, mostReviewed.size()); i++) {
+            ProductStats stats = mostReviewed.get(i);
+            Product product = stats.getProduct();
+            response.append(i + 1).append(". **").append(product.getName()).append("**\n");
+            response.append("   📊 ").append(stats.getReviewCount()).append(" đánh giá");
+            response.append(" • ⭐ ").append(String.format("%.1f", stats.getAverageRating())).append("\n");
+            response.append("   💰 ").append(formatPrice(getMinPrice(product.getVariants()))).append("\n\n");
+        }
+
+        response.append("🎯 **Sản phẩm được nhiều khách hàng quan tâm!**");
+        return response.toString();
+    }
+
+    private String buildCompleteReviewResponse() {
+        StringBuilder response = new StringBuilder();
+        response.append("📊 **THỐNG KÊ ĐÁNH GIÁ SẢN PHẨM**\n\n");
+
+        // Best Rated
+        List<Object[]> topRated = reviewRepository.findTopRatedProducts();
+        if (!topRated.isEmpty()) {
+            response.append("🏆 **TOP ĐÁNH GIÁ CAO:**\n");
+            for (int i = 0; i < Math.min(3, topRated.size()); i++) {
+                Object[] data = topRated.get(i);
+                response.append("• ").append(data[0])
+                        .append(" - ⭐").append(String.format("%.1f", data[1])).append("\n");
+            }
+            response.append("\n");
+        }
+
+        // Most Reviewed
+        List<Product> allProducts = getCachedProducts();
+        Optional<Product> mostReviewed = allProducts.stream()
+                .max(Comparator.comparingInt(p -> reviewRepository.findByProduct_IdAndStatus(p.getId(), "ACTIVE").size()));
+        if (mostReviewed.isPresent()) {
+            Product product = mostReviewed.get();
+            int reviewCount = reviewRepository.findByProduct_IdAndStatus(product.getId(), "ACTIVE").size();
+            response.append("🗣️ **ĐƯỢC REVIEW NHIỀU NHẤT:**\n");
+            response.append("• ").append(product.getName())
+                    .append(" - ").append(reviewCount).append(" reviews\n\n");
+        }
+
+        response.append("💡 **Cần thông tin chi tiết? Hãy hỏi cụ thể hơn!**");
+        return response.toString();
     }
 
     // ==================== GEMINI CORE ====================
@@ -245,38 +436,17 @@ public class AIChatServiceImpl implements AIChatService {
 
         Set<String> queries = new LinkedHashSet<>();
 
-        // 🚨 DANH SÁCH TỪ KHÓA TỐI ƯU THEO SẢN PHẨM THỰC TẾ
         String[][] productKeywordGroups = {
-                // Microsoft Office
                 {"microsoft office 365", "office 365", "microsoft office", "office"},
-
-                // Grammarly
                 {"grammarly premium", "grammarly"},
-
-                // Học tập
                 {"khan academy plus", "khan academy", "coursera pro", "coursera"},
-
-                // Streaming & Entertainment
-                {"spotify premium", "spotify", "netflix gift card", "netflix",
-                        "disney+ 1 năm", "disney+", "disney plus"},
-
-                // Game
+                {"spotify premium", "spotify", "netflix gift card", "netflix", "disney+ 1 năm", "disney+", "disney plus"},
                 {"steam wallet 100k", "steam wallet", "steam"},
-
-                // Công cụ làm việc
-                {"slack pro", "slack", "zoom business", "zoom",
-                        "notion plus", "notion", "trello premium", "trello"},
-
-                // Windows OS
-                {"windows 11 pro key", "windows 11 home key", "windows 11",
-                        "windows 10 pro key", "windows 10 home key", "windows 10", "windows"},
-
-                // VPN Services
-                {"nordvpn 1 năm", "nordvpn", "expressvpn 6 tháng", "expressvpn",
-                        "surfshark vpn", "surfshark", "cyberghost vpn", "cyberghost", "vpn"}
+                {"slack pro", "slack", "zoom business", "zoom", "notion plus", "notion", "trello premium", "trello"},
+                {"windows 11 pro key", "windows 11 home key", "windows 11", "windows 10 pro key", "windows 10 home key", "windows 10", "windows"},
+                {"nordvpn 1 năm", "nordvpn", "expressvpn 6 tháng", "expressvpn", "surfshark vpn", "surfshark", "cyberghost vpn", "cyberghost", "vpn"}
         };
 
-        // 🚨 TỐI ƯU: Tìm từ khóa CỤ THỂ trước, rồi đến TỔNG QUÁT
         boolean foundSpecificKeyword = false;
 
         for (String[] keywordGroup : productKeywordGroups) {
@@ -286,12 +456,11 @@ public class AIChatServiceImpl implements AIChatService {
                         log.info("✅ Found specific keyword: '{}'", keyword);
                     }
                     foundSpecificKeyword = true;
-                    break; // Chỉ lấy 1 từ khóa trong nhóm
+                    break;
                 }
             }
         }
 
-        // 🚨 Nếu không tìm thấy từ khóa cụ thể, dùng từ khóa tổng quát
         if (!foundSpecificKeyword) {
             String[] generalKeywords = {
                     "premium", "pro", "plus", "business", "key", "gift card",
@@ -306,7 +475,6 @@ public class AIChatServiceImpl implements AIChatService {
             }
         }
 
-        // 🚨 FALLBACK: Tách từ đơn từ tin nhắn
         if (queries.isEmpty()) {
             String[] words = normalized.split("\\s+");
             for (String word : words) {
@@ -320,21 +488,16 @@ public class AIChatServiceImpl implements AIChatService {
         log.info("🔍 Final extracted queries: {}", queries);
         return new ArrayList<>(queries);
     }
-    // 🚨 CẬP NHẬT: Method kiểm tra từ đơn với danh sách sản phẩm thực tế
+
     private boolean isEnhancedProductWord(String word) {
         if (word.length() < 3) return false;
 
         String[] enhancedProductWords = {
-                // Brands
                 "microsoft", "office", "grammarly", "khan", "coursera", "spotify",
                 "netflix", "steam", "disney", "slack", "zoom", "notion", "trello",
                 "windows", "nordvpn", "expressvpn", "surfshark", "cyberghost",
-
-                // Product types
                 "premium", "pro", "plus", "business", "key", "wallet", "vpn",
                 "gift", "card", "license", "home", "pro", "year", "tháng",
-
-                // Categories
                 "academy", "streaming", "music", "video", "game", "tool", "security"
         };
 
@@ -348,30 +511,10 @@ public class AIChatServiceImpl implements AIChatService {
         return false;
     }
 
-    // 🚨 METHOD MỚI: Kiểm tra từ đơn có phải là sản phẩm không
-    private boolean isProductWord(String word) {
-        if (word.length() < 3) return false;
-
-        String[] productWords = {
-                "office", "word", "excel", "windows", "photoshop", "premiere",
-                "illustrator", "steam", "game", "adobe", "microsoft", "license",
-                "grammarly", "spotify", "netflix", "matlab", "autocad", "visual",
-                "studio", "antivirus", "kaspersky", "norton", "bitdefender"
-        };
-
-        for (String productWord : productWords) {
-            if (productWord.contains(word) || word.contains(productWord)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private List<Product> findRelevantProducts(IntentAnalysis intent, String originalMessage) {
         List<Product> products = new ArrayList<>();
-        Set<String> processedProductNames = new HashSet<>(); // 🚨 Dùng tên thay vì ID
+        Set<String> processedProductNames = new HashSet<>();
 
-        // Tìm theo tất cả queries
         if (intent.getSearchQueries() != null && !intent.getSearchQueries().isEmpty()) {
             for (String query : intent.getSearchQueries()) {
                 log.info("Searching products by keyword: '{}'", query);
@@ -379,7 +522,6 @@ public class AIChatServiceImpl implements AIChatService {
                 log.info("Found {} products for query: '{}'", keywordResults.size(), query);
 
                 for (Product product : keywordResults) {
-                    // 🚨 SỬA: Dùng tên sản phẩm để tránh duplicate
                     if (product != null && product.getName() != null) {
                         if (processedProductNames.add(product.getName().toLowerCase())) {
                             products.add(product);
@@ -389,7 +531,6 @@ public class AIChatServiceImpl implements AIChatService {
             }
         }
 
-        // Tìm theo category
         if (products.isEmpty() && intent.getCategory() != null) {
             log.info("Searching products by category: '{}'", intent.getCategory());
             List<Product> categoryResults = productRepository.searchByKeyword(intent.getCategory());
@@ -402,7 +543,6 @@ public class AIChatServiceImpl implements AIChatService {
             }
         }
 
-        // Semantic search
         if (products.isEmpty()) {
             log.info("Falling back to semantic search for: '{}'", originalMessage);
             List<Product> semanticResults = findProductsBySemanticSearch(originalMessage);
@@ -415,7 +555,6 @@ public class AIChatServiceImpl implements AIChatService {
             }
         }
 
-        // Popular products fallback
         if (products.isEmpty() && isMeaningfulProductQuery(originalMessage)) {
             log.info("Returning popular products as fallback");
             List<Product> popularResults = getPopularProducts();
@@ -428,7 +567,6 @@ public class AIChatServiceImpl implements AIChatService {
             }
         }
 
-        // Lọc theo giá
         if (intent.getMaxPrice() != null) {
             products = products.stream()
                     .filter(p -> p != null && hasAffordableVariant(p, intent.getMaxPrice()))
@@ -653,9 +791,9 @@ public class AIChatServiceImpl implements AIChatService {
         }
     }
 
-    // ==================== CONTEXT BUILDER ====================
+    // ==================== ENHANCED CONTEXT BUILDER ====================
 
-    private String buildContext(List<Product> products, IntentAnalysis intent, String originalMessage) {
+    private String buildEnhancedContext(List<Product> products, IntentAnalysis intent, String originalMessage) {
         StringBuilder context = new StringBuilder();
 
         if (products != null && !products.isEmpty()) {
@@ -664,7 +802,7 @@ public class AIChatServiceImpl implements AIChatService {
                 Product product = products.get(i);
                 if (product != null) {
                     context.append("【Sản phẩm ").append(i + 1).append("】\n");
-                    context.append(buildProductContext(product)).append("\n---\n");
+                    context.append(buildEnhancedProductContext(product)).append("\n---\n");
                 }
             }
         } else {
@@ -677,11 +815,11 @@ public class AIChatServiceImpl implements AIChatService {
         context.append("- Max Price: ").append(intent.getMaxPrice()).append("\n");
         context.append("- Category: ").append(intent.getCategory()).append("\n");
 
-        log.info("📋 Context built with {} products", products != null ? products.size() : 0);
+        log.info("📋 Enhanced context built with {} products", products != null ? products.size() : 0);
         return context.toString();
     }
 
-    private String buildProductContext(Product product) {
+    private String buildEnhancedProductContext(Product product) {
         if (product == null) {
             return "Sản phẩm không tồn tại";
         }
@@ -696,6 +834,18 @@ public class AIChatServiceImpl implements AIChatService {
 
         if (product.getCategory() != null && product.getCategory().getName() != null) {
             context.append("Danh mục: ").append(product.getCategory().getName()).append("\n");
+        }
+
+        List<Review> reviews = reviewRepository.findByProduct_IdAndStatus(product.getId(), "ACTIVE");
+        if (!reviews.isEmpty()) {
+            double avgRating = reviews.stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+            context.append("Đánh giá: ⭐ ").append(String.format("%.1f", avgRating))
+                    .append(" (").append(reviews.size()).append(" reviews)\n");
+        } else {
+            context.append("Đánh giá: Chưa có đánh giá\n");
         }
 
         if (product.getVariants() != null && !product.getVariants().isEmpty()) {
@@ -716,6 +866,10 @@ public class AIChatServiceImpl implements AIChatService {
     // ==================== FALLBACK & UTILITIES ====================
 
     private String fallbackResponse(String originalMessage) {
+        if (isReviewRelated(originalMessage)) {
+            return handleReviewRequest(originalMessage);
+        }
+
         IntentAnalysis intent = analyzeIntent(originalMessage);
         List<Product> products = findRelevantProducts(intent, originalMessage);
 
@@ -735,7 +889,6 @@ public class AIChatServiceImpl implements AIChatService {
 
         String normalized = normalize(message);
 
-        // 🚨 CHỈ KIỂM TRA CÓ TỪ KHÓA SẢN PHẨM - KHÔNG FILTER NON-PRODUCT
         Pattern productPattern = Pattern.compile(
                 "(?i)\\b(office|windows|photoshop|steam|game|microsoft|adobe|" +
                         "license|bản quyền|grammarly|spotify|netflix|matlab|autocad|" +
@@ -747,7 +900,6 @@ public class AIChatServiceImpl implements AIChatService {
 
         log.info("🎯 Product detection - HasProduct: {}, Message: '{}'", hasProduct, normalized);
 
-        // 🚨 LUÔN TRẢ VỀ TRUE NẾU CÓ TỪ KHÓA SẢN PHẨM
         return hasProduct;
     }
 
@@ -790,7 +942,8 @@ public class AIChatServiceImpl implements AIChatService {
                 "Tôi là Mia - trợ lý AI của LicenseShop. Tôi có thể giúp bạn:\n\n" +
                 "🔎 Tìm license phù hợp với nhu cầu\n" +
                 "💰 So sánh giá cả các phiên bản\n" +
-                "⭐ Tư vấn sản phẩm bán chạy\n" +
+                "⭐ Tư vấn sản phẩm đánh giá tốt\n" +
+                "📊 Cung cấp thông tin đánh giá sản phẩm\n" +
                 "🆘 Hỗ trợ thông tin cửa hàng\n\n" +
                 "💡 **Hãy cho tôi biết bạn cần gì!**\n" +
                 "📞 **Hỗ trợ nhanh: 1900 636 969**";
@@ -800,8 +953,9 @@ public class AIChatServiceImpl implements AIChatService {
         return "🤖 **Xin lỗi, tôi chỉ có thể hỗ trợ các câu hỏi về LicenseShop**\n\n" +
                 "Tôi có thể giúp bạn tìm kiếm và tư vấn về:\n\n" +
                 "🛍️ **Sản phẩm license:** Microsoft, Adobe, Windows, Game keys...\n" +
+                "📊 **Đánh giá sản phẩm:** Sản phẩm tốt nhất, được review nhiều...\n" +
                 "🏪 **Thông tin cửa hàng:** Liên hệ, giao hàng, thanh toán\n\n" +
-                "💡 **Gợi ý:** Hãy hỏi về 'Office 2021', 'Windows 11', 'Photoshop CC'...\n" +
+                "💡 **Gợi ý:** Hãy hỏi về 'Office 2021', 'Windows 11', 'đánh giá sản phẩm'...\n" +
                 "📞 **Hỗ trợ nhanh: 1900 636 969**";
     }
 
@@ -851,5 +1005,23 @@ public class AIChatServiceImpl implements AIChatService {
         if (!name.isEmpty()) return name;
         if (!dur.isEmpty()) return dur;
         return "Gói cơ bản";
+    }
+
+    // ==================== INNER CLASS CHO PRODUCT STATS ====================
+
+    private static class ProductStats {
+        private final Product product;
+        private final double averageRating;
+        private final int reviewCount;
+
+        public ProductStats(Product product, double averageRating, int reviewCount) {
+            this.product = product;
+            this.averageRating = averageRating;
+            this.reviewCount = reviewCount;
+        }
+
+        public Product getProduct() { return product; }
+        public double getAverageRating() { return averageRating; }
+        public int getReviewCount() { return reviewCount; }
     }
 }

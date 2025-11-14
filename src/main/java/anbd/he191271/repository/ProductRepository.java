@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository<P, I extends Number> extends JpaRepository<Product, Integer> {
@@ -28,6 +29,13 @@ public interface ProductRepository<P, I extends Number> extends JpaRepository<Pr
 
     List<Product> findByStatus(String status);        // hiện có
     List<Product> findByCategoryId(Integer id);       // hiện có
+
+    // Trong ProductRepository.java - THÊM METHOD MỚI
+    @Query("SELECT p FROM Product p WHERE p.status = 'available'")
+    List<Product> findAllAvailableProducts();
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.variants WHERE p.id = :productId")
+    Optional<Product> findByIdWithVariants(@Param("productId") Integer productId);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE %:keyword% OR LOWER(p.description) LIKE %:keyword%")
     List<Product> searchByKeyword(@Param("keyword") String keyword);

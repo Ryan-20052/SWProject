@@ -172,6 +172,8 @@ public class ReviewController {
             model.addAttribute("review", review);
             return "review";
         }
+        // Gán rating hợp lệ
+        review.setRating(rating);
 
         // ✅ VALIDATE FILE SIZE VÀ TYPE
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -195,9 +197,6 @@ public class ReviewController {
                 return "review";
             }
         }
-
-        // Gán rating hợp lệ
-        review.setRating(rating);
 
         try {
             byte[] imageBytes = (imageFile != null && !imageFile.isEmpty()) ? imageFile.getBytes() : null;

@@ -97,7 +97,7 @@ public class ProfileController {
                 List<String> errors = customerProfileService.validateAvatar(avatarFile);
                 if (!errors.isEmpty()) {
                     model.addAttribute("customer", customer);
-                    model.addAttribute("editMode", true);
+                    model.addAttribute("editMode", false);
                     model.addAttribute("errors", errors);
                     return "profile";
                 }
