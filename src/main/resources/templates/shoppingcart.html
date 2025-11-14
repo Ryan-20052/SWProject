@@ -600,7 +600,7 @@
                     <td th:text="${item.variant != null ? item.variant.price + ' đ' : ''}"></td>
                     <td class="quantity">
                         <button type="button" class="decrease">-</button>
-                        <input type="number" name="quantities" th:value="${item.quantity} " min="1" readonly >
+                        <input type="number" name="quantities" th:value="${item.quantity} " min="1" max="50" readonly >
                         <input type="hidden" name="itemIds" th:value="${item.id}">
                         <button type="button" class="increase">+</button>
                     </td>
@@ -1034,14 +1034,16 @@
         const btnDec = qtyBox.querySelector('.decrease');
 
         btnInc.addEventListener('click', () => {
-            input.value = parseInt(input.value) + 1;
-            updatePrice();
+            const currentValue = parseInt(input.value);
+            if (currentValue < 10) { // CHỈ SỬA DÒNG NÀY - thêm điều kiện kiểm tra
+                input.value = currentValue + 1;
+            }
+            // Nếu đạt 50 rồi thì không làm gì cả
         });
 
         btnDec.addEventListener('click', () => {
             if (parseInt(input.value) > 1) {
                 input.value = parseInt(input.value) - 1;
-                updatePrice();
             }
         });
     });
