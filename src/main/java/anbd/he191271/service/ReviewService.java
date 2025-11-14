@@ -1,6 +1,7 @@
 package anbd.he191271.service;
 
 import anbd.he191271.entity.Review;
+import anbd.he191271.repository.LicenseKeyRepository;
 import anbd.he191271.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,9 +22,29 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private LicenseKeyRepository licenseKeyRepository; // ✅ THÊM DEPENDENCY NÀY
+
     public Review getReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review không tồn tại"));
+    }
+
+    // ✅ KIỂM TRA CUSTOMER ĐÃ MUA SẢN PHẨM CHƯA
+    public boolean hasCustomerPurchasedProduct(int customerId, int productId) {
+        try {
+            // 🗃️ TRUY VẤN DATABASE KIỂM TRA
+            long purchaseCount = reviewRepository.countByCustomerIdAndProductId(customerId, productId);
+
+            // 📝 LOG ĐỂ DEBUG
+            System.out.println("🔍 Purchase check - Customer: " + customerId +
+                    ", Product: " + productId + ", Count: " + purchaseCount);
+
+            return purchaseCount > 0; // → TRUE nếu đã mua ít nhất 1 license
+        } catch (Exception e) {
+            System.out.println("❌ Error checking purchase: " + e.getMessage());
+            return false; // → FALSE nếu có lỗi
+        }
     }
 
     public Page<Review> getFilteredReviews(int productId,
@@ -33,7 +54,7 @@ public class ReviewService {
                                            LocalDate endDate,
                                            int page,
                                            int size,
-                                           String sort) { // Thêm tham số sort
+                                           String sort) {
 
         LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;

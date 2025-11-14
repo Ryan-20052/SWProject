@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -23,7 +24,7 @@ public class PurchasedLicenseController {
     private LicenseKeyRepository licenseKeyRepository;
 
     @Autowired
-    private LicenseService licenseService; // THAY ĐỔI THÀNH LicenseService
+    private LicenseService licenseService;
     @Autowired
     private CategoryRepository categoryRepository;
 
@@ -44,7 +45,7 @@ public class PurchasedLicenseController {
             return "redirect:/login.html";
         }
 
-        // Cập nhật license hết hạn - SỬ DỤNG LicenseService
+        // Cập nhật license hết hạn
         licenseService.updateExpiredLicenses();
 
         List<LicenseKey> allLicenses = licenseKeyRepository.findAllByCustomerId(customer.getId());
@@ -63,9 +64,10 @@ public class PurchasedLicenseController {
 
         // tìm kiếm theo tên sản phẩm
         if (search != null && !search.isBlank()) {
+
             allLicenses = allLicenses.stream()
                     .filter(l -> l.getOrderDetail().getVariant().getProduct()
-                            .getName().toLowerCase().contains(search.toLowerCase()))
+                            .getName().toLowerCase().contains(search.toLowerCase().trim()))
                     .toList();
         }
 

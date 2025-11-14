@@ -40,23 +40,23 @@ public class RevenueController {
             return "redirect:/login.html";
         }
 
-        // Xác định xem có đang filter theo ngày không
-        boolean isDateFiltered = (startDate != null && endDate != null);
+        LocalDate today = LocalDate.now();
 
-        // Set default date range if not provided - lấy tất cả doanh thu từ trước đến nay
+        // Set default date range
         if (startDate == null) {
-            startDate = LocalDate.of(2020, 1, 1); // Ngày bắt đầu rất xa
+            startDate = LocalDate.of(2020, 1, 1);
         }
         if (endDate == null) {
-            endDate = LocalDate.now();
+            endDate = today;
         }
+
+
 
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        var dashboard = revenueService.getRevenueDashboard(startDateTime, endDateTime, timeRange, isDateFiltered);
+        var dashboard = revenueService.getRevenueDashboard(startDateTime, endDateTime);
 
-        // Xử lý search và sort cho sản phẩm
         List<Map<String, Object>> allProducts = dashboard.get("revenueByProduct") != null ?
                 (List<Map<String, Object>>) dashboard.get("revenueByProduct") :
                 List.of();
@@ -64,7 +64,7 @@ public class RevenueController {
         // Search
         if (search != null && !search.trim().isEmpty()) {
             allProducts = allProducts.stream()
-                    .filter(p -> p.get("productName").toString().toLowerCase().contains(search.toLowerCase()))
+                    .filter(p -> p.get("productName").toString().toLowerCase().contains(search.toLowerCase().trim()))
                     .collect(Collectors.toList());
         }
 
@@ -119,7 +119,7 @@ public class RevenueController {
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("search", search);
         model.addAttribute("sort", sort);
-        model.addAttribute("isDateFiltered", isDateFiltered);
+        model.addAttribute("today", today);
 
         return "revenue";
     }
@@ -137,12 +137,25 @@ public class RevenueController {
             return "redirect:/login.html";
         }
 
-        // Set default date range if not provided
+        LocalDate today = LocalDate.now();
+
+        // Set default date range
         if (startDate == null) {
-            startDate = LocalDate.now().minusDays(30); // 30 ngày gần nhất
+            startDate = today.minusDays(30);
         }
         if (endDate == null) {
-            endDate = LocalDate.now();
+            endDate = today;
+        }
+
+        // Đơn giản hóa validation
+        if (startDate.isAfter(today)) {
+            startDate = today.minusDays(30);
+        }
+        if (endDate.isAfter(today)) {
+            endDate = today;
+        }
+        if (endDate.isBefore(startDate)) {
+            endDate = startDate;
         }
 
         // Lấy chi tiết doanh thu theo ngày
@@ -152,6 +165,7 @@ public class RevenueController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("manager", manager);
+        model.addAttribute("today", today);
 
         return "revenue-daily-details";
     }

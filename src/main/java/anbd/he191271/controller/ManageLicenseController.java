@@ -117,7 +117,8 @@ public class ManageLicenseController {
             return "redirect:/login.html";
         }
         if(license.getStatus().equals("BANNED")){
-            licenseService.delete(license);
+            license.setStatus("EXPIRED");
+            licenseService.save(license);
             redirectAttributes.addFlashAttribute("msg", "Đã xóa license key");
         }else{
             return "redirect:/manageLicense/viewLicense";

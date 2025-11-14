@@ -2,14 +2,17 @@ package anbd.he191271.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import org.hibernate.validator.constraints.Length;
 
 public class ProductDTO {
     private Integer productId;
     @NotBlank(message = "Không được để trống")
     @Pattern(regexp = "^[A-Za-z0-9]+(\\s[A-Za-z0-9]+)*$", message = "Tên sản phẩm chỉ chứa chữ, số và cách nhau bởi một khoảng trắng")
+    @Length(max = 250, message = "Độ dài không quá 250 kí tự")
     private String name;
     private Integer categoryId;
     @NotBlank(message = "Không được để trống")
+    @Length(max = 1000, message = "Độ dài không quá 1000 kí tự")
     private String imgUrl;
     @NotBlank(message = "Không được để trống")
     private String description;

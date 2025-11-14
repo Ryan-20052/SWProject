@@ -460,7 +460,7 @@
                     <tr th:each="v : ${p.variants}">
                         <td th:text="${v.name}"></td>
                         <td th:text="${v.duration}"></td>
-                        <td th:text="${v.price}"></td>
+                        <td th:text="${#numbers.formatInteger(v.price, 0, 'COMMA')}"></td>
                         <td th:text="${v.status}"></td>
                         <td style="display:flex; gap:6px; padding:8px; align-items:center;" >
                             <!-- Nút Ẩn (khi đang available) -->

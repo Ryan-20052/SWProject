@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cập nhật sản phẩm</title>
+    <title>Cập nhật danh mục sản phẩm</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,14 +93,14 @@
 </header>
 
 <div class="dashboard">
-    <h2>Cập nhật sản phẩm</h2>
+    <h2>Cập nhật danh mục sản phẩm</h2>
     <form th:action="@{/manage/updateCategory}" th:object="${request}" method="post">
         <!-- Hidden để gửi id -->
         <input type="hidden" th:field="*{category_id}">
 
 
-        <label for="name">Tên sản phẩm</label>
-        <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên sản phẩm" required>
+        <label for="name">Tên danh mục sản phẩm</label>
+        <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên danh mục sản phẩm" required>
 
         <label for="description">Mô tả</label>
         <input type="text" id="description" th:field="*{description}" placeholder="Nhập mô tả" required>
@@ -108,7 +108,7 @@
         <button type="submit">Cập nhật</button>
     </form>
 
-    <a th:href="@{/manage/category}" class="back-link">Quay lại danh sách sản phẩm</a>
+    <a th:href="@{/manage/category}" class="back-link">Quay lại danh sách danh mục sản phẩm</a>
 </div>
 </body>
 </html>
