@@ -137,15 +137,7 @@ public class PaymentServiceImpl implements PaymentService {
                 order.setStatus("PAID");
                 orderRepo.save(order);
 
-                // ✅ Gọi giảm lượt sử dụng voucher nếu có
-                if (order.getVoucherCode() != null && !order.getVoucherCode().isBlank()) {
-                    try {
-                        voucherService.decreaseUsage(order.getVoucherCode());
-                        System.out.println("🎟️ Voucher " + order.getVoucherCode() + " đã được trừ 1 lượt (handleReturn)");
-                    } catch (Exception e) {
-                        System.err.println("⚠️ Lỗi khi trừ voucher: " + e.getMessage());
-                    }
-                }
+
             }
 
             return new PaymentResponseDTO("00", "Thanh toán thành công", null,
