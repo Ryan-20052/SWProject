@@ -302,7 +302,7 @@
     <form th:action="${statusList != null} ? @{/manageReport/viewHandledReport} : @{/manageReport/viewPendingReport}" method="get"
           style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:16px;">
         <div style="display:flex; flex-direction:column;">
-            <label for="customerName" style="font-size:0.9em; color:#555;">Mã đơn hàng:</label>
+            <label for="customerName" style="font-size:0.9em; color:#555;">Tên khách hàng:</label>
             <input type="text" name="customerName" id="customerName" placeholder="Tìm theo tên khách hàng"
                    th:value="${customerName}"
                    style="padding:8px 12px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;">
