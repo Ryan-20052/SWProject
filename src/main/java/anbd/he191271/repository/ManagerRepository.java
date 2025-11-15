@@ -14,6 +14,8 @@ public interface ManagerRepository  extends JpaRepository<Manager, Integer> {
     Optional<Manager> findByEmail(String email);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    boolean existsByEmailAndIdNot(String email, Integer id);
+    boolean existsByUsernameAndIdNot(String username, Integer id);
     @Query("""
     SELECT m FROM Manager m
     WHERE (:username = '' OR :username IS NULL OR LOWER(m.username) LIKE LOWER(CONCAT('%', :username, '%')))

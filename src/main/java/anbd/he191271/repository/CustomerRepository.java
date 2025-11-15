@@ -13,6 +13,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     Optional<Customer> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
+    boolean existsByEmailAndIdNot(String email, Integer id);
+    boolean existsByUsernameAndIdNot(String username, Integer id);
 
     @Query("""
     SELECT c FROM Customer c
@@ -24,4 +26,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
                                    @Param("email") String email,
                                    @Param("status") String status,
                                    Pageable pageable);
+
+
 }

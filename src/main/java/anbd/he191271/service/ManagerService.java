@@ -80,5 +80,20 @@ public class ManagerService {
         return managerRepository.searchManagers(username, email, status, pageable);
     }
 
+    // Trong ManagerService.java
+    public boolean isEmailExists(String email, Integer excludeManagerId) {
+        if (excludeManagerId == null) {
+            return managerRepository.existsByEmail(email);
+        }
+        return managerRepository.existsByEmailAndIdNot(email, excludeManagerId);
+    }
+
+    public boolean isUsernameExists(String username, Integer excludeManagerId) {
+        if (excludeManagerId == null) {
+            return managerRepository.existsByUsername(username);
+        }
+        return managerRepository.existsByUsernameAndIdNot(username, excludeManagerId);
+    }
+
 
 }

@@ -5,6 +5,7 @@ import anbd.he191271.entity.Customer;
 import anbd.he191271.service.AdminLogService;
 import anbd.he191271.service.CustomerService;
 
+import anbd.he191271.service.ManagerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,10 +24,12 @@ public class AdminCustomerController {
 
     private final CustomerService customerService;
     private final AdminLogService logService;
+    private final ManagerService managerService;
 
-    public AdminCustomerController(CustomerService customerService, AdminLogService logService) {
+    public AdminCustomerController(CustomerService customerService, AdminLogService logService, ManagerService managerService) {
         this.customerService = customerService;
         this.logService = logService;
+        this.managerService = managerService;
     }
 
 
@@ -111,6 +114,23 @@ public class AdminCustomerController {
             Customer c = customerService.getCustomerById(id);
             if (c == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found");
 
+            // Kiểm tra email trùng
+            if (email != null && !email.equals(c.getEmail())) {
+                if (customerService.isEmailExists(email, id)  && managerService.isEmailExists(email,id)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "EMAIL_EXISTS", "message", "Email đã tồn tại trong hệ thống"));
+                }
+            }
+
+            // Kiểm tra username trùng
+            if (username != null && !username.equals(c.getUsername())) {
+                if (customerService.isUsernameExists(username, id) && managerService.isUsernameExists(username, id)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "USERNAME_EXISTS", "message", "Username đã tồn tại trong hệ thống"));
+                }
+            }
+
+            // Cập nhật thông tin
             if (name != null) c.setName(name);
             if (username != null) c.setUsername(username);
             if (email != null) c.setEmail(email);
@@ -119,9 +139,10 @@ public class AdminCustomerController {
             if (avatar != null && !avatar.isEmpty()) c.setAvatar(avatar.getBytes());
 
             customerService.save(c);
-            return ResponseEntity.ok(c);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật thành công"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi cập nhật: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "SYSTEM_ERROR", "message", "Lỗi cập nhật: " + e.getMessage()));
         }
     }
 

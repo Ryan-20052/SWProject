@@ -84,6 +84,26 @@
         .save-btn:disabled { background: #ccc; cursor: not-allowed; }
         .cancel-btn { background: #e53935; }
         .cancel-btn:hover { background: #c62828; }
+        /* Thêm vào phần style hiện có */
+        .field-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        input.error {
+            border-color: red !important;
+        }
+
+        input.success {
+            border-color: green !important;
+        }
+
+        .info-row {
+            position: relative;
+            margin-bottom: 16px; /* Tăng margin để chứa message */
+        }
 
         /* Loading state */
         .loading {
@@ -194,19 +214,24 @@
         }
     }
 
-    // 🟢 Cập nhật thông tin Manager
+    // 🟢 Cập nhật thông tin Manager (ĐÃ SỬA)
     async function saveProfile(file = null) {
         if (isLoading) return;
+
+        // Validate form trước khi gửi
+        if (!validateForm()) {
+            return;
+        }
 
         try {
             isLoading = true;
             showLoading(true);
 
             const formData = new FormData();
-            formData.append("name", document.getElementById("name").value);
-            formData.append("username", document.getElementById("username").value);
-            formData.append("email", document.getElementById("email").value);
-            formData.append("phone", document.getElementById("phone").value);
+            formData.append("name", document.getElementById("name").value.trim());
+            formData.append("username", document.getElementById("username").value.trim());
+            formData.append("email", document.getElementById("email").value.trim());
+            formData.append("phone", document.getElementById("phone").value.trim());
             formData.append("status", document.getElementById("status").value);
 
             if (file) {
@@ -221,7 +246,27 @@
             const result = await res.json();
 
             if (!res.ok) {
-                throw new Error(result.error || "Lỗi khi cập nhật!");
+                // Xử lý các lỗi cụ thể từ backend
+                if (result.error === "EMAIL_EXISTS") {
+                    showNotification("❌ Email đã tồn tại trong hệ thống! Vui lòng sử dụng email khác.", "error");
+                    document.getElementById("email").style.borderColor = "red";
+                    return;
+                } else if (result.error === "USERNAME_EXISTS") {
+                    showNotification("❌ Username đã tồn tại trong hệ thống! Vui lòng chọn username khác.", "error");
+                    document.getElementById("username").style.borderColor = "red";
+                    return;
+                } else if (result.error === "INVALID_EMAIL") {
+                    showNotification("❌ Email không hợp lệ! Vui lòng kiểm tra lại.", "error");
+                    document.getElementById("email").style.borderColor = "red";
+                    return;
+                } else if (result.error === "INVALID_PHONE") {
+                    showNotification("❌ Số điện thoại không hợp lệ! Phải có 10-11 chữ số.", "error");
+                    document.getElementById("phone").style.borderColor = "red";
+                    return;
+                } else {
+                    showNotification("❌ Lỗi khi cập nhật: " + (result.message || "Có lỗi xảy ra"), "error");
+                    return;
+                }
             }
 
             showNotification("✅ Cập nhật thành công!", "success");
@@ -230,11 +275,189 @@
             }, 1500);
 
         } catch (err) {
-            showNotification("❌ " + err.message, "error");
+            showNotification("❌ Lỗi kết nối: " + err.message, "error");
         } finally {
             isLoading = false;
             showLoading(false);
         }
+    }
+
+    // 🟡 Validate form trước khi gửi
+    function validateForm() {
+        const email = document.getElementById("email").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        let isValid = true;
+
+        // Reset border colors
+        document.getElementById("email").style.borderColor = "";
+        document.getElementById("username").style.borderColor = "";
+        document.getElementById("phone").style.borderColor = "";
+
+        // Validate email
+        if (email && !isValidEmail(email)) {
+            showNotification("❌ Email không hợp lệ! Vui lòng nhập email đúng định dạng.", "error");
+            document.getElementById("email").style.borderColor = "red";
+            isValid = false;
+        }
+
+        // Validate phone
+        if (phone && !isValidPhone(phone)) {
+            showNotification("❌ Số điện thoại không hợp lệ! Phải có 10-11 chữ số.", "error");
+            document.getElementById("phone").style.borderColor = "red";
+            isValid = false;
+        }
+
+        // Validate required fields
+        if (!username) {
+            showNotification("❌ Username không được để trống!", "error");
+            document.getElementById("username").style.borderColor = "red";
+            isValid = false;
+        }
+
+        if (!email) {
+            showNotification("❌ Email không được để trống!", "error");
+            document.getElementById("email").style.borderColor = "red";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // 🟣 Real-time validation cho email và username
+    function setupRealTimeValidation() {
+        // Real-time email validation
+        document.getElementById("email").addEventListener("blur", function() {
+            const email = this.value.trim();
+            if (email && email !== managerData.email) {
+                if (!isValidEmail(email)) {
+                    this.style.borderColor = "red";
+                    showFieldMessage(this, "Email không hợp lệ");
+                } else {
+                    this.style.borderColor = "green";
+                    hideFieldMessage(this);
+                    // Kiểm tra email trùng (có thể gọi API nếu cần)
+                }
+            }
+        });
+
+        // Real-time username validation
+        document.getElementById("username").addEventListener("blur", function() {
+            const username = this.value.trim();
+            if (username && username !== managerData.username) {
+                if (username.length < 3) {
+                    this.style.borderColor = "red";
+                    showFieldMessage(this, "Username phải có ít nhất 3 ký tự");
+                } else {
+                    this.style.borderColor = "green";
+                    hideFieldMessage(this);
+                    // Kiểm tra username trùng (có thể gọi API nếu cần)
+                }
+            }
+        });
+
+        // Real-time phone validation
+        document.getElementById("phone").addEventListener("blur", function() {
+            const phone = this.value.trim();
+            if (phone && phone !== managerData.phone) {
+                if (!isValidPhone(phone)) {
+                    this.style.borderColor = "red";
+                    showFieldMessage(this, "Số điện thoại phải có 10-11 chữ số");
+                } else {
+                    this.style.borderColor = "green";
+                    hideFieldMessage(this);
+                }
+            }
+        });
+
+        // Reset validation khi người dùng bắt đầu nhập
+        document.getElementById("email").addEventListener("input", function() {
+            this.style.borderColor = "";
+            hideFieldMessage(this);
+        });
+
+        document.getElementById("username").addEventListener("input", function() {
+            this.style.borderColor = "";
+            hideFieldMessage(this);
+        });
+
+        document.getElementById("phone").addEventListener("input", function() {
+            this.style.borderColor = "";
+            hideFieldMessage(this);
+        });
+    }
+
+    // 🟢 Utility functions
+    function isValidEmail(email) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    function isValidPhone(phone) {
+        const phoneRegex = /^[0-9]{10,11}$/;
+        return phoneRegex.test(phone);
+    }
+
+    function showFieldMessage(inputElement, message) {
+        let messageElement = inputElement.parentNode.querySelector('.field-message');
+        if (!messageElement) {
+            messageElement = document.createElement('div');
+            messageElement.className = 'field-message';
+            messageElement.style.cssText = `
+                color: red;
+                font-size: 12px;
+                margin-top: 4px;
+            `;
+            inputElement.parentNode.appendChild(messageElement);
+        }
+        messageElement.textContent = message;
+    }
+
+    function hideFieldMessage(inputElement) {
+        const messageElement = inputElement.parentNode.querySelector('.field-message');
+        if (messageElement) {
+            messageElement.remove();
+        }
+    }
+
+    function showLoading(loading) {
+        const container = document.querySelector('.profile-container');
+        const saveBtn = document.getElementById('saveBtn');
+
+        if (loading) {
+            container.classList.add('loading');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '⏳ Đang xử lý...';
+        } else {
+            container.classList.remove('loading');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '💾 Lưu thay đổi';
+        }
+    }
+
+    function showNotification(message, type) {
+        // Remove existing notification
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            background: ${type === 'success' ? '#43a047' : '#e53935'};
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.remove(), 4000);
     }
 
     // 🟣 Xử lý chọn avatar
@@ -276,46 +499,6 @@
         });
     }
 
-    // 🟠 Utility functions
-    function showLoading(loading) {
-        const container = document.querySelector('.profile-container');
-        const saveBtn = document.getElementById('saveBtn');
-
-        if (loading) {
-            container.classList.add('loading');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '⏳ Đang xử lý...';
-        } else {
-            container.classList.remove('loading');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '💾 Lưu thay đổi';
-        }
-    }
-
-    function showNotification(message, type) {
-        // Remove existing notification
-        const existing = document.querySelector('.notification');
-        if (existing) existing.remove();
-
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 4px;
-            color: white;
-            font-weight: bold;
-            z-index: 1000;
-            background: ${type === 'success' ? '#43a047' : '#e53935'};
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => notification.remove(), 3000);
-    }
-
     // 🟡 Event Listeners
     document.getElementById("saveBtn").addEventListener("click", async (e) => {
         e.preventDefault();
@@ -323,13 +506,14 @@
     });
 
     document.getElementById("cancelBtn").addEventListener("click", () => {
-        if (confirm("Bạn có chắc muốn hủy thay đổi không?")) {
+        if (confirm("Bạn có chắc muốn hủy thay đổi không? Mọi thay đổi chưa lưu sẽ bị mất.")) {
             window.location.href = "adminManagerController.html";
         }
     });
 
     // Khởi động
     setupAvatarHandlers();
+    setupRealTimeValidation();
     loadManager();
 </script>
 </body>

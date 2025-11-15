@@ -183,7 +183,6 @@
         const username = document.getElementById("username").value.trim();
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
-        const message = document.getElementById("message") || document.createElement("p");
 
         // 1️⃣ Kiểm tra định dạng email cơ bản bằng regex
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -214,11 +213,19 @@
                 body: JSON.stringify({ username, email, password })
             });
 
-            const text = await res.text();
+            const result = await res.json();
 
             if (!res.ok) {
-                alert("❌ Không thể thêm Manager! " + text);
-                return;
+                if (result.error === "EMAIL_EXISTS") {
+                    alert("❌ Email đã tồn tại trong hệ thống! Vui lòng sử dụng email khác.");
+                    return;
+                } else if (result.error === "USERNAME_EXISTS") {
+                    alert("❌ Username đã tồn tại trong hệ thống! Vui lòng chọn username khác.");
+                    return;
+                } else {
+                    alert("❌ Không thể thêm Manager! " + (result.message || ""));
+                    return;
+                }
             }
 
             alert("✅ Thêm Manager thành công!");

@@ -1,8 +1,7 @@
 package anbd.he191271.controller;
 
 import anbd.he191271.entity.Manager;
-import anbd.he191271.service.AdminLogService;
-import anbd.he191271.service.ManagerService;
+import anbd.he191271.service.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +28,12 @@ public class AdminManagerController {
 
     private final ManagerService managerService;
     private final AdminLogService logService;
+    private final CustomerService customerService;
 
-    public AdminManagerController(ManagerService managerService, AdminLogService logService) {
+    public AdminManagerController(ManagerService managerService, AdminLogService logService, CustomerService customerService) {
         this.managerService = managerService;
         this.logService = logService;
+        this.customerService = customerService;
     }
 
     // ✅ Lấy danh sách tất cả managers
@@ -45,14 +46,27 @@ public class AdminManagerController {
     @PostMapping
     public ResponseEntity<?> addManager(@RequestBody Manager manager) {
         try {
+            // Kiểm tra email trùng
+            if (managerService.isEmailExists(manager.getEmail(), null)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "EMAIL_EXISTS", "message", "Email đã tồn tại trong hệ thống"));
+            }
+
+            // Kiểm tra username trùng
+            if (managerService.isUsernameExists(manager.getUsername(), null)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "USERNAME_EXISTS", "message", "Username đã tồn tại trong hệ thống"));
+            }
+
             Manager saved = managerService.save(manager);
             logService.saveLog("🟢 Thêm Manager: " + saved.getUsername(), "manager");
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Không thể thêm Manager: " + e.getMessage()));
+                    .body(Map.of("error", "SYSTEM_ERROR", "message", "Không thể thêm Manager: " + e.getMessage()));
         }
     }
+
 
     // ✅ Ban (khóa) manager
     @PutMapping("/{id}/ban")
@@ -114,6 +128,7 @@ public class AdminManagerController {
         }
     }
 
+    // ✅ Cập nhật manager (ĐÃ SỬA)
     @PutMapping(value = "/{id}/form", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateManagerForm(
             @PathVariable int id,
@@ -128,19 +143,37 @@ public class AdminManagerController {
             Manager manager = managerService.getManagerById(id);
             if (manager == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Manager không tồn tại"));
+                        .body(Map.of("error", "NOT_FOUND", "message", "Manager không tồn tại"));
             }
 
-            // Validation
+            // Kiểm tra email trùng (nếu có thay đổi)
+            if (email != null && !email.equals(manager.getEmail())) {
+                if (managerService.isEmailExists(email, id)&& customerService.isUsernameExists(username, id)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "EMAIL_EXISTS", "message", "Email đã tồn tại trong hệ thống"));
+                }
+            }
+
+            // Kiểm tra username trùng (nếu có thay đổi)
+            if (username != null && !username.equals(manager.getUsername())) {
+                if (managerService.isUsernameExists(username, id)&&customerService.isUsernameExists(username, id)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "USERNAME_EXISTS", "message", "Username đã tồn tại trong hệ thống"));
+                }
+            }
+
+            // Validation định dạng
             if (email != null && !email.isEmpty()) {
                 if (!email.matches("^[\\w._%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
-                    return ResponseEntity.badRequest().body("Email không hợp lệ");
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "INVALID_EMAIL", "message", "Email không hợp lệ"));
                 }
             }
 
             if (phone != null && !phone.isEmpty()) {
                 if (!phone.matches("^[0-9]{10,11}$")) {
-                    return ResponseEntity.badRequest().body("Số điện thoại không hợp lệ");
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "INVALID_PHONE", "message", "Số điện thoại không hợp lệ"));
                 }
             }
 
@@ -153,13 +186,14 @@ public class AdminManagerController {
 
             // Xử lý avatar
             if (avatar != null && !avatar.isEmpty()) {
-                // Validate file
                 if (avatar.getSize() > 5 * 1024 * 1024) {
-                    return ResponseEntity.badRequest().body("Avatar quá lớn (tối đa 5MB)");
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "AVATAR_TOO_LARGE", "message", "Avatar quá lớn (tối đa 5MB)"));
                 }
                 String contentType = avatar.getContentType();
                 if (!Arrays.asList("image/jpeg", "image/png", "image/gif").contains(contentType)) {
-                    return ResponseEntity.badRequest().body("Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)");
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "INVALID_AVATAR_TYPE", "message", "Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)"));
                 }
                 manager.setAvatar(avatar.getBytes());
             }
@@ -171,7 +205,7 @@ public class AdminManagerController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Lỗi cập nhật: " + e.getMessage()));
+                    .body(Map.of("error", "SYSTEM_ERROR", "message", "Lỗi cập nhật: " + e.getMessage()));
         }
     }
 }

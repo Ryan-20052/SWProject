@@ -76,6 +76,19 @@
             font-weight: bold;
             color: white;
         }
+        .validation-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        input.error {
+            border-color: red !important;
+        }
+
+        input.success {
+            border-color: green !important;
+        }
         .save-btn { background: #1976d2; }
         .save-btn:hover { background: #1259a6; }
         .cancel-btn { background: #e53935; }
@@ -181,15 +194,27 @@
                 body: formData
             });
 
+            const result = await res.json();
+
             if (!res.ok) {
-                const err = await res.text();
-                throw new Error(err);
+                if (result.error === "EMAIL_EXISTS") {
+                    throw new Error("Email đã tồn tại trong hệ thống!");
+                } else if (result.error === "USERNAME_EXISTS") {
+                    throw new Error("Username đã tồn tại trong hệ thống!");
+                } else {
+                    throw new Error(result.message || "Có lỗi xảy ra khi cập nhật");
+                }
             }
 
-            alert("✅ Cập nhật thành công!");
-            window.location.href = "adminCustomerController.html";
+            if (result.success) {
+                alert("✅ " + (result.message || "Cập nhật thành công!"));
+                window.location.href = "adminCustomerController.html";
+            } else {
+                throw new Error(result.message || "Có lỗi xảy ra khi cập nhật");
+            }
         } catch (e) {
-            alert("❌ Lỗi khi cập nhật: " + e.message);
+            alert("❌ " + e.message);
+            console.error("Update error:", e);
         }
     }
 
@@ -221,6 +246,48 @@
             await saveProfile(file);
         }
     });
+    // Thêm real-time validation cho email và username
+    document.getElementById("email").addEventListener("blur", async function() {
+        const email = this.value;
+        if (email && email !== customerData.email) {
+            try {
+                // Gọi API để kiểm tra email (cần tạo endpoint mới hoặc sử dụng endpoint hiện có)
+                const res = await fetch(`${API_URL}/check-email?email=${email}&excludeId=${customerId}`);
+                if (res.ok) {
+                    const exists = await res.json();
+                    if (exists) {
+                        this.style.borderColor = "red";
+                        showValidationMessage(this, "Email đã tồn tại");
+                    } else {
+                        this.style.borderColor = "green";
+                        hideValidationMessage(this);
+                    }
+                }
+            } catch (error) {
+                console.error("Email validation error:", error);
+            }
+        }
+    });
+
+    // Hàm hiển thị thông báo validation
+    function showValidationMessage(inputElement, message) {
+        let messageElement = inputElement.nextElementSibling;
+        if (!messageElement || !messageElement.classList.contains("validation-message")) {
+            messageElement = document.createElement("div");
+            messageElement.className = "validation-message";
+            messageElement.style.color = "red";
+            messageElement.style.fontSize = "12px";
+            inputElement.parentNode.appendChild(messageElement);
+        }
+        messageElement.textContent = message;
+    }
+
+    function hideValidationMessage(inputElement) {
+        const messageElement = inputElement.nextElementSibling;
+        if (messageElement && messageElement.classList.contains("validation-message")) {
+            messageElement.remove();
+        }
+    }
 
     loadCustomer();
 </script>

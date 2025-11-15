@@ -76,7 +76,20 @@ public class CustomerService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return customerRepository.searchCustomers(username, email, status, pageable);
     }
+    // Trong CustomerService.java
+    public boolean isEmailExists(String email, Integer excludeCustomerId) {
+        if (excludeCustomerId == null) {
+            return customerRepository.existsByEmail(email);
+        }
+        return customerRepository.existsByEmailAndIdNot(email, excludeCustomerId);
+    }
 
+    public boolean isUsernameExists(String username, Integer excludeCustomerId) {
+        if (excludeCustomerId == null) {
+            return customerRepository.existsByUsername(username);
+        }
+        return customerRepository.existsByUsernameAndIdNot(username, excludeCustomerId);
+    }
 
 
 }
