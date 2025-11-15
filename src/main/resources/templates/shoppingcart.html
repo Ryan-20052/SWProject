@@ -464,9 +464,11 @@
                 <!-- Giỏ hàng (chỉ sau đăng nhập) -->
 
                 <!-- Hỗ trợ khách hàng (chỉ sau đăng nhập) -->
-                <button th:href="@{/support/view}" class="nav-btn" role="button" aria-label="Hỗ trợ khách hàng">
-                    📞 Hỗ trợ
+
                 </button>
+                <a th:href="@{/support/view}" class="nav-btn" role="button" aria-label="Hỗ trợ khách hàng">
+                    <span> 📞Hỗ trợ</span>
+                </a>
 
                 <!-- Avatar / profile -->
                 <div id="userAvatar" class="user-avatar" title="Tài khoản" style="cursor:pointer;">
