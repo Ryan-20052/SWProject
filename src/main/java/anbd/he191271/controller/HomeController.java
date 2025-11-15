@@ -73,7 +73,27 @@ public class HomeController {
             Model model,
             HttpSession session) {
 
-        // Gọi service mới với bộ lọc
+        // 🆕 KIỂM TRA THÔNG BÁO THANH TOÁN TỪ SESSION
+        Boolean paymentSuccess = (Boolean) session.getAttribute("paymentSuccess");
+        String successOrderCode = (String) session.getAttribute("successOrderCode");
+        String paymentError = (String) session.getAttribute("paymentError");
+
+        if (paymentSuccess != null) {
+            model.addAttribute("showPaymentSuccess", true);
+            model.addAttribute("successOrderCode", successOrderCode);
+
+            // Xóa session attributes sau khi đã lấy
+            session.removeAttribute("paymentSuccess");
+            session.removeAttribute("successOrderCode");
+        }
+
+        if (paymentError != null) {
+            model.addAttribute("showPaymentError", true);
+            model.addAttribute("paymentErrorMessage", paymentError);
+            session.removeAttribute("paymentError");
+        }
+
+
         Page<Product> productPage = productService.getProductsWithFilters(
                 null, search, minPrice, maxPrice, sort, page, size);
 

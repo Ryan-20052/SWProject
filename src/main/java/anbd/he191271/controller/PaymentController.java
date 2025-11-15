@@ -6,6 +6,7 @@ import anbd.he191271.service.PaymentService;
 import anbd.he191271.service.PurchaseService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,8 @@ public class PaymentController {
      */
     @GetMapping("/vnpay-return")
     public void paymentReturn(@RequestParam Map<String, String> params,
-                              HttpServletResponse response) throws Exception {
+                              HttpServletResponse response,
+                              HttpServletRequest request) throws Exception {
         PaymentResponseDTO result = paymentService.handleReturn(params);
 
         if (result != null && result.getOrderCode() != null) {
@@ -56,17 +58,30 @@ public class PaymentController {
                 try {
                     purchaseService.processSuccessfulPayment(result.getOrderCode());
                     System.out.println("✅ Đã gửi license key cho đơn hàng: " + result.getOrderCode());
+
+                    // 🆕 THÊM THÔNG BÁO THÀNH CÔNG VÀO SESSION
+                    HttpSession session = request.getSession();
+                    session.setAttribute("paymentSuccess", true);
+                    session.setAttribute("successOrderCode", result.getOrderCode());
+
                 } catch (Exception e) {
                     System.err.println("⚠️ Lỗi khi xử lý license key: " + e.getMessage());
+                    HttpSession session = request.getSession();
+                    session.setAttribute("paymentError", "Có lỗi xảy ra khi xử lý đơn hàng: " + e.getMessage());
                 }
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("paymentError", "Thanh toán thất bại");
             }
 
-            // ✅ Redirect về trang homepage kèm trạng thái
-            String redirectUrl = "http://localhost:8080/home/homepage?status=" + (isSuccess ? "success" : "fail");
+            // ✅ Redirect về trang homepage
+            String redirectUrl = "http://localhost:8080/home/homepage";
             response.sendRedirect(redirectUrl);
         } else {
             // ❌ Nếu lỗi
-            response.sendRedirect("http://localhost:8080/home/homepage?status=fail");
+            HttpSession session = request.getSession();
+            session.setAttribute("paymentError", "Lỗi xử lý thanh toán");
+            response.sendRedirect("http://localhost:8080/home/homepage");
         }
     }
 

@@ -31,7 +31,7 @@ public class ManageReportController {
                              String startDate,
                              String endDate) {
         Stream<ProductReport> stream = productReportService.getAllReports().stream();
-        if (status != null && !status.isEmpty()) {
+        if (status != null) {
             if(status.equalsIgnoreCase("pending")){
                 stream = stream.filter(r -> r.getStatus().equalsIgnoreCase("pending"));
             }else{
@@ -47,7 +47,7 @@ public class ManageReportController {
             model.addAttribute("status", status);
         }
         if (customerName != null && !customerName.trim().isEmpty()) {
-            stream = stream.filter(r -> r.getName().toLowerCase().contains(customerName.trim().toLowerCase()));
+            stream = stream.filter(r -> r.getName().toLowerCase().trim().contains(customerName.toLowerCase()));
         }
         if (title != null && !title.trim().isEmpty()) {
             stream = stream.filter(r -> r.getTitle().equalsIgnoreCase(title));

@@ -157,13 +157,97 @@
             border: 1.5px solid rgba(255,255,255,0.18);
             padding: 8px 14px;
             text-decoration: none;
-
-
         }
         .assistant-btn:hover, .cart-btn:hover, .support-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.08); }
 
         /* Khi header compact, giảm kích thước các nút 1 chút */
         header.compact .actions button { padding: 6px 10px; font-size: 13px; }
+
+        /* --------------------
+           User Dropdown Styles - ĐÃ THÊM
+           -------------------- */
+        .user-avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--blue-dark);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .user-avatar:hover {
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.05);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown .item {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+            font-size: 14px;
+        }
+
+        .dropdown .item:hover {
+            background: #f8f9fa;
+            color: var(--blue);
+        }
+
+        .dropdown .item-name {
+            font-weight: bold;
+            color: var(--blue);
+            border-bottom: 2px solid var(--blue);
+        }
+
+        .dropdown .item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown form {
+            margin: 0;
+        }
 
         /* --------------------
            Navigation
@@ -457,6 +541,59 @@
         }
         .page-num:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
 
+        /* --------------------
+           Toast Animations - ĐÃ THÊM
+           -------------------- */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-success, .toast-error {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .toast-success.hiding, .toast-error.hiding {
+            animation: slideOutRight 0.5s ease-in forwards;
+        }
+
+        /* Progress bar for auto-hide */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 12px 12px;
+            animation: progressBar 3s linear forwards;
+        }
+
+        @keyframes progressBar {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+
         /* Responsive: rút gọn layout header cho mobile */
         @media (max-width: 880px) {
             .header-inner { padding: 0 12px; gap: 10px; }
@@ -507,6 +644,128 @@
 </head>
 
 <body>
+<!-- 🎉 Toast Notification Container -->
+<div id="notificationContainer"
+     style="position: fixed; top: 100px; right: 20px; z-index: 9999; max-width: 400px;">
+
+    <!-- Success Notification -->
+    <div th:if="${showPaymentSuccess}"
+         id="successToast"
+         class="toast-success"
+         style="background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideInRight 0.5s ease-out;
+                border-left: 4px solid #047857;">
+
+        <!-- Icon -->
+        <div style="flex-shrink: 0;
+                    width: 24px;
+                    height: 24px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+
+        <!-- Content -->
+        <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">
+                🎉 Thanh toán thành công!
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;">
+                Đơn hàng <strong th:text="${successOrderCode}">ORD-XXXX</strong> đã được xử lý.
+                License keys đã được gửi đến email của bạn.
+            </div>
+        </div>
+
+        <!-- Close Button -->
+        <button onclick="this.parentElement.remove()"
+                style="background: none;
+                       border: none;
+                       color: white;
+                       cursor: pointer;
+                       padding: 4px;
+                       border-radius: 4px;
+                       opacity: 0.8;
+                       transition: opacity 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Error Notification -->
+    <div th:if="${showPaymentError}"
+         id="errorToast"
+         class="toast-error"
+         style="background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideInRight 0.5s ease-out;
+                border-left: 4px solid #b91c1c;">
+
+        <!-- Icon -->
+        <div style="flex-shrink: 0;
+                    width: 24px;
+                    height: 24px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+
+        <!-- Content -->
+        <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">
+                ❌ Thanh toán thất bại
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;"
+                 th:text="${paymentErrorMessage}">
+                Có lỗi xảy ra khi xử lý thanh toán.
+            </div>
+        </div>
+
+        <!-- Close Button -->
+        <button onclick="this.parentElement.remove()"
+                style="background: none;
+                       border: none;
+                       color: white;
+                       cursor: pointer;
+                       padding: 4px;
+                       border-radius: 4px;
+                       opacity: 0.8;
+                       transition: opacity 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+</div>
+
 <header id="siteHeader">
     <div class="header-inner">
         <h1>License Shop</h1>
@@ -535,7 +794,7 @@
                     Trợ lý ảo
                 </a>
 
-                <!-- Giỏ hàng (chỉ sau đăng nhập) - ĐÃ SỬA: BỎ SỐ LƯỢNG -->
+                <!-- Giỏ hàng (chỉ sau đăng nhập) -->
                 <a th:href="@{/cart/view}" class="cart-btn" role="button" aria-label="Giỏ hàng">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.45C8.89 16.37 9.32 17 10 17h8v-2h-7.42l.72-1.55L17 7H7zM10 20a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"/>
@@ -548,28 +807,28 @@
                     <span>Hỗ trợ</span>
                 </a>
 
-                <!-- Avatar / profile (giữ nguyên dropdown của bạn) -->
-                <div id="userAvatar" class="user-avatar" title="Tài khoản" style="cursor:pointer;">
-                    <img th:if="${customer.avatar != null}"
-                         th:src="@{'/customer/avatar/' + ${customer.id}}" alt="avatar" class="avatar-img"/>
-                    <span th:if="${customer.avatar == null}"
-                          th:text="${#strings.substring(customer.name,0,1).toUpperCase()}">U</span>
-                </div>
+                <!-- Avatar / profile với dropdown wrapper -->
+                <div class="user-avatar-container">
+                    <div id="userAvatar" class="user-avatar" title="Tài khoản">
+                        <img th:if="${customer.avatar != null}"
+                             th:src="@{'/customer/avatar/' + ${customer.id}}" alt="avatar" class="avatar-img"/>
+                        <span th:if="${customer.avatar == null}"
+                              th:text="${#strings.substring(customer.name,0,1).toUpperCase()}">U</span>
+                    </div>
 
-                <div id="userDropdown" class="dropdown" aria-hidden="true">
-                    <div class="item item-name" th:text="${customer.name}">Tên user</div>
-                    <a th:href="@{/customer/profile}" class="item">Profile</a>
-                    <a th:href="@{/purchasedlicenses}" class="item">Purchased License</a>
-                    <!-- SỬA LINK NÀY -->
-                    <a th:href="@{/home/my-reported-reviews}" class="item">My Reported Reviews</a>
-                    <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
-                        <button type="submit" class="item" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;">
-                            Log out
-                        </button>
-                    </form>
+                    <div id="userDropdown" class="dropdown" aria-hidden="true">
+                        <div class="item item-name" th:text="${customer.name}">Tên user</div>
+                        <a th:href="@{/customer/profile}" class="item">Profile</a>
+                        <a th:href="@{/purchasedlicenses}" class="item">Purchased License</a>
+                        <a th:href="@{/home/my-reported-reviews}" class="item">My Reported Reviews</a>
+                        <form th:action="@{/auth/customer/logout}" method="post" style="margin:0;">
+                            <button type="submit" class="item" style="width:100%;background:none;border:none;text-align:left;cursor:pointer;">
+                                Log out
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </header>
@@ -793,8 +1052,6 @@
 </main>
 
 <script>
-    // XÓA HOÀN TOÀN HÀM updateCartCountUI() VÀ CÁC LỜI GỌI LIÊN QUAN
-
     // Search input clear button behavior
     document.addEventListener('DOMContentLoaded', function() {
         const avatar = document.getElementById('userAvatar');
@@ -829,9 +1086,51 @@
             clearBtn.addEventListener('click', function() {
                 input.value = '';
                 clearBtn.classList.add('hidden');
-                // nếu có chức năng lọc, submit form hoặc call search lại tại đây
             });
         }
+
+        // 🎉 Toast Notification Auto-hide
+        const successToast = document.getElementById('successToast');
+        const errorToast = document.getElementById('errorToast');
+
+        function autoHideToast(toastElement) {
+            if (toastElement) {
+                // Add progress bar
+                const progressBar = document.createElement('div');
+                progressBar.className = 'toast-progress';
+                toastElement.style.position = 'relative';
+                toastElement.appendChild(progressBar);
+
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toastElement.classList.add('hiding');
+                    setTimeout(() => {
+                        if (toastElement.parentElement) {
+                            toastElement.parentElement.removeChild(toastElement);
+                        }
+                    }, 500);
+                }, 3000);
+            }
+        }
+
+        // Apply to both success and error toasts
+        autoHideToast(successToast);
+        autoHideToast(errorToast);
+
+        // Also handle manual close with smooth animation
+        document.querySelectorAll('#notificationContainer button').forEach(button => {
+            button.addEventListener('click', function() {
+                const toast = this.closest('.toast-success, .toast-error');
+                if (toast) {
+                    toast.classList.add('hiding');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.parentElement.removeChild(toast);
+                        }
+                    }, 500);
+                }
+            });
+        });
     });
 </script>
 
