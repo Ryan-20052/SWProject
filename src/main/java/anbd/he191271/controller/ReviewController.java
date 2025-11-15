@@ -88,8 +88,6 @@ public class ReviewController {
             model.addAttribute("hasImage", hasImage);
             model.addAttribute("startDate", startDate);
             model.addAttribute("endDate", endDate);
-            model.addAttribute("selectedSort", sort);
-
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại!");

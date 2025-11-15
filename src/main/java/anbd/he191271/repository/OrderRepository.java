@@ -28,7 +28,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Long getTotalRevenueByPeriod(@Param("startDate") LocalDateTime startDate,
                                  @Param("endDate") LocalDateTime endDate);
 
-    // Doanh thu theo product và khoảng thời gian
+    // Doanh thu theo product và khoảng thời
     @Query("SELECT p.name, SUM(od.amount * v.price) as revenue " +
             "FROM OrderDetail od " +
             "JOIN od.variant v " +
