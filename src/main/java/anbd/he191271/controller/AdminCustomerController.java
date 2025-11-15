@@ -116,7 +116,7 @@ public class AdminCustomerController {
 
             // Kiểm tra email trùng
             if (email != null && !email.equals(c.getEmail())) {
-                if (customerService.isEmailExists(email, id)  && managerService.isEmailExists(email,id)) {
+                if (customerService.isEmailExists(email, id)  || managerService.isEmailExists(email,id)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("error", "EMAIL_EXISTS", "message", "Email đã tồn tại trong hệ thống"));
                 }
@@ -124,7 +124,7 @@ public class AdminCustomerController {
 
             // Kiểm tra username trùng
             if (username != null && !username.equals(c.getUsername())) {
-                if (customerService.isUsernameExists(username, id) && managerService.isUsernameExists(username, id)) {
+                if (customerService.isUsernameExists(username, id) || managerService.isUsernameExists(username, id)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("error", "USERNAME_EXISTS", "message", "Username đã tồn tại trong hệ thống"));
                 }

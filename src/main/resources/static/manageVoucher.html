@@ -565,6 +565,11 @@
         }
 
         // 🔥 5. Kiểm tra số tiền đơn hàng tối thiểu
+        if (document.getElementById("minOrderAmount").value.trim() === "") {
+            alert("Số tiền đơn hàng tối thiểu không được để trống!");
+            return false;
+        }
+
         if (minOrderAmount < 0) {
             alert("Số tiền đơn hàng tối thiểu không được âm!");
             return false;
@@ -594,7 +599,6 @@
         return true;
     }
 
-    // Các hàm khác giữ nguyên...
     window.onload = function() {
         loadVouchers();
         toggleMaxDiscountField(); // 🔥 KÍCH HOẠT KHI TẢI TRANG

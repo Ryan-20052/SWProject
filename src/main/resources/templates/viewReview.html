@@ -501,15 +501,7 @@
     <!-- BỘ LỌC VÀ SẮP XẾP -->
     <div class="card">
         <div class="card-body">
-            <!-- Section sắp xếp -->
             <div class="sort-section">
-                <div class="sort-options">
-                    <label for="sort"><strong>Sắp xếp:</strong></label>
-                    <select id="sort" name="sort" class="sort-select" onchange="updateSort()">
-                        <option value="newest" th:selected="${selectedSort == 'newest'}">Mới nhất</option>
-                        <option value="oldest" th:selected="${selectedSort == 'oldest'}">Cũ nhất</option>
-                    </select>
-                </div>
                 <div class="total-results" th:if="${reviews != null}">
                     <span class="text-muted">Hiển thị <strong th:text="${reviews.numberOfElements}">0</strong> trong tổng số <strong th:text="${reviews.totalElements}">0</strong> đánh giá</span>
                 </div>
@@ -517,8 +509,6 @@
 
             <form class="filter-form" th:action="@{/review/list}" method="get" id="filterForm">
                 <input type="hidden" name="productId" th:value="${productId}"/>
-                <input type="hidden" name="sort" th:value="${selectedSort}" id="sortHidden"/>
-
                 <div class="form-group">
                     <label for="startDate"><i class="far fa-calendar-alt"></i> Từ ngày</label>
                     <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="form-control" onchange="updateEndDateMin()">
@@ -562,8 +552,6 @@
     <div class="card">
         <div class="card-header">
             <h2><i class="fas fa-comments"></i> Đánh giá từ khách hàng
-                <span th:if="${selectedSort == 'newest'}" class="text-muted" style="font-size: 14px;">(Mới nhất)</span>
-                <span th:if="${selectedSort == 'oldest'}" class="text-muted" style="font-size: 14px;">(Cũ nhất)</span>
             </h2>
         </div>
         <div class="card-body" style="padding: 0;">

@@ -82,6 +82,17 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        .notice{
+            margin: 0 0 12px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: #dc2626;    /* xanh nhạt */
+            border: 1px solid #10b981;
+            color: white;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -94,6 +105,9 @@
 
 <div class="dashboard">
     <h2>Cập nhật danh mục sản phẩm</h2>
+
+    <div th:if="${msg}" class="notice" th:text="${msg}"></div>
+
     <form th:action="@{/manage/updateCategory}" th:object="${request}" method="post">
         <!-- Hidden để gửi id -->
         <input type="hidden" th:field="*{category_id}">
@@ -101,9 +115,11 @@
 
         <label for="name">Tên danh mục sản phẩm</label>
         <input type="text" id="name" th:field="*{name}" placeholder="Nhập tên danh mục sản phẩm" required>
+        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:#dc2626; font-size:0.9em; margin-top:2px;"></div>
 
         <label for="description">Mô tả</label>
         <input type="text" id="description" th:field="*{description}" placeholder="Nhập mô tả" required>
+        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" style="color:#dc2626; font-size:0.9em; margin-top:2px;"></div>
 
         <button type="submit">Cập nhật</button>
     </form>
