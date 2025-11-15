@@ -189,21 +189,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ----------------- Cập nhật giá khi thay đổi số lượng -----------------
-    amountInput?.addEventListener('change', function() {
+    amountInput.addEventListener('keydown', function (e) {
+        // Chặn e, E, +, - (type=number vẫn cho nhập)
+        if (["e", "E", "+", "-"].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    amountInput.addEventListener('input', function () {
+        // Xóa toàn bộ ký tự không phải số
+        this.value = this.value.replace(/\D/g, "");
+
+        let quantity = parseInt(this.value || "1", 10);
+
+        // Nếu trống thì set lại 1
+        if (!quantity) quantity = 1;
+
+        // Validate tối đa 10
+        if (quantity > 10) {
+            alert("Bạn chỉ được mua tối đa 10 sản phẩm 1 lần!");
+            quantity = 10;
+        }
+
+        this.value = quantity;
+
+        // Cập nhật giá
         if (originalPrice) {
-            const quantity = parseInt(this.value || '1', 10);
             const total = originalPrice * quantity;
 
+            // Nếu có voucher -> apply lại
             if (currentVoucherCode && total >= (currentVoucherData?.minOrderAmount || 0)) {
-                // Nếu có voucher và đủ điều kiện, tính lại giá
                 applyBtn.click();
             } else {
-                // Nếu không đủ điều kiện, hiển thị giá gốc
                 updatePriceDisplay(originalPrice);
-                if (currentVoucherCode && total < (currentVoucherData?.minOrderAmount || 0)) {
-                    voucherMessage.textContent = `❌ Đơn hàng chưa đạt tối thiểu ${currentVoucherData.minOrderAmount.toLocaleString()}đ`;
-                    voucherMessage.style.color = 'red';
-                }
             }
         }
     });
