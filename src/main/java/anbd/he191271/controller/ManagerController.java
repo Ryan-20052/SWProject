@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 
@@ -98,14 +99,14 @@ public class ManagerController {
         List<Product> productList =  productService.getAllProduct();
         for(Product p : productList){
             if(product.getProductId() == null){
-                if(p.getName().equalsIgnoreCase(product.getName())){
+                if(p.getName().trim().equalsIgnoreCase(product.getName().trim())){
                     return true;
                 }
             }else{
                 if (p.getId() == product.getProductId()) {
                     continue;
                 }
-                if(p.getName().equalsIgnoreCase(product.getName())){
+                if(p.getName().trim().equalsIgnoreCase(product.getName().trim())){
                     return true;
                 }
             }
@@ -117,7 +118,7 @@ public class ManagerController {
         List<Variant> variantList =  variantService.getAllVariant();
         for(Variant v : variantList){
             if(variant.getId() == null){
-                if(v.getName().equalsIgnoreCase(variant.getName())){
+                if(v.getName().trim().equalsIgnoreCase(variant.getName().trim())){
                     return true;
                 }
                 if(v.getDuration().equalsIgnoreCase(variant.getDuration()) && v.getProduct().getId() == variant.getProductId()){
@@ -127,10 +128,29 @@ public class ManagerController {
                 if (v.getId() == variant.getId()) {
                     continue;
                 }
-                if(v.getName().equalsIgnoreCase(variant.getName())){
+                if(v.getName().trim().equalsIgnoreCase(variant.getName().trim())){
                     return true;
                 }
                 if(v.getDuration().equalsIgnoreCase(variant.getDuration()) && v.getProduct().getId() == variant.getProductId()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isCategoryDup(CategoryDTO category){
+        List<Categories> categoryList =  categoryService.getAllCategories();
+        for(Categories c : categoryList){
+            if(category.getCategory_id() == null){
+                if(c.getName().trim().equalsIgnoreCase(category.getName().trim())){
+                    return true;
+                }
+            }else{
+                if (c.getId() == category.getCategory_id()) {
+                    continue;
+                }
+                if(c.getName().trim().equalsIgnoreCase(category.getName().trim())){
                     return true;
                 }
             }
@@ -152,7 +172,7 @@ public class ManagerController {
             redirectAttributes.addFlashAttribute("msg", "sản phẩm đã tồn tại");
             return "redirect:/manage/updateProduct/" + request.getProductId();
         }
-        product.setName(request.getName());
+        product.setName(request.getName().trim());
         product.setManager_id(manager.getId());
         product.setImg_url(request.getImgUrl());
         product.setDescription(request.getDescription());
@@ -197,7 +217,7 @@ public class ManagerController {
             return "redirect:/manage/manageHome";
         }
         Product product = productService.findProductById(request.getProductId());
-        Variant variant = new Variant(request.getName(),request.getDuration(),request.getPrice(), product);
+        Variant variant = new Variant(request.getName().trim(),request.getDuration(),request.getPrice(), product);
         variantService.saveVariant(variant);
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add variant "+ request.getName());
         managerLogService.save(log);
@@ -230,7 +250,7 @@ public class ManagerController {
             redirectAttributes.addFlashAttribute("msg", "Gói sản phẩm đã tồn tại");
             return "redirect:/manage/updateVariant/" + request.getId();
         }
-        variant.setName(request.getName());
+        variant.setName(request.getName().trim());
         variant.setDuration(request.getDuration());
         variant.setPrice(request.getPrice());
         variant.setProduct(productService.findProductById(request.getProductId()));
@@ -351,6 +371,10 @@ public class ManagerController {
         if (manager == null) {
             return "redirect:/login.html";
         }
+        if(isCategoryDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "danh mục đã tồn tại");
+            return "redirect:/manage/category";
+        }
         if(bindingResult.hasErrors()) {
             model.addAttribute("categoryList", categoryService.getAllCategories());
             model.addAttribute("manager", manager);
@@ -358,7 +382,7 @@ public class ManagerController {
         }
         ManagerLog log =  new ManagerLog(manager.getUsername(), "add category "+ request.getName());
         managerLogService.save(log);
-        Categories category = new Categories(request.getName(), request.getDescription());
+        Categories category = new Categories(request.getName().trim(), request.getDescription());
         categoryService.save(category);
         return "redirect:/manage/category";
     }
@@ -403,11 +427,20 @@ public class ManagerController {
     }
 
     @PostMapping("updateCategory")
-    public String updateVariant(@ModelAttribute("request") CategoryDTO request, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String updateVariant(@Valid @ModelAttribute("request") CategoryDTO request, BindingResult bindingResult, HttpSession session, RedirectAttributes redirectAttributes, Model model) {
         Categories category =  categoryService.getCategoryById(request.getCategory_id());
         Manager manager=(Manager)session.getAttribute("manager");
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("category", category);
+            model.addAttribute("manager", manager);
+            return "categoryUpdatePage";
+        }
+        if(isCategoryDup(request)){
+            redirectAttributes.addFlashAttribute("msg", "danh mục đã tồn tại");
+            return "redirect:/manage/updateCategory/" + request.getCategory_id();
+        }
+        category.setName(request.getName().trim());
+        category.setDescription(request.getDescription().trim());
         categoryService.save(category);
         ManagerLog log =  new ManagerLog(manager.getUsername(), "update category "+ request.getName());
         managerLogService.save(log);
